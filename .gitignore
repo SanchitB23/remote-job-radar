@@ -1,0 +1,15 @@
+# Node / Next.js
+node_modules
+.next
+dist
+npm-debug.log
+
+# Go
+services/**/bin
+coverage
+
+# Docker
+*.env
+
+# macOS
+.DS_Store

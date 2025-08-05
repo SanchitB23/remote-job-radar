@@ -1,0 +1,19 @@
+type Job {
+  id: ID!
+  title: String!
+  company: String!
+  location: String
+  salaryMin: Int
+  salaryMax: Int
+  fitScore: Float!
+  url: String!
+  publishedAt: String!
+}
+
+type Query {
+  jobs(
+    minFit: Float = 0
+    search: String
+    first: Int = 50
+  ): [Job!]!
+}

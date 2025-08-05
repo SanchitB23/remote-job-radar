@@ -1,0 +1,7 @@
+services:
+  db:
+    image: ankane/pgvector:latest # Postgres 15 with pgvector
+    environment:
+      POSTGRES_PASSWORD: local
+    ports:
+      - "5432:5432"
