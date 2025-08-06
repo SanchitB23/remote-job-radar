@@ -9,7 +9,11 @@ services/**/bin
 coverage
 
 # Docker
-*.env
+.env*
 
 # macOS
 .DS_Store
+
+.idea*
+
+.turbo*

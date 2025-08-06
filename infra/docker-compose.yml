@@ -1,7 +1,11 @@
 services:
   db:
     image: ankane/pgvector:latest # Postgres 15 with pgvector
+    container_name: remote-job-radar-db-1
     environment:
       POSTGRES_PASSWORD: local
     ports:
       - "5432:5432"
+  embedder:
+    build: ../services/embedder
+    ports: ["8000:8000"]
