@@ -63,7 +63,7 @@ func main() {
 
 	logger.Info("Starting Remote Job Radar Aggregator Service")
 
-	err := godotenv.Load("services/aggregator/.env.local") // load DB_DSN, etc.
+	err := godotenv.Load(".env.local") // load DB_DSN, etc.
 	if err != nil {
 		logger.Warn("Could not load .env.local", zap.Error(err))
 	}
@@ -86,7 +86,7 @@ func main() {
 
 	// Kick off first fetch on startup
 	logger.Info("Starting initial fetch")
-	runFetch(store)
+	runFetch(store, skillVec)
 	logger.Info("Initial fetch completed")
 
 	// schedule every 2 h
@@ -95,7 +95,7 @@ func main() {
 	go func() {
 		for range ticker.C {
 			logger.Info("Scheduled fetch triggered")
-			runFetch(store)
+			runFetch(store, skillVec)
 		}
 	}()
 
@@ -111,7 +111,11 @@ func main() {
 	}()
 
 	// tiny REST for health + manual trigger
-	logger.Info("Starting HTTP server", zap.String("port", "8080"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	logger.Info("Starting HTTP server", zap.String("port", port))
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -121,15 +125,15 @@ func main() {
 
 	r.Post("/fetch", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
-		runFetch(store)
+		runFetch(store, skillVec)
 		w.Write([]byte("triggered"))
 	})
 
 	logger.Info("Service fully initialized and ready to serve requests")
-	logger.Fatal("HTTP server stopped", zap.Error(http.ListenAndServe(":8080", r)))
+	logger.Fatal("HTTP server stopped", zap.Error(http.ListenAndServe(":"+port, r)))
 }
 
-func runFetch(store *storage.Store) {
+func runFetch(store *storage.Store, skillVec []float32) {
 	startTime := time.Now()
 	logger.Info("Starting job fetch operation")
 
@@ -155,4 +159,14 @@ func runFetch(store *storage.Store) {
 	logger.Info("Successfully upserted Remotive jobs",
 		zap.Int("count", len(rows)),
 		zap.Duration("duration", duration))
+
+	// Immediately score new jobs after fetching
+	logger.Info("Scoring newly fetched jobs")
+	scoringStartTime := time.Now()
+	if err := scorer.ScoreNewRows(context.Background(), store, skillVec); err != nil {
+		logger.Error("Scoring error", zap.Error(err))
+	} else {
+		logger.Info("Scoring completed for new jobs",
+			zap.Duration("duration", time.Since(scoringStartTime)))
+	}
 }

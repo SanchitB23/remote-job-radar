@@ -4,22 +4,64 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
+	"go.uber.org/zap"
 )
 
 func Embed(ctx context.Context, text string) ([]float32, error) {
-	body, _ := json.Marshal(map[string]string{"text": text})
-	req, _ := http.NewRequestWithContext(ctx, "POST", "http://localhost:8000/embed", bytes.NewReader(body))
+	if text == "" {
+		return nil, fmt.Errorf("empty text provided for embedding")
+	}
+
+	logger.Debug("Calling embedder service", zap.Int("textLength", len(text)))
+
+	body, err := json.Marshal(map[string]string{"text": text})
+	if err != nil {
+		logger.Error("Failed to marshal embedding request", zap.Error(err))
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "http://localhost:8000/embed", bytes.NewReader(body))
+	if err != nil {
+		logger.Error("Failed to create HTTP request", zap.Error(err))
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
 	req.Header.Set("Content-Type", "application/json")
-	var resp struct{ Vector []float32 `json:"vector"` }
-	client := &http.Client{}
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
 	httpResp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		logger.Error("Failed to call embedder service", zap.Error(err))
+		return nil, fmt.Errorf("failed to call embedder service: %w", err)
 	}
 	defer httpResp.Body.Close()
-	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
-		return nil, err
+
+	if httpResp.StatusCode != http.StatusOK {
+		logger.Error("Embedder service returned non-OK status",
+			zap.Int("statusCode", httpResp.StatusCode))
+		return nil, fmt.Errorf("embedder service returned status %d", httpResp.StatusCode)
 	}
+
+	var resp struct {
+		Vector []float32 `json:"vector"`
+	}
+	if err := json.NewDecoder(httpResp.Body).Decode(&resp); err != nil {
+		logger.Error("Failed to decode embedder response", zap.Error(err))
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if len(resp.Vector) == 0 {
+		logger.Error("Embedder returned empty vector")
+		return nil, fmt.Errorf("embedder returned empty vector")
+	}
+
+	logger.Debug("Successfully generated embedding", zap.Int("vectorDimensions", len(resp.Vector)))
 	return resp.Vector, nil
 }

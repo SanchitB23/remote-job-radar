@@ -6,6 +6,11 @@ services:
       POSTGRES_PASSWORD: local
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
   embedder:
     build: ../services/embedder
     ports: ["8000:8000"]
+
+volumes:
+  pgdata:

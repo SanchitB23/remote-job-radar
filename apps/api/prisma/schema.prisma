@@ -1,0 +1,35 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // point to the same DB as aggregator
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Job {
+  id          String                 @id
+  source      String
+  title       String
+  company     String
+  description String                 @db.Text
+  location    String?
+  salaryMin   Int?                   @map("salary_min")
+  salaryMax   Int?                   @map("salary_max")
+  url         String
+  publishedAt DateTime               @map("published_at")
+  vector      Unsupported("vector")? // pgvector type
+  fitScore    Float?                 @map("fit_score")
+  bookmarks   Bookmark[]
+
+  @@map("jobs")
+}
+
+model Bookmark {
+  id     String @id @default(uuid())
+  jobId  String
+  userId String
+  job    Job    @relation(fields: [jobId], references: [id])
+
+  @@index([userId])
+}

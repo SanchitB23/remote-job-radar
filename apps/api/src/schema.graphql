@@ -8,12 +8,23 @@ type Job {
   fitScore: Float!
   url: String!
   publishedAt: String!
+  bookmarked: Boolean! # calculated per-user
 }
 
 type Query {
   jobs(
     minFit: Float = 0
     search: String
+    minSalary: Int
+    location: String
     first: Int = 50
   ): [Job!]!
+}
+
+type Mutation {
+  bookmark(id: ID!): Boolean!
+}
+
+type Subscription {
+  newJob(minFit: Float = 70): Job!
 }
