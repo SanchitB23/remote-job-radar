@@ -7,7 +7,10 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "test": "turbo test"
+    "test": "turbo test",
+    "dev:infra": "docker compose -f infra/docker-compose.yml up -d db embedder",
+    "dev:all": "npm run dev:infra && npm run dev",
+    "dev:smokeTest": "echo '--- DB row count ---' && docker exec -it remote-job-radar-db-1 psql -U postgres -c \"SELECT COUNT(*) FROM jobs;\" && echo '\n--- Aggregator health ---' && (curl -s http://localhost:8080/health || echo 'Aggregator not running') && echo '\n--- GraphQL query ---' && (curl -s -X POST http://localhost:4000/graphql -H 'Content-Type: application/json' -d '{\"query\":\"{ jobs(minFit:0, first:3){ id title company fitScore } }\"}' | jq || echo 'GraphQL not reachable') && echo '\n--- Web app HEAD ---' && (curl -I -s http://localhost:3000 | head -n 1 || echo 'Web not reachable')"
   },
   "workspaces": [
     "apps/*",
