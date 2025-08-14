@@ -91,7 +91,6 @@ export function getResolvers(prisma: PrismaClient) {
     },
 
     Mutation: {
-      // TODO: Add bookmark mutation once Bookmark table is created
       bookmark: async (_: any, { id }: any, ctx: any) => {
         try {
           if (!ctx.userId) throw new Error("UNAUTHENTICATED");
@@ -126,7 +125,7 @@ export function getResolvers(prisma: PrismaClient) {
       },
     },
 
-    // TODO: Add Job.bookmarked resolver once Bookmark table is created
+
     Job: {
       bookmarked: async (parent: any, _: any, ctx: any) => {
         const count = await ctx.prisma.bookmark.count({
