@@ -5,6 +5,12 @@ import pg from "pg";
 const pubsub = new PubSub();
 const NEW_JOB = "NEW_JOB";
 
+const orderMap: Record<string, { [key: string]: "asc" | "desc" }> = {
+  fit: { fit_score: "desc" },
+  date: { published_at: "desc" },
+  salary: { salary_min: "desc" },
+};
+
 export function getResolvers(prisma: PrismaClient) {
   // --- hook Postgres NOTIFY to PubSub ---
   const listener = new pg.Client({
@@ -24,69 +30,75 @@ export function getResolvers(prisma: PrismaClient) {
   return {
     Query: {
       jobs: async (_: any, args: any, ctx: any) => {
-        const { minFit, search, minSalary, location, first } = args;
+        const {
+          minFit = 0,
+          search,
+          minSalary,
+          location,
+          sources,
+          sortBy = "fit",
+          first = 50,
+          after,
+        } = args;
+
+        const cursorFilter = after
+          ? { id: { gt: Buffer.from(after, "base64").toString("utf8") } }
+          : undefined;
 
         console.log("🔍 Jobs query called with args:", args);
         console.log("📋 Context userId:", ctx.userId);
 
         const whereClause = {
-          fit_score: minFit ? { gte: minFit } : undefined,
+          fit_score: { gte: minFit },
           salary_min: minSalary ? { gte: minSalary } : undefined,
           location: location
             ? { contains: location, mode: "insensitive" }
             : undefined,
+          source: sources && sources.length ? { in: sources } : undefined,
           OR: search
             ? [
                 { title: { contains: search, mode: "insensitive" } },
                 { description: { contains: search, mode: "insensitive" } },
               ]
             : undefined,
+          ...cursorFilter,
         };
 
         console.log("🔎 Where clause:", JSON.stringify(whereClause, null, 2));
 
-        // First, let's check total job count
-        const totalJobs = await ctx.prisma.job.count();
-        console.log("📊 Total jobs in database:", totalJobs);
-
         const result = await ctx.prisma.job.findMany({
           where: whereClause,
-          orderBy: [
-            { fit_score: { sort: "desc", nulls: "last" } },
-            { published_at: "desc" },
-          ],
-          take: first,
+          orderBy: orderMap.hasOwnProperty(sortBy) ? orderMap[sortBy] : orderMap.fit,
+          take: first + 1, // fetch one extra to check hasNextPage
         });
 
         console.log("✅ Query result count:", result.length);
 
-        console.log(
-          "📝 First job result:",
-          result[0]
-            ? {
-                id: result[0].id,
-                title: result[0].title,
-                fitScore: result[0].fit_score,
-                publishedAt: result[0].published_at,
-              }
-            : "No jobs found"
-        );
+        const edges = result.slice(0, first);
+        const endCursor = edges.length
+          ? Buffer.from(edges[edges.length - 1].id).toString("base64")
+          : null;
+        const hasNextPage = result.length > first;
 
         // Convert snake_case to camelCase for each job
-        return result.map((job: any) => ({
-          id: job.id,
-          source: job.source,
-          title: job.title,
-          company: job.company,
-          description: job.description,
-          location: job.location,
-          salaryMin: job.salary_min,
-          salaryMax: job.salary_max,
-          url: job.url,
-          publishedAt: job.published_at,
-          vector: job.vector,
-          fitScore: job.fit_score,
-        }));
+        return {
+          edges: edges.map((job: any) => ({
+            id: job.id,
+            source: (job.source ?? "").toUpperCase(),
+            title: job.title,
+            company: job.company,
+            description: job.description,
+            location: job.location,
+            salaryMin: job.salary_min,
+            salaryMax: job.salary_max,
+            url: job.url,
+            publishedAt: job.published_at,
+            vector: job.vector,
+            fitScore: job.fit_score,
+          })),
+          endCursor,
+          hasNextPage,
+        };
       },
     },
 
@@ -124,7 +136,6 @@ export function getResolvers(prisma: PrismaClient) {
         ),
       },
     },
-
 
     Job: {
       bookmarked: async (parent: any, _: any, ctx: any) => {

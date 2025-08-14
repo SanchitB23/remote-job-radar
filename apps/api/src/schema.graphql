@@ -1,4 +1,14 @@
 """
+Possible sources of job listings
+"""
+enum JobSource {
+  LINKEDIN
+  INDEED
+  REMOTIVE
+  ADZUNA
+  OTHER
+}
+"""
 A remote job posting with AI-generated fit score
 """
 type Job {
@@ -22,6 +32,14 @@ type Job {
   publishedAt: String!
   "Whether the current user has bookmarked this job"
   bookmarked: Boolean! # calculated per-user
+  "Source of the job listing (e.g. LinkedIn, Indeed)"
+  source: JobSource!
+}
+
+type JobsConnection {
+  edges: [Job!]!
+  endCursor: String
+  hasNextPage: Boolean!
 }
 
 type Query {
@@ -37,9 +55,11 @@ type Query {
     minSalary: Int
     "Location filter (partial match, case insensitive)"
     location: String
-    "Maximum number of jobs to return"
+    sources: [JobSource!]
+    sortBy: String = "fit" # "fit" | "date" | "salary"
+    after: String # cursor (base64 id)
     first: Int = 50
-  ): [Job!]!
+  ): JobsConnection!
 }
 
 type Mutation {
