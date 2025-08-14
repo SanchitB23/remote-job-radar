@@ -22,7 +22,8 @@ export async function fetchJobsClient(
   params: FetchJobsParams,
   token?: string
 ): Promise<{ jobs: Job[] }> {
-  return fetchJobsShared(params, token);
+  const jobsConnection = await fetchJobsShared(params, token);
+  return { jobs: Array.isArray(jobsConnection?.edges) ? jobsConnection.edges : [] };
 }
 
 // React Hook for fetching jobs with automatic auth

@@ -68,7 +68,9 @@ export function getResolvers(prisma: PrismaClient) {
 
         const result = await ctx.prisma.job.findMany({
           where: whereClause,
-          orderBy: orderMap.hasOwnProperty(sortBy) ? orderMap[sortBy] : orderMap.fit,
+          orderBy: orderMap.hasOwnProperty(sortBy)
+            ? orderMap[sortBy]
+            : orderMap.fit,
           take: first + 1, // fetch one extra to check hasNextPage
         });
 
