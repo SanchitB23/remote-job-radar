@@ -1,5 +1,5 @@
-import { fetchJobs } from "../../lib/gqlClient";
-import { JobsPageClient } from "../../components/JobsPageClient";
+import { fetchJobs } from "../../lib/gqlClient.ssr";
+import { JobsPageClient } from "./JobsPageClient";
 import {
   QueryClient,
   dehydrate,

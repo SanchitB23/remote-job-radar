@@ -1,16 +1,17 @@
 "use client";
 
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { BookmarkButton } from "./bookmarkBtn";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { useJobs } from "../lib/hooks";
-import type { Job } from "../lib/gqlClient.client";
+import { BookmarkButton } from "../../components/bookmarkBtn";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { useJobs } from "../../lib/hooks";
+import type { Job } from "../../lib/gqlClient.client";
+import FilterSidebar from "@/components/filterSidebar";
 
 export function JobsPageClient() {
   const { data, isLoading, error } = useJobs({ minFit: 1, first: 10 });
 
   const jobs: Job[] = data?.jobs || [];
-
+  console.log("Jobs:", jobs);
   return (
     <>
       <SignedOut>
@@ -44,26 +45,29 @@ export function JobsPageClient() {
               </p>
             </div>
           ) : (
-            <ul className="space-y-2">
-              {jobs.map((j: Job) => (
-                <li
-                  key={j.id}
-                  className="border p-4 rounded-lg hover:bg-gray-50"
-                >
-                  <a href={j.url} target="_blank" className="block">
-                    <h3 className="font-semibold text-lg">{j.title}</h3>
-                    <p className="text-gray-600">{j.company}</p>
-                    <p className="text-sm text-green-600">
-                      Fit Score: {Math.round(j.fitScore)}%
-                    </p>
-                  </a>
-                  <BookmarkButton
-                    id={j.id}
-                    bookmarked={j.bookmarked ?? false}
-                  />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="space-y-2">
+                {jobs.map((j: Job) => (
+                  <li
+                    key={j.id}
+                    className="border p-4 rounded-lg hover:bg-gray-50"
+                  >
+                    <a href={j.url} target="_blank" className="block">
+                      <h3 className="font-semibold text-lg">{j.title}</h3>
+                      <p className="text-gray-600">{j.company}</p>
+                      <p className="text-sm text-green-600">
+                        Fit Score: {Math.round(j.fitScore)}%
+                      </p>
+                    </a>
+                    <BookmarkButton
+                      id={j.id}
+                      bookmarked={j.bookmarked ?? false}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <FilterSidebar />
+            </>
           )}
         </div>
       </SignedIn>
