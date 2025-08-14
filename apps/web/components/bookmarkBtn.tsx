@@ -41,7 +41,7 @@ export function BookmarkButton({ id, bookmarked }: Props) {
       aria-label={optimisticBookmarked ? "Remove bookmark" : "Add bookmark"}
       title={optimisticBookmarked ? "Remove bookmark" : "Add bookmark"}
       disabled={bookmarkMutation.isPending}
-      className={`ml-2 text-lg ${
+      className={`ml-2 text-lg cursor-pointer ${
         optimisticBookmarked ? "text-yellow-500" : "text-gray-400"
       } ${bookmarkMutation.isPending ? "opacity-60" : ""}`}
       onClick={handleToggle}

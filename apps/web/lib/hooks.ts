@@ -2,12 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import {
-  fetchJobsClient,
-  toggleBookmarkClient,
-  type FetchJobsParams,
-  type Job,
-} from "./gqlClient.client";
+import { fetchJobsClient, toggleBookmarkClient } from "./gqlClient.client";
+import { FetchJobsParams, Job } from "./shared-gql";
 
 // Custom hook for fetching jobs
 export function useJobs(params: FetchJobsParams = {}) {

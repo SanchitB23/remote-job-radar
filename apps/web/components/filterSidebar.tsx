@@ -49,67 +49,91 @@ export default function FilterSidebar() {
   }
 
   return (
-    <aside className="w-72 shrink-0 border-l p-3 space-y-3">
-      <div>
-        <label className="block text-sm">Min Fit</label>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={minFit}
-          onChange={(e) => setMinFit(Number(e.target.value))}
-        />
-        <div className="text-sm">{minFit}%</div>
-      </div>
-      <div>
-        <label className="block text-sm">Min Salary (USD)</label>
-        <input
-          className="border p-1 w-full"
-          type="number"
-          value={minSalary}
-          onChange={(e) => setMinSalary(Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <label className="block text-sm">Location</label>
-        <input
-          className="border p-1 w-full"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-      </div>
-      <div>
-        <label className="block text-sm">Search</label>
-        <input
-          className="border p-1 w-full"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-      <div>
-        <div className="text-sm font-medium mb-1">Sources</div>
-        {["remotive", "adzuna"].map((s) => (
-          <label key={s} className="block text-sm">
-            <input
-              type="checkbox"
-              checked={sources.includes(s)}
-              onChange={() => toggleSource(s)}
-            />{" "}
-            {s}
+    <aside
+      className="border bg-white dark:bg-zinc-900 dark:border-zinc-800 p-3 flex flex-col gap-3 w-full mb-4
+        sm:rounded-lg
+        lg:w-72 lg:mb-0 lg:mr-4 lg:sticky lg:top-4
+        lg:shadow-lg lg:rounded-2xl lg:bg-zinc-50 dark:lg:bg-zinc-950 lg:border-none"
+    >
+      <div className="grid grid-cols-2 gap-3 lg:flex lg:flex-col lg:gap-4">
+        <div>
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
+            Min Fit
           </label>
-        ))}
-      </div>
-      <div>
-        <label className="block text-sm">Sort by</label>
-        <select
-          className="border p-1 w-full"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="fit">Fit (desc)</option>
-          <option value="date">Newest</option>
-          <option value="salary">Salary</option>
-        </select>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={minFit}
+            onChange={(e) => setMinFit(Number(e.target.value))}
+          />
+          <div className="text-sm text-zinc-700 dark:text-zinc-300">
+            {minFit}%
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
+            Min Salary (USD)
+          </label>
+          <input
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            type="number"
+            value={minSalary}
+            onChange={(e) => setMinSalary(Number(e.target.value))}
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
+            Location
+          </label>
+          <input
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
+            Search
+          </label>
+          <input
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="col-span-2">
+          <div className="text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200">
+            Sources
+          </div>
+          {["remotive", "adzuna"].map((s) => (
+            <label
+              key={s}
+              className="block text-sm text-zinc-700 dark:text-zinc-200"
+            >
+              <input
+                type="checkbox"
+                checked={sources.includes(s)}
+                onChange={() => toggleSource(s)}
+              />{" "}
+              {s}
+            </label>
+          ))}
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
+            Sort by
+          </label>
+          <select
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="fit">Fit (desc)</option>
+            <option value="date">Newest</option>
+            <option value="salary">Salary</option>
+          </select>
+        </div>
       </div>
     </aside>
   );

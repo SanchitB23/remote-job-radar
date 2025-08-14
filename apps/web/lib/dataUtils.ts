@@ -1,6 +1,3 @@
-// This file is for generic data processing, serialization, and helpers.
-// Add utility functions here as needed for your app.
-
 // Common function to process and serialize GraphQL responses and errors
 export async function processGraphQLResponse(
   res: Response | { ok: boolean; json: () => Promise<any> },

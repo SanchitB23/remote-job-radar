@@ -11,10 +11,6 @@ import {
   GRAPHQL_WS_ENDPOINT,
 } from "./shared-gql";
 
-// Re-export types and utilities for convenience
-export type { Job, FetchJobsParams };
-export { createGraphQLClient };
-
 // Client-side API functions for React Query
 
 // Client-side fetch jobs function - can be used with manual token
@@ -23,18 +19,8 @@ export async function fetchJobsClient(
   token?: string
 ): Promise<{ jobs: Job[] }> {
   const jobsConnection = await fetchJobsShared(params, token);
-  return { jobs: Array.isArray(jobsConnection?.edges) ? jobsConnection.edges : [] };
-}
-
-// React Hook for fetching jobs with automatic auth
-export function useFetchJobs(params: FetchJobsParams) {
-  const { getToken } = useAuth();
-
   return {
-    fetchJobs: async () => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return fetchJobsShared(params, token);
-    },
+    jobs: Array.isArray(jobsConnection?.edges) ? jobsConnection.edges : [],
   };
 }
 
@@ -44,18 +30,6 @@ export async function toggleBookmarkClient(
   token?: string
 ): Promise<{ bookmark: boolean }> {
   return toggleBookmarkShared(jobId, token);
-}
-
-// React Hook for toggling bookmarks with automatic auth
-export function useToggleBookmark() {
-  const { getToken } = useAuth();
-
-  return {
-    toggleBookmark: async (jobId: string) => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return toggleBookmarkShared(jobId, token);
-    },
-  };
 }
 
 export async function getWSClient(jwt?: string) {

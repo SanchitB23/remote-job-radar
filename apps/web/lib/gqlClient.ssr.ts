@@ -16,24 +16,17 @@ export async function toggleBookmark(jobId: string) {
   return toggleBookmarkShared(jobId, jwt);
 }
 
-export async function fetchJobs(params: FetchJobsParams) {
-  const { getToken } = await auth();
-  const jwt = await getToken({ template: "remote-job-radar" });
-
-  return fetchJobsShared(params, jwt);
-}
-
 export async function getClient() {
   const { getToken } = await auth();
-  const jwt = await getToken({ template: "remote-job-radar" });
-  return createGraphQLClient(jwt);
+  const token = await getToken({ template: "remote-job-radar" });
+  return createGraphQLClient(token);
 }
 
 export async function getWSClient() {
   const { getToken } = await auth();
-  const jwt = await getToken({ template: "remote-job-radar" });
+  const token = await getToken({ template: "remote-job-radar" });
   return createClient({
     url: GRAPHQL_WS_ENDPOINT,
-    connectionParams: { Authorization: `Bearer ${jwt}` },
+    connectionParams: { Authorization: `Bearer ${token}` },
   });
 }
