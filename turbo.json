@@ -12,5 +12,5 @@
     "lint": {},
     "test": {}
   },
-  "globalDependencies": ["go.work", "**/*.go"]
+  "globalDependencies": ["go.work", "**/*.go", "apps/api/.env"]
 }

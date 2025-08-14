@@ -30,8 +30,8 @@ export function getResolvers(prisma: PrismaClient) {
         console.log("📋 Context userId:", ctx.userId);
 
         const whereClause = {
-          fitScore: minFit ? { gte: minFit } : undefined,
-          salaryMin: minSalary ? { gte: minSalary } : undefined,
+          fit_score: minFit ? { gte: minFit } : undefined,
+          salary_min: minSalary ? { gte: minSalary } : undefined,
           location: location
             ? { contains: location, mode: "insensitive" }
             : undefined,
@@ -49,60 +49,69 @@ export function getResolvers(prisma: PrismaClient) {
         const totalJobs = await ctx.prisma.job.count();
         console.log("📊 Total jobs in database:", totalJobs);
 
-        // Check jobs matching our criteria
-        const matchingJobsCount = await ctx.prisma.job.count({
-          where: whereClause,
-        });
-        console.log("🎯 Jobs matching criteria:", matchingJobsCount);
-
-        // Get some sample fitScores to understand the data
-        const fitScoreSample = await ctx.prisma.job.findMany({
-          select: { id: true, fitScore: true, title: true, publishedAt: true },
-          orderBy: [
-            { fitScore: { sort: "desc", nulls: "last" } },
-            { publishedAt: "desc" },
-          ],
-          take: 5,
-        });
-        console.log("📈 Sample fitScores (top 5):", fitScoreSample);
-
         const result = await ctx.prisma.job.findMany({
           where: whereClause,
           orderBy: [
-            { fitScore: { sort: "desc", nulls: "last" } },
-            { publishedAt: "desc" },
+            { fit_score: { sort: "desc", nulls: "last" } },
+            { published_at: "desc" },
           ],
           take: first,
         });
 
         console.log("✅ Query result count:", result.length);
+
         console.log(
           "📝 First job result:",
           result[0]
             ? {
                 id: result[0].id,
                 title: result[0].title,
-                fitScore: result[0].fitScore,
-                publishedAt: result[0].publishedAt,
+                fitScore: result[0].fit_score,
+                publishedAt: result[0].published_at,
               }
             : "No jobs found"
         );
 
-        return result.map((r: any) => ({
-          ...r,
-          bookmarked: false /* resolved below */,
+        // Convert snake_case to camelCase for each job
+        return result.map((job: any) => ({
+          id: job.id,
+          source: job.source,
+          title: job.title,
+          company: job.company,
+          description: job.description,
+          location: job.location,
+          salaryMin: job.salary_min,
+          salaryMax: job.salary_max,
+          url: job.url,
+          publishedAt: job.published_at,
+          vector: job.vector,
+          fitScore: job.fit_score,
         }));
       },
     },
 
     Mutation: {
+      // TODO: Add bookmark mutation once Bookmark table is created
       bookmark: async (_: any, { id }: any, ctx: any) => {
-        await ctx.prisma.bookmark.upsert({
-          where: { userId_jobId: { userId: ctx.userId, jobId: id } },
-          create: { userId: ctx.userId, jobId: id },
-          update: {},
-        });
-        return true;
+        try {
+          if (!ctx.userId) throw new Error("UNAUTHENTICATED");
+
+          const where = { user_id_job_id: { user_id: ctx.userId, job_id: id } };
+
+          const existing = await ctx.prisma.bookmark.findUnique({ where });
+          if (existing) {
+            await ctx.prisma.bookmark.delete({ where });
+            return false; // now unbookmarked
+          }
+
+          await ctx.prisma.bookmark.create({
+            data: { user_id: ctx.userId, job_id: id },
+          });
+          return true; // now bookmarked
+        } catch (error) {
+          console.error("Error occurred while bookmarking:", error);
+          throw new Error("Failed to bookmark job");
+        }
       },
     },
 
@@ -117,10 +126,11 @@ export function getResolvers(prisma: PrismaClient) {
       },
     },
 
+    // TODO: Add Job.bookmarked resolver once Bookmark table is created
     Job: {
       bookmarked: async (parent: any, _: any, ctx: any) => {
         const count = await ctx.prisma.bookmark.count({
-          where: { userId: ctx.userId, jobId: parent.id },
+          where: { user_id: ctx.userId, job_id: parent.id },
         });
         return count > 0;
       },

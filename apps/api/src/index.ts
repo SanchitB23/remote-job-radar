@@ -9,6 +9,7 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { getResolvers } from "./resolvers/index.js";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { getUserId } from "./auth.js";
 
 const prisma = new PrismaClient();
 
@@ -57,7 +58,16 @@ await apolloServer.start();
 app.use(
   "/graphql",
   expressMiddleware(apolloServer, {
-    context: async () => ({ prisma, userId: "demo" }),
+    context: async ({ req }) => {
+      try {
+        const userId = await getUserId(req);
+        return { prisma, userId };
+      } catch (error) {
+        console.error("Context creation failed:", error);
+        // Return context without userId if JWT verification fails
+        return { prisma, userId: null };
+      }
+    },
   })
 );
 

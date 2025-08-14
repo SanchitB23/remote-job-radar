@@ -17,3 +17,5 @@ coverage
 .idea*
 
 .turbo*
+
+.history
