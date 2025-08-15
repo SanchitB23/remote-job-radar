@@ -15,9 +15,13 @@ export function getParamsFromUrl(
       ? Number(searchParams.get("minSalary"))
       : undefined,
     location: searchParams.get("location") || undefined,
-    sources: searchParams.get("sources")
-      ? searchParams.get("sources")!.split(",")
-      : undefined,
+    sources: (() => {
+      const all = searchParams.getAll("sources");
+      if (all.length > 0) return all;
+      const single = searchParams.get("sources");
+      if (single) return single.split(",");
+      return undefined;
+    })(),
     sortBy: searchParams.get("sortBy") || undefined,
     after: searchParams.get("after") || undefined,
   };

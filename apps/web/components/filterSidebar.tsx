@@ -31,7 +31,9 @@ export default function FilterSidebar() {
     if (debouncedLocation) params.set("location", debouncedLocation);
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (debouncedSources.length > 0) {
-      debouncedSources.forEach((s) => params.append("source", s));
+      debouncedSources.forEach((s) =>
+        params.append("sources", s.toUpperCase())
+      );
     }
     if (debouncedSortBy && debouncedSortBy !== "fit")
       params.set("sortBy", debouncedSortBy);

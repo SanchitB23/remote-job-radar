@@ -64,13 +64,19 @@ export function getResolvers(prisma: PrismaClient) {
         console.log("🔍 Jobs query called with args:", args);
         console.log("📋 Context userId:", ctx.userId);
 
+        // Normalize sources to lowercase for DB filtering
+        const normalizedSources =
+          sources && sources.length
+            ? sources.map((s: string) => s.toLowerCase())
+            : undefined;
+
         const whereClause = {
           fit_score: { gte: minFit },
           salary_min: minSalary ? { gte: minSalary } : undefined,
           location: location
             ? { contains: location, mode: "insensitive" }
             : undefined,
-          source: sources && sources.length ? { in: sources } : undefined,
+          source: normalizedSources ? { in: normalizedSources } : undefined,
           OR: search
             ? [
                 { title: { contains: search, mode: "insensitive" } },
