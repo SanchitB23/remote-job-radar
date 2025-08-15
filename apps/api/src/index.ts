@@ -23,6 +23,11 @@ const app = express();
 const httpServer = http.createServer(app);
 const wsServer = new WebSocketServer({ server: httpServer, path: "/graphql" });
 
+// Health check endpoint (must be after app is defined)
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
+
 interface WebSocketContext {
   connectionParams?: {
     Authorization?: string;
