@@ -135,6 +135,11 @@ func vectorToString(vector []float32) string {
 	return "[" + strings.Join(parts, ",") + "]"
 }
 
+// Ping checks the database connection
+func (s *Store) Ping(ctx context.Context) error {
+	return s.DB.PingContext(ctx)
+}
+
 type JobRow struct {
 	ID, Source, Title, Company, Description, Location, URL string
 	SalaryMin, SalaryMax                                   int

@@ -8,13 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/fetch"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/scorer"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
@@ -102,18 +100,7 @@ func main() {
 		port = "8080"
 	}
 	logger.Info("Starting HTTP server", zap.String("port", port))
-	r := chi.NewRouter()
-
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Health check requested", zap.String("remote_addr", r.RemoteAddr))
-		w.Write([]byte("ok"))
-	})
-
-	r.Post("/fetch", func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
-		runFetch(store, skillVec)
-		w.Write([]byte("triggered"))
-	})
+	r := setupRoutes(store, skillVec)
 
 	// Start HTTP server in a goroutine so it binds as early as possible
 	httpServer := &http.Server{
