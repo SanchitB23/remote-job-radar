@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -76,7 +77,6 @@ func main() {
 	}
 
 	dsn := os.Getenv("DB_DSN")
-	logger.Info("Database configuration", zap.String("dsn", dsn))
 
 	logger.Info("Establishing database connection")
 	store, err := storage.New(dsn)
@@ -89,12 +89,43 @@ func main() {
 		logger.Fatal("Failed to initialize embedder", zap.Error(err))
 	}
 
+	// Load skills vector before starting server and jobs
 	logger.Info("Loading skills configuration")
 	skillVec := loadSkillVec(context.Background(), embedder)
 	if skillVec == nil {
 		logger.Fatal("Failed to load skills vector")
 	}
 
+	// tiny REST for health + manual trigger
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	logger.Info("Starting HTTP server", zap.String("port", port))
+	r := chi.NewRouter()
+
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Health check requested", zap.String("remote_addr", r.RemoteAddr))
+		w.Write([]byte("ok"))
+	})
+
+	r.Post("/fetch", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
+		runFetch(store, skillVec)
+		w.Write([]byte("triggered"))
+	})
+
+	// Start HTTP server in a goroutine so it binds as early as possible
+	httpServer := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
+	}
+	go func() {
+		logger.Info("Service fully initialized and ready to serve requests")
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("HTTP server stopped", zap.Error(err))
+		}
+	}()
 	// Kick off first fetch on startup
 	logger.Info("Starting initial fetch")
 	runFetch(store, skillVec)
@@ -121,27 +152,21 @@ func main() {
 		}
 	}()
 
-	// tiny REST for health + manual trigger
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	// Graceful shutdown handling
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, os.Kill)
+
+	<-stop
+	logger.Info("Shutdown signal received, shutting down gracefully...")
+
+	// Attempt graceful HTTP server shutdown
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		logger.Error("HTTP server shutdown error", zap.Error(err))
+	} else {
+		logger.Info("HTTP server shutdown complete")
 	}
-	logger.Info("Starting HTTP server", zap.String("port", port))
-	r := chi.NewRouter()
-
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Health check requested", zap.String("remote_addr", r.RemoteAddr))
-		w.Write([]byte("ok"))
-	})
-
-	r.Post("/fetch", func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
-		runFetch(store, skillVec)
-		w.Write([]byte("triggered"))
-	})
-
-	logger.Info("Service fully initialized and ready to serve requests")
-	logger.Fatal("HTTP server stopped", zap.Error(http.ListenAndServe(":"+port, r)))
 }
 
 func runFetch(store *storage.Store, skillVec []float32) {
