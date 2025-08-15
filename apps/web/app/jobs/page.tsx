@@ -14,7 +14,7 @@ import { fetchJobsShared } from "@/lib/shared-gql";
 export default async function JobsPageServer({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const sp = await searchParams;
   const urlSearchParams = new URLSearchParams(
