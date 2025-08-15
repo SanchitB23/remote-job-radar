@@ -7,7 +7,7 @@ import { useDebounce } from "../lib/useDebounce";
 export default function FilterSidebar() {
   const router = useRouter();
   const q = useSearchParams();
-  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? 70));
+  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? 10));
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
   const [location, setLocation] = useState(q.get("location") ?? "");
   const [search, setSearch] = useState(q.get("search") ?? "");
@@ -16,29 +16,33 @@ export default function FilterSidebar() {
   );
   const [sortBy, setSortBy] = useState(q.get("sortBy") ?? "fit");
 
-  // Debounce text inputs with 500ms delay
+  // Debounce all filter values with 500ms delay
+  const debouncedMinFit = useDebounce(minFit, 500);
   const debouncedMinSalary = useDebounce(minSalary, 500);
   const debouncedLocation = useDebounce(location, 500);
   const debouncedSearch = useDebounce(search, 500);
+  const debouncedSources = useDebounce(sources, 500);
+  const debouncedSortBy = useDebounce(sortBy, 500);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (minFit) params.set("minFit", String(minFit));
+    if (debouncedMinFit) params.set("minFit", String(debouncedMinFit));
     if (debouncedMinSalary) params.set("minSalary", String(debouncedMinSalary));
     if (debouncedLocation) params.set("location", debouncedLocation);
     if (debouncedSearch) params.set("search", debouncedSearch);
-    if (sources.length > 0) {
-      sources.forEach((s) => params.append("source", s));
+    if (debouncedSources.length > 0) {
+      debouncedSources.forEach((s) => params.append("source", s));
     }
-    if (sortBy && sortBy !== "fit") params.set("sortBy", sortBy);
+    if (debouncedSortBy && debouncedSortBy !== "fit")
+      params.set("sortBy", debouncedSortBy);
     router.replace(`/jobs?${params.toString()}`, { scroll: false });
   }, [
-    minFit,
+    debouncedMinFit,
     debouncedMinSalary,
     debouncedLocation,
     debouncedSearch,
-    sources,
-    sortBy,
+    debouncedSources,
+    debouncedSortBy,
     router,
   ]);
 

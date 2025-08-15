@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /**
  * Custom hook that debounces a value
@@ -8,14 +8,20 @@ import { useState, useEffect } from "react";
  */
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const firstUpdate = useRef(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // Skip debounce on first render
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      setDebouncedValue(value);
+    }
+    const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(handler);
     };
   }, [value, delay]);
 

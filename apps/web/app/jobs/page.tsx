@@ -1,4 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
+
+import FilterSidebar from "@/components/filterSidebar";
 import { JobsPageClient } from "./JobsPageClient";
 import {
   QueryClient,
@@ -45,7 +47,14 @@ export default async function JobsPageServer({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <JobsPageClient />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 items-start">
+        <div className="lg:col-span-1 lg:sticky lg:top-4">
+          <FilterSidebar />
+        </div>
+        <div className="lg:col-span-3">
+          <JobsPageClient />
+        </div>
+      </div>
     </HydrationBoundary>
   );
 }
