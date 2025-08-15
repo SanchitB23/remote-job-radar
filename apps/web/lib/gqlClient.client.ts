@@ -2,14 +2,11 @@
 
 import { createClient } from "graphql-ws";
 import type { Client, Sink } from "graphql-ws";
-import { useAuth } from "@clerk/nextjs";
 import {
   fetchJobsShared,
   toggleBookmarkShared,
-  createGraphQLClient,
-  type Job,
-  type FetchJobsParams,
   GRAPHQL_WS_ENDPOINT,
+  FetchJobsParams,
 } from "./shared-gql";
 
 // Subscription query for new jobs
@@ -54,17 +51,6 @@ export function subscribeToNewJobs({
 
 // Client-side API functions for React Query
 
-// Client-side fetch jobs function - can be used with manual token
-export async function fetchJobsClient(
-  params: FetchJobsParams,
-  token?: string
-): Promise<{ jobs: Job[] }> {
-  const jobsConnection = await fetchJobsShared(params, token);
-  return {
-    jobs: Array.isArray(jobsConnection?.edges) ? jobsConnection.edges : [],
-  };
-}
-
 // Client-side fetch jobs connection function - returns full connection data for pagination
 export async function fetchJobsConnectionClient(
   params: FetchJobsParams,
@@ -88,46 +74,4 @@ export async function getWSClient(jwt?: string) {
     url: GRAPHQL_WS_ENDPOINT,
     connectionParams,
   });
-}
-
-// React Hook for WebSocket client with automatic auth
-export function useWSClient() {
-  const { getToken } = useAuth();
-
-  return {
-    getWSClient: async () => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return createClient({
-        url: GRAPHQL_WS_ENDPOINT,
-        connectionParams: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-    },
-  };
-}
-
-// Comprehensive hook that provides all GraphQL operations with automatic auth
-export function useGraphQL() {
-  const { getToken } = useAuth();
-
-  return {
-    fetchJobs: async (params: FetchJobsParams) => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return fetchJobsShared(params, token);
-    },
-    toggleBookmark: async (jobId: string) => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return toggleBookmarkShared(jobId, token);
-    },
-    getWSClient: async () => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return createClient({
-        url: GRAPHQL_WS_ENDPOINT,
-        connectionParams: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-    },
-    getClient: async () => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return createGraphQLClient(token);
-    },
-  };
 }

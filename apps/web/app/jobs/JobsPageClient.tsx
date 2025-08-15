@@ -127,15 +127,23 @@ export function JobsPageClient() {
           <li
             key={j.id}
             className="relative border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer group"
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (target.closest("[data-bookmark-btn]")) return;
+              window.open(j.url, "_blank", "noopener");
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={j.title}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                const target = e.target as HTMLElement;
+                if (target.closest("[data-bookmark-btn]")) return;
+                window.open(j.url, "_blank", "noopener");
+              }
+            }}
           >
-            {/* Full-card clickable link, except for the bookmark button */}
-            <a
-              href={j.url}
-              target="_blank"
-              className="absolute inset-0 z-0 rounded-lg pointer-events-auto"
-              tabIndex={-1}
-              aria-label={j.title}
-            />
             <div className="relative z-10 flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">
@@ -146,14 +154,9 @@ export function JobsPageClient() {
                   Fit Score: {Math.round(j.fitScore)}%
                 </p>
               </div>
-              <div>
-                <span className="ml-2 z-20 pointer-events-auto">
-                  <BookmarkButton
-                    id={j.id}
-                    bookmarked={j.bookmarked ?? false}
-                  />
-                </span>
-              </div>
+              <span className="ml-2 z-20 pointer-events-auto" data-bookmark-btn>
+                <BookmarkButton id={j.id} bookmarked={j.bookmarked ?? false} />
+              </span>
             </div>
           </li>
         ))}
