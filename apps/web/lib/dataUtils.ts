@@ -1,6 +1,6 @@
 // Common function to process and serialize GraphQL responses and errors
 export async function processGraphQLResponse(
-  res: Response | { ok: boolean; json: () => Promise<any> },
+  res: Response | { ok: boolean; json: () => Promise<unknown> },
   context?: { logLabel?: string }
 ) {
   const label = context?.logLabel || "GraphQL request failed";

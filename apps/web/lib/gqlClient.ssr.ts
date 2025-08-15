@@ -2,11 +2,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "graphql-ws";
 import {
-  fetchJobsShared,
-  toggleBookmarkShared,
   createGraphQLClient,
-  type FetchJobsParams,
   GRAPHQL_WS_ENDPOINT,
+  toggleBookmarkShared,
 } from "./shared-gql";
 
 export async function toggleBookmark(jobId: string) {
