@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import toast from "react-hot-toast";
-import { getWSClient, subscribeToNewJobs } from "@/lib/gqlClient.client";
+import { getWSClient, subscribeToNewJobs } from "@/services/gql-sub";
 import type { Client } from "graphql-ws";
 
 // Configurable minimum fit score for job alerts

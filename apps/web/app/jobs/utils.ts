@@ -1,4 +1,5 @@
-import { FetchJobsParams } from "@/lib/shared-gql";
+import { FetchJobsParams } from "@/types/gql";
+
 
 export function getParamsFromUrl(
   searchParams: URLSearchParams

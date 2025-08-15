@@ -9,7 +9,7 @@ import { useInfiniteJobs } from "../../lib/hooks";
 import { getParamsFromUrl } from "./utils";
 
 import JobCardSkeleton from "./JobCardSkeleton";
-import { Job } from "@/lib/shared-gql";
+import { Job } from "@/types/gql";
 
 function JobsError({ error }: { error: unknown }) {
   return (

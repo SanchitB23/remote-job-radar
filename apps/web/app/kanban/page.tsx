@@ -16,8 +16,9 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import KanbanLoading from "./KanbanLoading";
 import { KANBAN_COLUMNS } from "./constants";
-import { PipelineItem } from "@/lib/shared-gql";
+
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
+import { PipelineItem } from "@/types/gql";
 
 export default function Kanban() {
   const { data: pipelineData, isLoading, error } = usePipeline();

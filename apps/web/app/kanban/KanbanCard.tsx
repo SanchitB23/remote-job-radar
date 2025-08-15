@@ -1,10 +1,11 @@
+import { PipelineItem } from "@/types/gql";
 import {
   useSortable,
   AnimateLayoutChanges,
   defaultAnimateLayoutChanges,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { PipelineItem } from "@/lib/shared-gql";
+
 import React from "react";
 
 export function KanbanCard({

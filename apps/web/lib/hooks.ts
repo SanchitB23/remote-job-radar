@@ -6,24 +6,21 @@ import {
   useInfiniteQuery,
   useQuery,
 } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
 import {
-  fetchJobsConnectionClient,
-  toggleBookmarkClient,
-} from "./gqlClient.client";
-import { fetchPipelineShared, upsertPipelineItemShared } from "./shared-gql";
-import { FetchJobsParams, JobsConnection } from "./shared-gql";
+  fetchJobsApi,
+  toggleBookmarkApi,
+  fetchPipelineApi,
+  upsertPipelineItemApi,
+} from "../services/api-client";
+import { FetchJobsParams, JobsConnection } from "@/types/gql";
 
 // Custom hook for infinite pagination of jobs
 export function useInfiniteJobs(params: Omit<FetchJobsParams, "after"> = {}) {
-  const { getToken } = useAuth();
-
   return useInfiniteQuery({
     queryKey: ["jobs-infinite", params],
     queryFn: async ({ pageParam }) => {
-      const token = await getToken({ template: "remote-job-radar" });
       const queryParams = { ...params, after: pageParam };
-      return fetchJobsConnectionClient(queryParams, token || undefined);
+      return fetchJobsApi(queryParams);
     },
     getNextPageParam: (lastPage: JobsConnection) => {
       return lastPage.hasNextPage ? lastPage.endCursor : undefined;
@@ -36,13 +33,11 @@ export function useInfiniteJobs(params: Omit<FetchJobsParams, "after"> = {}) {
 
 // Custom hook for bookmark mutation
 export function useBookmarkMutation() {
-  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (jobId: string) => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return toggleBookmarkClient(jobId, token || undefined);
+      return toggleBookmarkApi(jobId);
     },
     onSuccess: () => {
       // Invalidate and refetch both regular and infinite queries
@@ -57,13 +52,10 @@ export function useBookmarkMutation() {
 
 // Custom hook for fetching pipeline data
 export function usePipeline() {
-  const { getToken } = useAuth();
-
   return useQuery({
     queryKey: ["pipeline"],
     queryFn: async () => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return fetchPipelineShared(token || undefined);
+      return fetchPipelineApi();
     },
     staleTime: 30 * 1000, // Consider data fresh for 30 seconds
     enabled: true,
@@ -72,7 +64,6 @@ export function usePipeline() {
 
 // Custom hook for pipeline upsert mutation
 export function usePipelineUpsertMutation() {
-  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -85,8 +76,7 @@ export function usePipelineUpsertMutation() {
       column: string;
       position: number;
     }) => {
-      const token = await getToken({ template: "remote-job-radar" });
-      return upsertPipelineItemShared(jobId, column, position, token);
+      return upsertPipelineItemApi(jobId, column, position);
     },
     onSuccess: () => {
       // Invalidate and refetch pipeline queries

@@ -8,7 +8,7 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import { getParamsFromUrl } from "./utils";
-import { fetchJobsShared } from "@/lib/shared-gql";
+import { fetchJobsShared } from "@/services/gql-api";
 
 // Server component that prefetches data
 export default async function JobsPageServer({
