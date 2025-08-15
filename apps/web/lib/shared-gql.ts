@@ -13,6 +13,14 @@ export interface Job {
   publishedAt: string;
   bookmarked: boolean;
   source: string;
+  isTracked?: boolean; // Whether the job is in the user's pipeline
+}
+
+export interface PipelineItem {
+  id: string;
+  column: string;
+  position: number;
+  job: Job;
 }
 
 export interface JobsConnection {
@@ -48,6 +56,7 @@ export const JOBS_QUERY = `#graphql
         publishedAt
         bookmarked
         source
+        isTracked
       }
       endCursor
       hasNextPage
@@ -58,6 +67,28 @@ export const JOBS_QUERY = `#graphql
 export const BOOKMARK_MUTATION = `#graphql
   mutation($id: ID!) {
     bookmark(id: $id)
+  }
+`;
+
+export const PIPELINE_QUERY = `#graphql
+  query {
+    pipeline {
+      id
+      column
+      position
+      job {
+        id
+        title
+        company
+        url
+      }
+    }
+  }
+`;
+
+export const PIPELINE_UPSERT_MUTATION = `#graphql
+  mutation($jobId: ID!, $column: String!, $position: Int!) {
+    pipelineUpsert(jobId: $jobId, column: $column, position: $position)
   }
 `;
 
@@ -126,6 +157,32 @@ export async function toggleBookmarkShared(
   return executeGraphQLQuery<{ bookmark: boolean }>(
     BOOKMARK_MUTATION,
     { id: jobId },
+    token
+  );
+}
+
+// Shared pipeline fetching logic
+export async function fetchPipelineShared(
+  token?: string | null
+): Promise<PipelineItem[]> {
+  const response = await executeGraphQLQuery<{ pipeline: PipelineItem[] }>(
+    PIPELINE_QUERY,
+    {},
+    token
+  );
+  return response.pipeline;
+}
+
+// Shared pipeline upsert logic
+export async function upsertPipelineItemShared(
+  jobId: string,
+  column: string,
+  position: number,
+  token?: string | null
+): Promise<{ pipelineUpsert: boolean }> {
+  return executeGraphQLQuery<{ pipelineUpsert: boolean }>(
+    PIPELINE_UPSERT_MUTATION,
+    { jobId, column, position },
     token
   );
 }

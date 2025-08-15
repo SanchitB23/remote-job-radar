@@ -22,5 +22,8 @@
   "description": "",
   "devDependencies": {
     "turbo": "^2.5.5"
+  },
+  "dependencies": {
+    "@dnd-kit/sortable": "^10.0.0"
   }
 }

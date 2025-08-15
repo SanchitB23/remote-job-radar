@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PubSub, withFilter } from "graphql-subscriptions";
+import { GraphQLError } from "graphql";
 import pg from "pg";
 
 const pubsub = new PubSub();
@@ -46,6 +47,11 @@ export function getResolvers(prisma: PrismaClient) {
   return {
     Query: {
       jobs: async (_: any, args: any, ctx: any) => {
+        if (!ctx.userId) {
+          throw new GraphQLError("UNAUTHENTICATED", {
+            extensions: { code: "UNAUTHENTICATED" },
+          });
+        }
         const {
           minFit = 0,
           search,
@@ -124,6 +130,18 @@ export function getResolvers(prisma: PrismaClient) {
           hasNextPage,
         };
       },
+      pipeline: (_: any, __: any, ctx: any) => {
+        if (!ctx.userId) {
+          throw new GraphQLError("UNAUTHENTICATED", {
+            extensions: { code: "UNAUTHENTICATED" },
+          });
+        }
+        return ctx.prisma.pipelineItem.findMany({
+          where: { user_id: ctx.userId },
+          include: { job: true },
+          orderBy: [{ column: "asc" }, { position: "asc" }],
+        });
+      },
     },
 
     Mutation: {
@@ -148,6 +166,31 @@ export function getResolvers(prisma: PrismaClient) {
           throw new Error("Failed to bookmark job");
         }
       },
+      pipelineUpsert: async (
+        _: any,
+        { jobId, column, position }: any,
+        ctx: any
+      ) => {
+        if (!ctx.userId) throw new Error("UNAUTHENTICATED");
+        await ctx.prisma.pipelineItem.upsert({
+          where: { user_id_job_id: { user_id: ctx.userId, job_id: jobId } },
+          create: { user_id: ctx.userId, job_id: jobId, column, position },
+          update: { column, position },
+        });
+        return true;
+      },
+      pipelineReorder: async (_: any, { ids, positions }: any, ctx: any) => {
+        if (!ctx.userId) throw new Error("UNAUTHENTICATED");
+        await ctx.prisma.$transaction(
+          ids.map((id: string, i: number) =>
+            ctx.prisma.pipelineItem.update({
+              where: { id },
+              data: { position: positions[i] },
+            })
+          )
+        );
+        return true;
+      },
     },
 
     Subscription: {
@@ -167,6 +210,18 @@ export function getResolvers(prisma: PrismaClient) {
           where: { user_id: ctx.userId, job_id: parent.id },
         });
         return count > 0;
+      },
+      isTracked: async (parent: any, _: any, ctx: any) => {
+        if (!ctx.userId) return false;
+        const x = await ctx.prisma.pipelineItem.findUnique({
+          where: {
+            user_id_job_id: {
+              user_id: ctx.userId,
+              job_id: parent.id,
+            },
+          },
+        });
+        return x !== null;
       },
     },
   };

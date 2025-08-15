@@ -21,6 +21,7 @@ model job {
   vector       Unsupported("vector")?
   fit_score    Float?
   bookmarks    bookmark[]
+  PipelineItem PipelineItem[]
 
   @@map("jobs")
 }
@@ -34,4 +35,19 @@ model bookmark {
   @@unique([user_id, job_id])
   @@index([user_id])
   @@map("bookmarks")
+}
+
+model PipelineItem {
+  id        String   @id @default(uuid())
+  user_id   String
+  job_id     String
+  column    String // "wishlist" | "applied" | "interview" | "offer"
+  position  Int // ordering within column
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  job job @relation(fields: [job_id], references: [id])
+
+  @@unique([user_id, job_id])
+  @@index([user_id, column, position])
 }

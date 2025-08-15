@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useCallback } from "react";
 import { BookmarkButton } from "../../components/bookmarkBtn";
+import { AddToPipelineButton } from "../../components/addToPipelineBtn";
 
 import { useInfiniteJobs } from "../../lib/hooks";
 import { getParamsFromUrl } from "./utils";
@@ -154,8 +155,21 @@ export function JobsPageClient() {
                   Fit Score: {Math.round(j.fitScore)}%
                 </p>
               </div>
-              <span className="ml-2 z-20 pointer-events-auto" data-bookmark-btn>
-                <BookmarkButton id={j.id} bookmarked={j.bookmarked ?? false} />
+              <span
+                className="ml-2 z-20 pointer-events-auto flex gap-2"
+                data-bookmark-btn
+              >
+                <span
+                  title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}
+                >
+                  <BookmarkButton
+                    id={j.id}
+                    bookmarked={j.bookmarked ?? false}
+                  />
+                </span>
+                <span title="Add to Pipeline (Wishlist)">
+                  <AddToPipelineButton jobId={j.id} inPipeline={j.isTracked} />
+                </span>
               </span>
             </div>
           </li>

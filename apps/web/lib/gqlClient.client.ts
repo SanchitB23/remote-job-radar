@@ -1,12 +1,12 @@
 "use client";
 
-import { createClient } from "graphql-ws";
 import type { Client, Sink } from "graphql-ws";
+import { createClient } from "graphql-ws";
 import {
-  fetchJobsShared,
-  toggleBookmarkShared,
-  GRAPHQL_WS_ENDPOINT,
   FetchJobsParams,
+  fetchJobsShared,
+  GRAPHQL_WS_ENDPOINT,
+  toggleBookmarkShared,
 } from "./shared-gql";
 
 // Subscription query for new jobs

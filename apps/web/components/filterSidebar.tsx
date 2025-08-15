@@ -137,7 +137,7 @@ export default function FilterSidebar() {
           >
             <option value="fit">Fit (desc)</option>
             <option value="date">Newest</option>
-            <option value="salary">Salary</option>
+            <option value="salary">Salary (desc)</option>
           </select>
         </div>
       </div>
