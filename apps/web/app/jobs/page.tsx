@@ -35,13 +35,22 @@ export default async function JobsPageServer({
     ? await getToken({ template: "remote-job-radar" })
     : undefined;
 
-  await queryClient.prefetchQuery({
-    queryKey: ["jobs", params],
+  // Remove 'after' from params since it's handled by infinite query
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { after: _, ...infiniteParams } = params;
+
+  // Prefetch the first page of infinite query
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["jobs-infinite", infiniteParams],
     queryFn: async () => {
-      const jobsConnection = await fetchJobsShared(params, token || "");
-      return {
-        jobs: Array.isArray(jobsConnection?.edges) ? jobsConnection.edges : [],
-      };
+      return await fetchJobsShared(infiniteParams, token || "");
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: {
+      hasNextPage: boolean;
+      endCursor?: string;
+    }) => {
+      return lastPage.hasNextPage ? lastPage.endCursor : undefined;
     },
   });
 

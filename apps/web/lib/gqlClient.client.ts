@@ -65,6 +65,14 @@ export async function fetchJobsClient(
   };
 }
 
+// Client-side fetch jobs connection function - returns full connection data for pagination
+export async function fetchJobsConnectionClient(
+  params: FetchJobsParams,
+  token?: string
+) {
+  return fetchJobsShared(params, token);
+}
+
 // Client-side bookmark toggle function - can be used with manual token
 export async function toggleBookmarkClient(
   jobId: string,
