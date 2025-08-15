@@ -38,11 +38,16 @@ useServer(
     context: async (ctx: WebSocketContext) => {
       // Restore JWT auth for WebSocket context
       const connectionParams = ctx.connectionParams || {};
-      const authHeader = connectionParams.Authorization || connectionParams.authorization;
+      const authHeader =
+        connectionParams.Authorization || connectionParams.authorization;
       let userId = null;
       if (authHeader) {
         userId = await getUserIdFromToken(authHeader as string);
-        console.log(`[WS] WebSocket connection established. userId: ${userId ?? 'anonymous'}`);
+        console.log(
+          `[WS] WebSocket connection established. userId: ${
+            userId ?? "anonymous"
+          }`
+        );
       } else {
         console.log("[WS] WebSocket connection established. No auth header.");
       }
@@ -53,7 +58,25 @@ useServer(
 );
 
 // 3. Set up Express middleware
-app.use(cors());
+// Parse allowed origins from environment variable (comma-separated)
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  : undefined;
+
+if (!allowedOrigins || allowedOrigins.length === 0) {
+  throw new Error(
+    "CORS_ORIGIN environment variable must be set with at least one allowed origin."
+  );
+}
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // 4. Apollo
@@ -76,6 +99,7 @@ app.use(
 );
 
 const PORT = 4000;
+const DEPLOYED_URL = process.env.DEPLOYED_URL || `http://localhost:${PORT}`;
 httpServer.listen(PORT, () =>
-  console.log(`🚀 GraphQL ready at http://localhost:${PORT}/graphql`)
+  console.log(`🚀 GraphQL ready at ${DEPLOYED_URL}/graphql`)
 );
