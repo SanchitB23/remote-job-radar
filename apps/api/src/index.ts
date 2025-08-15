@@ -25,7 +25,8 @@ const wsServer = new WebSocketServer({ server: httpServer, path: "/graphql" });
 
 // Health check endpoint (must be after app is defined)
 app.get("/health", (req, res) => {
-  res.json({ ok: true });
+  // API health check: return boolean and status code
+  res.status(200).json({ ok: true });
 });
 
 // DB health check endpoint

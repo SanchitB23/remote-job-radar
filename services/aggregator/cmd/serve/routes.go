@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,25 +15,28 @@ func setupRoutes(store *storage.Store, skillVec []float32) http.Handler {
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Health check requested", zap.String("remote_addr", r.RemoteAddr))
-		w.Write([]byte("ok"))
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
 
 	r.Get("/health/db", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("DB health check requested", zap.String("remote_addr", r.RemoteAddr))
+		w.Header().Set("Content-Type", "application/json")
 		err := store.Ping(r.Context())
 		if err != nil {
 			logger.Error("DB health check failed", zap.Error(err))
 			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte("db unhealthy: " + err.Error()))
+			json.NewEncoder(w).Encode(map[string]interface{}{"ok": false, "error": err.Error()})
 			return
 		}
-		w.Write([]byte("db ok"))
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
 
 	r.Post("/fetch", func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
 		runFetch(store, skillVec)
-		w.Write([]byte("triggered"))
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{"ok": true, "message": "triggered"})
 	})
 
 	return r

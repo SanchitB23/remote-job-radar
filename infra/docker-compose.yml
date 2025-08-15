@@ -10,7 +10,7 @@ services:
       - pgdata:/var/lib/postgresql/data
   embedder:
     build: ../services/embedder
-    ports: ["8000:8000"]
+    ports: ["1234:8000"]
 
 volumes:
   pgdata:

@@ -70,6 +70,12 @@ export default function RootLayout({
                       >
                         Kanban
                       </Link>
+                      <Link
+                        href="/status"
+                        className="text-gray-600 hover:text-blue-600 transition-colors"
+                      >
+                        Server Status
+                      </Link>
                     </nav>
                   </SignedIn>
                 </div>
