@@ -14,6 +14,7 @@ import JobAlerts from "@/components/jobAlertToast";
 import { Toaster } from "react-hot-toast";
 import { dark } from "@clerk/themes";
 import { ReactQueryProvider } from "@/components/providers";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -87,6 +88,7 @@ export default function RootLayout({
             <JobAlerts />
             <Toaster position="top-right" />
           </ReactQueryProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
