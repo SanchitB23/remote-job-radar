@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "graphql-ws";
+import type { Client, Sink } from "graphql-ws";
 import { useAuth } from "@clerk/nextjs";
 import {
   fetchJobsShared,
@@ -10,6 +11,46 @@ import {
   type FetchJobsParams,
   GRAPHQL_WS_ENDPOINT,
 } from "./shared-gql";
+
+// Subscription query for new jobs
+export const NEW_JOB_SUBSCRIPTION = `#graphql
+  subscription NewJob($minFit: Float) {
+    newJob(minFit: $minFit) {
+      id
+      title
+      company
+      url
+      fitScore
+    }
+  }
+`;
+
+// Utility to subscribe to new jobs via WebSocket
+export function subscribeToNewJobs({
+  minFit = 8,
+  wsClient,
+  next,
+  error,
+  complete,
+}: {
+  minFit?: number;
+  wsClient: Client;
+  next: Sink["next"];
+  error?: Sink["error"];
+  complete?: Sink["complete"];
+}) {
+  return wsClient.subscribe(
+    {
+      query: NEW_JOB_SUBSCRIPTION,
+      variables: { minFit },
+    },
+    {
+      next,
+      error: error || (() => {}),
+      complete: complete || (() => {}),
+    }
+  );
+}
 
 // Client-side API functions for React Query
 
@@ -33,9 +74,11 @@ export async function toggleBookmarkClient(
 }
 
 export async function getWSClient(jwt?: string) {
+  const connectionParams = jwt ? { Authorization: `Bearer ${jwt}` } : {};
+
   return createClient({
     url: GRAPHQL_WS_ENDPOINT,
-    connectionParams: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+    connectionParams,
   });
 }
 

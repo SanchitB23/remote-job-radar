@@ -22,7 +22,23 @@ export function getResolvers(prisma: PrismaClient) {
       const jobId = msg.payload;
       if (jobId) {
         const job = await prisma.job.findUnique({ where: { id: jobId } });
-        if (job) pubsub.publish(NEW_JOB, { newJob: job });
+        if (job) {
+          // Transform database fields to GraphQL schema format
+          const transformedJob = {
+            id: job.id,
+            source: (job.source ?? "").toUpperCase(),
+            title: job.title,
+            company: job.company,
+            description: job.description,
+            location: job.location,
+            salaryMin: job.salary_min,
+            salaryMax: job.salary_max,
+            url: job.url,
+            publishedAt: job.published_at,
+            fitScore: job.fit_score, // Transform snake_case to camelCase
+          };
+          pubsub.publish(NEW_JOB, { newJob: transformedJob });
+        }
       }
     });
   });

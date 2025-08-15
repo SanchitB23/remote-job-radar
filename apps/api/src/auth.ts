@@ -39,3 +39,37 @@ export async function getUserId(req: Request): Promise<string | null> {
     return null;
   }
 }
+
+export async function getUserIdFromToken(
+  token: string
+): Promise<string | null> {
+  try {
+    if (!token) return null;
+
+    // Remove "Bearer " prefix if present
+    const cleanToken = token.replace("Bearer ", "");
+
+    const decoded = jwt.decode(cleanToken, { complete: true }) as any;
+    if (!decoded?.header?.kid) {
+      console.warn("JWT token missing kid in header");
+      return null;
+    }
+
+    const kid = decoded.header.kid;
+
+    const key = await jwkClient.getSigningKey(kid);
+    const payload: any = jwt.verify(cleanToken, key.getPublicKey(), {
+      issuer: process.env.CLERK_JWT_ISSUER,
+      algorithms: ["RS256"],
+    });
+
+    console.log("✅ JWT verified for user:", payload.sub);
+    return payload.sub; // Clerk user ID
+  } catch (error) {
+    console.warn(
+      "JWT verification failed:",
+      error instanceof Error ? error.message : error
+    );
+    return null;
+  }
+}

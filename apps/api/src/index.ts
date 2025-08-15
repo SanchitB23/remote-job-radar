@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import http from "node:http";
 import { WebSocketServer } from "ws";
-import { makeServer } from "graphql-ws";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import express from "express";
@@ -9,7 +8,8 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { getResolvers } from "./resolvers/index.js";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { getUserId } from "./auth.js";
+import { getUserId, getUserIdFromToken } from "./auth.js";
+import { useServer } from "graphql-ws/use/ws";
 
 const prisma = new PrismaClient();
 
@@ -23,30 +23,34 @@ const app = express();
 const httpServer = http.createServer(app);
 const wsServer = new WebSocketServer({ server: httpServer, path: "/graphql" });
 
-// Set up GraphQL WebSocket server
-const wsGraphQLServer = makeServer({
-  schema,
-  context: () => ({ prisma }),
-});
+interface WebSocketContext {
+  connectionParams?: {
+    Authorization?: string;
+    authorization?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
 
-wsServer.on("connection", (socket, request) => {
-  // Create a new disposable for managing the connection
-  const closed = wsGraphQLServer.opened(
-    {
-      protocol: socket.protocol,
-      send: (data) =>
-        new Promise((resolve, reject) => {
-          socket.send(data, (err) => (err ? reject(err) : resolve()));
-        }),
-      close: (code, reason) => socket.close(code, reason),
-      onMessage: (cb) => socket.on("message", cb),
+useServer(
+  {
+    schema,
+    context: async (ctx: WebSocketContext) => {
+      // Restore JWT auth for WebSocket context
+      const connectionParams = ctx.connectionParams || {};
+      const authHeader = connectionParams.Authorization || connectionParams.authorization;
+      let userId = null;
+      if (authHeader) {
+        userId = await getUserIdFromToken(authHeader as string);
+        console.log(`[WS] WebSocket connection established. userId: ${userId ?? 'anonymous'}`);
+      } else {
+        console.log("[WS] WebSocket connection established. No auth header.");
+      }
+      return { prisma, userId };
     },
-    { socket, request }
-  );
-
-  // Handle socket closure
-  socket.once("close", (code, reason) => closed(code, reason.toString()));
-});
+  },
+  wsServer
+);
 
 // 3. Set up Express middleware
 app.use(cors());
