@@ -1,6 +1,6 @@
 module github.com/sanchitb23/remote-job-radar/aggregator
 
-go 1.24.5
+go 1.24.4
 
 require gopkg.in/yaml.v3 v3.0.1
 
