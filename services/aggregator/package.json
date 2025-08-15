@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "go run cmd/serve/main.go",
+    "dev": "ENV=local go run cmd/serve/main.go",
     "build": "go build -o bin/aggregator cmd/serve/main.go",
     "start": "./bin/aggregator"
   }

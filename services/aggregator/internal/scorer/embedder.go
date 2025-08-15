@@ -6,13 +6,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"go.uber.org/zap"
 )
 
-func Embed(ctx context.Context, text string) ([]float32, error) {
+type Embedder struct {
+	URL    string
+	Client *http.Client
+}
+
+func NewEmbedder() (*Embedder, error) {
+	embedderURL := os.Getenv("EMBEDDER_URL")
+	if embedderURL == "" {
+		logger.Error("EMBEDDER_URL environment variable not set")
+		return nil, fmt.Errorf("EMBEDDER_URL environment variable not set")
+	}
+	return &Embedder{
+		URL: embedderURL,
+		Client: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	}, nil
+}
+
+func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
 	if text == "" {
 		return nil, fmt.Errorf("empty text provided for embedding")
 	}
@@ -25,18 +45,14 @@ func Embed(ctx context.Context, text string) ([]float32, error) {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", "http://localhost:8000/embed", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", e.URL, bytes.NewReader(body))
 	if err != nil {
 		logger.Error("Failed to create HTTP request", zap.Error(err))
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{
-		Timeout: 30 * time.Second,
-	}
-
-	httpResp, err := client.Do(req)
+	httpResp, err := e.Client.Do(req)
 	if err != nil {
 		logger.Error("Failed to call embedder service", zap.Error(err))
 		return nil, fmt.Errorf("failed to call embedder service: %w", err)

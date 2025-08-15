@@ -53,7 +53,12 @@ func ScoreNewRows(ctx context.Context, st *storage.Store, skillVec []float32) er
 			continue
 		}
 
-		vec, err := Embed(ctx, text)
+		embedder, err := NewEmbedder()
+		if err != nil {
+			logger.Error("Failed to initialize embedder", zap.Error(err))
+			continue
+		}
+		vec, err := embedder.Embed(ctx, text)
 		if err != nil {
 			logger.Error("Failed to embed job", zap.String("jobId", r.ID), zap.Error(err))
 			continue // Skip this job but continue with others

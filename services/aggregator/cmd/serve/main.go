@@ -22,7 +22,7 @@ type skillFile struct {
 	Skills []string `yaml:"skills"`
 }
 
-func loadSkillVec(ctx context.Context) []float32 {
+func loadSkillVec(ctx context.Context, embedder *scorer.Embedder) []float32 {
 	skillsFile := os.Getenv("SKILLS_FILE")
 	logger.Info("Loading skills from file", zap.String("file", skillsFile))
 
@@ -44,7 +44,7 @@ func loadSkillVec(ctx context.Context) []float32 {
 	skillsText := strings.Join(sf.Skills, " ")
 
 	logger.Info("Generating embeddings for skills")
-	emb, err := scorer.Embed(ctx, skillsText)
+	emb, err := embedder.Embed(ctx, skillsText)
 	if err != nil {
 		logger.Error("Error generating embeddings", zap.Error(err))
 		return nil
@@ -63,9 +63,16 @@ func main() {
 
 	logger.Info("Starting Remote Job Radar Aggregator Service")
 
-	err := godotenv.Load(".env.local") // load DB_DSN, etc.
-	if err != nil {
-		logger.Warn("Could not load .env.local", zap.Error(err))
+	// Only load .env.local in local development
+	env := os.Getenv("ENV")
+	goEnv := os.Getenv("GO_ENV")
+	ginMode := os.Getenv("GIN_MODE")
+	logger.Info("Environment variables", zap.String("env", env), zap.String("goEnv", goEnv), zap.String("ginMode", ginMode))
+	if env == "local" || goEnv == "local" || ginMode == "debug" {
+		err := godotenv.Load(".env.local")
+		if err != nil {
+			logger.Warn("Could not load .env.local", zap.Error(err))
+		}
 	}
 
 	dsn := os.Getenv("DB_DSN")
@@ -77,9 +84,13 @@ func main() {
 		logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 	logger.Info("Database connection established")
+	embedder, err := scorer.NewEmbedder()
+	if err != nil {
+		logger.Fatal("Failed to initialize embedder", zap.Error(err))
+	}
 
 	logger.Info("Loading skills configuration")
-	skillVec := loadSkillVec(context.Background())
+	skillVec := loadSkillVec(context.Background(), embedder)
 	if skillVec == nil {
 		logger.Fatal("Failed to load skills vector")
 	}
