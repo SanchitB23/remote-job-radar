@@ -28,6 +28,17 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
+// DB health check endpoint
+app.get("/health/db", async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ db: "ok" });
+  } catch (err) {
+    console.error("DB health check failed:", err);
+    res.status(503).json({ db: "unhealthy" });
+  }
+});
+
 interface WebSocketContext {
   connectionParams?: {
     Authorization?: string;
