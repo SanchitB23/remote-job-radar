@@ -1,15 +1,15 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useCallback } from "react";
-import { BookmarkButton } from "../../components/bookmarkBtn";
+import { useCallback, useEffect } from "react";
 import { AddToPipelineButton } from "../../components/addToPipelineBtn";
+import { BookmarkButton } from "../../components/bookmarkBtn";
 
 import { useInfiniteJobs } from "../../lib/hooks";
 import { getParamsFromUrl } from "./utils";
 
-import JobCardSkeleton from "./JobCardSkeleton";
 import { Job } from "@/types/gql";
+import JobCardSkeleton from "./JobCardSkeleton";
 
 function JobsError({ error }: { error: unknown }) {
   return (

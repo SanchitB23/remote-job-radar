@@ -91,6 +91,10 @@ type Query {
     after: String
     "Number of jobs to return (max 50)"
     first: Int = 50
+    "Only return jobs bookmarked by the current user"
+    bookmarked: Boolean
+    "Only return jobs tracked (in pipeline) by the current user"
+    isTracked: Boolean
   ): JobsConnection!
 
   """

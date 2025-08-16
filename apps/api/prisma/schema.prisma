@@ -8,20 +8,20 @@ generator client {
 }
 
 model job {
-  id           String                 @id
-  source       String
-  title        String
-  company      String
-  description  String                 @db.Text
-  location     String?
-  salary_min   Int?
-  salary_max   Int?
-  url          String
-  published_at DateTime
-  vector       Unsupported("vector")?
-  fit_score    Float?
-  bookmarks    bookmark[]
-  PipelineItem PipelineItem[]
+  id             String                 @id
+  source         String
+  title          String
+  company        String
+  description    String                 @db.Text
+  location       String?
+  salary_min     Int?
+  salary_max     Int?
+  url            String
+  published_at   DateTime
+  vector         Unsupported("vector")?
+  fit_score      Float?
+  bookmarks      bookmark[]
+  pipeline_items PipelineItem[]
 
   @@map("jobs")
 }
@@ -38,11 +38,11 @@ model bookmark {
 }
 
 model PipelineItem {
-  id        String   @id @default(uuid())
-  user_id   String
+  id         String   @id @default(uuid())
+  user_id    String
   job_id     String
-  column    String // "wishlist" | "applied" | "interview" | "offer"
-  position  Int // ordering within column
+  column     String // "wishlist" | "applied" | "interview" | "offer"
+  position   Int // ordering within column
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -50,4 +50,5 @@ model PipelineItem {
 
   @@unique([user_id, job_id])
   @@index([user_id, column, position])
+  @@map("pipeline_items")
 }
