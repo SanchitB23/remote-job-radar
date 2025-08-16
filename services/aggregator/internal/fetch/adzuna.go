@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -32,7 +33,7 @@ type adzResp struct {
 	} `json:"results"`
 }
 
-func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
+func FetchAdzuna(ctx context.Context, page int, appID, appKey string) ([]storage.JobRow, error) {
 	if appID == "" || appKey == "" {
 		return nil, fmt.Errorf("adzuna API credentials are required")
 	}
@@ -45,7 +46,11 @@ func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
 	}
 	endpt := fmt.Sprintf("https://api.adzuna.com/v1/api/jobs/us/search/%d?%s", page, q.Encode())
 
-	resp, err := http.Get(endpt)
+	req, err := http.NewRequestWithContext(ctx, "GET", endpt, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

@@ -73,7 +73,7 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 		default:
 		}
 
-		adzunaJobs, err := fetch.FetchAdzuna(page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
+		adzunaJobs, err := fetch.FetchAdzuna(ctx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
 		if err != nil {
 			logger.Error("Adzuna fetch error", zap.Error(err), zap.Int("page", page))
 			break // Stop fetching more pages if one fails
