@@ -21,8 +21,9 @@ type Config struct {
 	EmbedderURL string
 
 	// Job Sources
-	AdzunaAppID  string
-	AdzunaAppKey string
+	AdzunaAppID       string
+	AdzunaAppKey      string
+	FetcherMaxPageNum int
 
 	// Skills
 	SkillsFile string
@@ -61,8 +62,9 @@ func Load() (*Config, error) {
 		Environment: getEnvWithDefault("ENV", "development"),
 
 		// Job Sources (optional)
-		AdzunaAppID:  os.Getenv("ADZUNA_APP_ID"),
-		AdzunaAppKey: os.Getenv("ADZUNA_APP_KEY"),
+		AdzunaAppID:       os.Getenv("ADZUNA_APP_ID"),
+		AdzunaAppKey:      os.Getenv("ADZUNA_APP_KEY"),
+		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),
 
 		// Scheduling defaults
 		FetchInterval: getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
@@ -114,6 +116,22 @@ func getDurationWithDefault(key string, defaultValue time.Duration) time.Duratio
 		zap.String("key", key),
 		zap.String("value", value),
 		zap.Duration("default", defaultValue))
+	return defaultValue
+}
+
+// getIntEnvWithDefault returns the int value of an environment variable, or the default if unset or invalid
+func getIntEnvWithDefault(key string, defaultValue int) int {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	if parsed, err := strconv.Atoi(value); err == nil {
+		return parsed
+	}
+	logger.Warn("Invalid int format, using default",
+		zap.String("key", key),
+		zap.String("value", value),
+		zap.Int("default", defaultValue))
 	return defaultValue
 }
 

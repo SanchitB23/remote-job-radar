@@ -66,7 +66,7 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 	var allAdzunaJobs []storage.JobRow
 
 	// Fetch multiple pages from Adzuna (since it's paginated)
-	for page := 1; page <= 3; page++ { // Fetch first 3 pages (150 jobs max)
+	for page := 1; page <= j.config.FetcherMaxPageNum; page++ {
 		select {
 		case <-ctx.Done():
 			return allAdzunaJobs, ctx.Err()

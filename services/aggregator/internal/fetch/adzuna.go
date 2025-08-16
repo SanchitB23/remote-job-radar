@@ -1,11 +1,12 @@
 package fetch
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 )
@@ -21,6 +22,9 @@ type adzResp struct {
 		Location    struct {
 			DisplayName string `json:"display_name"`
 		} `json:"location"`
+		Category struct {
+			Label string `json:"label"`
+		} `json:"category"`
 		SalaryMin   float64 `json:"salary_min"`
 		SalaryMax   float64 `json:"salary_max"`
 		RedirectURL string  `json:"redirect_url"`
@@ -37,9 +41,6 @@ func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
 		"app_id":           {appID},
 		"app_key":          {appKey},
 		"results_per_page": {"50"},
-		"page":             {fmt.Sprintf("%d", page)},
-		"what":             {"software"}, // filter optional
-		"where":            {"remote"},
 		"sort_by":          {"date"},
 	}
 	endpt := fmt.Sprintf("https://api.adzuna.com/v1/api/jobs/us/search/%d?%s", page, q.Encode())
@@ -50,6 +51,17 @@ func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
 	}
 	defer resp.Body.Close()
 
+	// Check for non-200 status codes and log the response body for debugging
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("adzuna: status %d, body: %s", resp.StatusCode, string(body))
+	}
+	// Check for non-JSON content-type (e.g., HTML error page)
+	if ct := resp.Header.Get("Content-Type"); ct != "" && !strings.Contains(ct, "json") {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("adzuna: unexpected content-type %s, body: %s", ct, string(body))
+	}
+
 	var data adzResp
 	if err = json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, err
@@ -57,15 +69,23 @@ func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
 
 	out := make([]storage.JobRow, 0, len(data.Results))
 	for _, j := range data.Results {
-		hash := fmt.Sprintf("%x", sha256.Sum256([]byte(j.RedirectURL)))
+		// Use source ID with prefix to prevent duplicates within source
+		id := fmt.Sprintf("adzuna-%s", j.ID)
+		// Remove "Job" or "Jobs" (case-insensitive, suffix only) from category label
+		workType := strings.TrimSpace(j.Category.Label)
+		workType = strings.TrimSuffix(workType, " Jobs")
+		workType = strings.TrimSuffix(workType, " jobs")
+		workType = strings.TrimSuffix(workType, " Job")
+		workType = strings.TrimSuffix(workType, " job")
+
 		out = append(out, storage.JobRow{
-			ID:          hash,
+			ID:          id,
 			Source:      "adzuna",
 			Title:       j.Title,
 			Company:     j.Company.DisplayName,
 			Description: j.Description,
 			Location:    j.Location.DisplayName,
-			WorkType:    "", // Adzuna doesn't provide work type category
+			WorkType:    workType,
 			SalaryMin:   int(j.SalaryMin),
 			SalaryMax:   int(j.SalaryMax),
 			URL:         j.RedirectURL,

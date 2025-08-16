@@ -1,7 +1,6 @@
 package fetch
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,6 +12,7 @@ const remotiveURL = "https://remotive.com/api/remote-jobs"
 
 type remotiveResp struct {
 	Jobs []struct {
+		ID          int    `json:"id"`
 		Title       string `json:"title"`
 		CompanyName string `json:"company_name"`
 		Description string `json:"description"`
@@ -37,7 +37,8 @@ func FetchRemotive() ([]storage.JobRow, error) {
 
 	rows := make([]storage.JobRow, 0, len(data.Jobs))
 	for _, j := range data.Jobs {
-		id := fmt.Sprintf("%x", sha256.Sum256([]byte(j.URL)))
+		// Use source ID with prefix to prevent duplicates within source
+		id := fmt.Sprintf("remotive-%d", j.ID)
 		min, max := parseSalary(j.Salary)
 		rows = append(rows, storage.JobRow{
 			ID:          id,
