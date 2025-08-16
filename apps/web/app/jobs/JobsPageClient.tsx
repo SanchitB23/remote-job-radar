@@ -58,6 +58,7 @@ export function JobsPageClient() {
   const {
     data,
     isLoading,
+    isFetching,
     error,
     fetchNextPage,
     hasNextPage,
@@ -66,6 +67,9 @@ export function JobsPageClient() {
 
   // Flatten all jobs from all pages
   const jobs: Job[] = data?.pages.flatMap((page) => page.edges) || [];
+
+  // Smart loading state: show skeletons for filter changes, not pagination
+  const isFilterLoading = isFetching && !isFetchingNextPage && !isLoading;
 
   // Load more jobs when user scrolls to bottom
   const handleLoadMore = useCallback(() => {
@@ -102,8 +106,8 @@ export function JobsPageClient() {
     return <JobsError error={error} />;
   }
 
-  if (isLoading) {
-    // Show 6 skeleton cards to mimic job list
+  if (isLoading || isFilterLoading) {
+    // Show skeleton cards for initial load or filter changes
     return (
       <ul className="space-y-2">
         {Array.from({ length: 6 }).map((_, i) => (

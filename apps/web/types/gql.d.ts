@@ -35,4 +35,6 @@ export interface FetchJobsParams {
   sources?: string[];
   sortBy?: string;
   after?: string;
+  bookmarked?: boolean | null; // true = only bookmarked, false = only unbookmarked, null = all
+  isTracked?: boolean | null; // true = only tracked, false = only untracked, null = all
 }

@@ -1,6 +1,6 @@
 export const JOBS_QUERY = `#graphql
-  query($minFit: Float, $first: Int, $search: String, $minSalary: Int, $location: String, $sources: [JobSource!], $sortBy: String, $after: String) {
-    jobs(minFit: $minFit, first: $first, search: $search, minSalary: $minSalary, location: $location, sources: $sources, sortBy: $sortBy, after: $after) {
+  query($minFit: Float, $first: Int, $search: String, $minSalary: Int, $location: String, $sources: [JobSource!], $sortBy: String, $after: String, $bookmarked: Boolean, $isTracked: Boolean) {
+    jobs(minFit: $minFit, first: $first, search: $search, minSalary: $minSalary, location: $location, sources: $sources, sortBy: $sortBy, after: $after, bookmarked: $bookmarked, isTracked: $isTracked) {
       edges {
         id
         title

@@ -16,35 +16,67 @@ export default function FilterSidebar() {
   );
   const [sortBy, setSortBy] = useState(q.get("sortBy") ?? "fit");
 
-  // Debounce all filter values with 500ms delay
-  const debouncedMinFit = useDebounce(minFit, 500);
-  const debouncedMinSalary = useDebounce(minSalary, 500);
-  const debouncedLocation = useDebounce(location, 500);
-  const debouncedSearch = useDebounce(search, 500);
-  const debouncedSources = useDebounce(sources, 500);
-  const debouncedSortBy = useDebounce(sortBy, 500);
+  // Track if we're applying filters (for UX feedback)
+  const [isApplyingFilters, setIsApplyingFilters] = useState(false);
+
+  // Three-state filters: null = all, true = only show, false = only hide
+  const [bookmarked, setBookmarked] = useState<boolean | null>(() => {
+    const param = q.get("bookmarked");
+    return param === "true" ? true : param === "false" ? false : null;
+  });
+  const [isTracked, setIsTracked] = useState<boolean | null>(() => {
+    const param = q.get("isTracked");
+    return param === "true" ? true : param === "false" ? false : null;
+  });
+
+  // Debounce only text/number inputs that change frequently
+  const debouncedMinFit = useDebounce(minFit, 300);
+  const debouncedMinSalary = useDebounce(minSalary, 300);
+  const debouncedLocation = useDebounce(location, 300);
+  // Using 300ms debounce for more responsive filtering UX; increase to 500ms if API load is a concern
+  const debouncedSearch = useDebounce(search, 300);
+  // No debouncing needed for click-based filters: sources, sortBy, bookmarked, isTracked
 
   useEffect(() => {
+    setIsApplyingFilters(true);
+
     const params = new URLSearchParams();
     if (debouncedMinFit) params.set("minFit", String(debouncedMinFit));
     if (debouncedMinSalary) params.set("minSalary", String(debouncedMinSalary));
     if (debouncedLocation) params.set("location", debouncedLocation);
     if (debouncedSearch) params.set("search", debouncedSearch);
-    if (debouncedSources.length > 0) {
-      debouncedSources.forEach((s) =>
-        params.append("sources", s.toUpperCase())
-      );
+    if (sources.length > 0) {
+      sources.forEach((s) => params.append("sources", s.toUpperCase()));
     }
-    if (debouncedSortBy && debouncedSortBy !== "fit")
-      params.set("sortBy", debouncedSortBy);
+    if (sortBy && sortBy !== "fit") params.set("sortBy", sortBy);
+
+    // Add bookmark filter
+    if (bookmarked !== null) {
+      params.set("bookmarked", String(bookmarked));
+    }
+
+    // Add tracking filter
+    if (isTracked !== null) {
+      params.set("isTracked", String(isTracked));
+    }
+
     router.replace(`/jobs?${params.toString()}`, { scroll: false });
+
+    // Reset loading state after a short delay
+    const timer = setTimeout(() => {
+      setIsApplyingFilters(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
   }, [
     debouncedMinFit,
     debouncedMinSalary,
     debouncedLocation,
     debouncedSearch,
-    debouncedSources,
-    debouncedSortBy,
+    sources,
+    sortBy,
+    bookmarked,
+    isTracked,
     router,
   ]);
 
@@ -57,11 +89,24 @@ export default function FilterSidebar() {
   return (
     <aside
       className="border bg-white dark:bg-zinc-900 dark:border-zinc-800 p-3 flex flex-col gap-3 w-full mb-4
-        sm:rounded-lg
-        lg:w-72 lg:mb-0 lg:mr-4 lg:sticky lg:top-4
-        lg:shadow-lg lg:rounded-2xl lg:bg-zinc-50 dark:lg:bg-zinc-950 lg:border-none"
+      sm:rounded-lg
+      lg:w-72 lg:mb-0 lg:mr-4 lg:sticky lg:top-4
+      lg:shadow-lg lg:rounded-2xl lg:bg-zinc-50 dark:lg:bg-zinc-950 lg:border-none relative"
     >
-      <div className="grid grid-cols-2 gap-3 lg:flex lg:flex-col lg:gap-4">
+      {/* Subtle loading overlay */}
+      {isApplyingFilters && (
+        <div className="absolute inset-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-[1px] rounded-2xl flex items-center justify-center z-10">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent"></div>
+        </div>
+      )}
+
+      <div
+        className={`grid grid-cols-2 gap-3 lg:flex lg:flex-col lg:gap-4 transition-opacity ${
+          isApplyingFilters
+            ? "pointer-events-none opacity-60"
+            : "pointer-events-auto opacity-100"
+        }`}
+      >
         <div>
           <label className="block text-sm text-zinc-700 dark:text-zinc-200">
             Min Fit
@@ -71,6 +116,7 @@ export default function FilterSidebar() {
             min={0}
             max={100}
             value={minFit}
+            disabled={isApplyingFilters}
             onChange={(e) => setMinFit(Number(e.target.value))}
           />
           <div className="text-sm text-zinc-700 dark:text-zinc-300">
@@ -82,9 +128,10 @@ export default function FilterSidebar() {
             Min Salary (USD)
           </label>
           <input
-            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             type="number"
             value={minSalary}
+            disabled={isApplyingFilters}
             onChange={(e) => setMinSalary(Number(e.target.value))}
           />
         </div>
@@ -93,8 +140,9 @@ export default function FilterSidebar() {
             Location
           </label>
           <input
-            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={location}
+            disabled={isApplyingFilters}
             onChange={(e) => setLocation(e.target.value)}
           />
         </div>
@@ -103,8 +151,9 @@ export default function FilterSidebar() {
             Search
           </label>
           <input
-            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={search}
+            disabled={isApplyingFilters}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
@@ -115,11 +164,16 @@ export default function FilterSidebar() {
           {["remotive", "adzuna"].map((s) => (
             <label
               key={s}
-              className="block text-sm text-zinc-700 dark:text-zinc-200"
+              className={`block text-sm text-zinc-700 dark:text-zinc-200 ${
+                isApplyingFilters
+                  ? "opacity-50 cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
             >
               <input
                 type="checkbox"
                 checked={sources.includes(s)}
+                disabled={isApplyingFilters}
                 onChange={() => toggleSource(s)}
               />{" "}
               {s}
@@ -131,13 +185,70 @@ export default function FilterSidebar() {
             Sort by
           </label>
           <select
-            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={sortBy}
+            disabled={isApplyingFilters}
             onChange={(e) => setSortBy(e.target.value)}
           >
             <option value="fit">Fit (desc)</option>
             <option value="date">Newest</option>
             <option value="salary">Salary (desc)</option>
+          </select>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200 mb-1">
+            Bookmarks
+          </label>
+          <select
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            value={
+              bookmarked === null
+                ? "all"
+                : bookmarked
+                ? "bookmarked"
+                : "unbookmarked"
+            }
+            disabled={isApplyingFilters}
+            onChange={(e) => {
+              const value = e.target.value;
+              setBookmarked(
+                value === "bookmarked"
+                  ? true
+                  : value === "unbookmarked"
+                  ? false
+                  : null
+              );
+            }}
+          >
+            <option value="all">All Jobs</option>
+            <option value="bookmarked">Only Bookmarked</option>
+            <option value="unbookmarked">Only Unbookmarked</option>
+          </select>
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200 mb-1">
+            Tracking Status
+          </label>
+          <select
+            className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            value={
+              isTracked === null ? "all" : isTracked ? "tracked" : "untracked"
+            }
+            disabled={isApplyingFilters}
+            onChange={(e) => {
+              const value = e.target.value;
+              setIsTracked(
+                value === "tracked"
+                  ? true
+                  : value === "untracked"
+                  ? false
+                  : null
+              );
+            }}
+          >
+            <option value="all">All Jobs</option>
+            <option value="tracked">Only Tracked</option>
+            <option value="untracked">Only Untracked</option>
           </select>
         </div>
       </div>

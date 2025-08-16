@@ -1,6 +1,5 @@
 import { FetchJobsParams } from "@/types/gql";
 
-
 export function getParamsFromUrl(
   searchParams: URLSearchParams
 ): FetchJobsParams {
@@ -25,5 +24,13 @@ export function getParamsFromUrl(
     })(),
     sortBy: searchParams.get("sortBy") || undefined,
     after: searchParams.get("after") || undefined,
+    bookmarked: (() => {
+      const param = searchParams.get("bookmarked");
+      return param === "true" ? true : param === "false" ? false : null;
+    })(),
+    isTracked: (() => {
+      const param = searchParams.get("isTracked");
+      return param === "true" ? true : param === "false" ? false : null;
+    })(),
   };
 }

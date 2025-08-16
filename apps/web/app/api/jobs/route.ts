@@ -44,6 +44,27 @@ export async function GET(request: NextRequest) {
       params.sources = searchParams.get("sources")!.split(",");
     }
 
+    // Parse filter parameters for bookmarks and tracking
+    const bookmarkedParam = searchParams.get("bookmarked");
+    if (bookmarkedParam !== null) {
+      params.bookmarked =
+        bookmarkedParam === "true"
+          ? true
+          : bookmarkedParam === "false"
+          ? false
+          : null;
+    }
+
+    const isTrackedParam = searchParams.get("isTracked");
+    if (isTrackedParam !== null) {
+      params.isTracked =
+        isTrackedParam === "true"
+          ? true
+          : isTrackedParam === "false"
+          ? false
+          : null;
+    }
+
     // Call the GraphQL backend
     const result = await fetchJobsShared(params, token);
 
