@@ -9,6 +9,7 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 
 	"github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 type Store struct{ DB *sql.DB }
@@ -22,6 +23,10 @@ func New(dsn string) (*Store, error) {
 }
 
 func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
+	if len(rows) == 0 {
+		return nil
+	}
+
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -38,18 +43,39 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 	ON CONFLICT (id) DO NOTHING`
 
 	var insertedJobs []string
-	for _, r := range rows {
-		result, err := tx.ExecContext(ctx, stmt,
-			r.ID, r.Source, r.Title, r.Company, r.Description, r.Location, r.WorkType,
-			r.SalaryMin, r.SalaryMax, r.URL, r.PublishedAt)
-		if err != nil {
-			logger.Error("Insert error: " + err.Error())
-			return err
+	batchSize := 100 // Process in smaller batches to avoid overwhelming the database
+
+	for i := 0; i < len(rows); i += batchSize {
+		end := i + batchSize
+		if end > len(rows) {
+			end = len(rows)
 		}
 
-		// Check if this was actually inserted (not a conflict)
-		if rowsAffected, _ := result.RowsAffected(); rowsAffected > 0 {
-			insertedJobs = append(insertedJobs, r.ID)
+		batch := rows[i:end]
+		logger.Info("Processing job batch",
+			zap.Int("batchStart", i+1),
+			zap.Int("batchEnd", end),
+			zap.Int("totalJobs", len(rows)))
+
+		for _, r := range batch {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+			}
+
+			result, err := tx.ExecContext(ctx, stmt,
+				r.ID, r.Source, r.Title, r.Company, r.Description, r.Location, r.WorkType,
+				r.SalaryMin, r.SalaryMax, r.URL, r.PublishedAt)
+			if err != nil {
+				logger.Error("Insert error: " + err.Error())
+				return err
+			}
+
+			// Check if this was actually inserted (not a conflict)
+			if rowsAffected, _ := result.RowsAffected(); rowsAffected > 0 {
+				insertedJobs = append(insertedJobs, r.ID)
+			}
 		}
 	}
 
@@ -59,6 +85,10 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 			logger.Error("NOTIFY error: " + err.Error())
 		}
 	}
+
+	logger.Info("Successfully processed all job batches",
+		zap.Int("totalProcessed", len(rows)),
+		zap.Int("newJobs", len(insertedJobs)))
 
 	return tx.Commit()
 }

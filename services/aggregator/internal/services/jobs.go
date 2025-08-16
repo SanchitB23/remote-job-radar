@@ -69,14 +69,26 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 	for page := 1; page <= j.config.FetcherMaxPageNum; page++ {
 		select {
 		case <-ctx.Done():
+			logger.Warn("Adzuna fetch interrupted by context cancellation",
+				zap.Int("page", page),
+				zap.Int("jobsFetched", len(allAdzunaJobs)))
 			return allAdzunaJobs, ctx.Err()
 		default:
 		}
 
-		adzunaJobs, err := fetch.FetchAdzuna(ctx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
+		// Create a timeout for individual page fetch
+		pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		adzunaJobs, err := fetch.FetchAdzuna(pageCtx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
+		cancel()
+
 		if err != nil {
 			logger.Error("Adzuna fetch error", zap.Error(err), zap.Int("page", page))
-			break // Stop fetching more pages if one fails
+			// Continue with what we have if we got some results
+			if len(allAdzunaJobs) > 0 {
+				logger.Info("Continuing with partial Adzuna results", zap.Int("count", len(allAdzunaJobs)))
+				break
+			}
+			return nil, err
 		}
 
 		logger.Info("Retrieved jobs from Adzuna",
@@ -116,7 +128,12 @@ func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
 
 	// Store all jobs in database
 	logger.Info("Upserting jobs to database", zap.Int("totalJobs", len(allJobs)))
-	if err = j.store.UpsertJobs(fetchCtx, allJobs); err != nil {
+
+	// Create a separate context for database operations to avoid cancellation
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer dbCancel()
+
+	if err = j.store.UpsertJobs(dbCtx, allJobs); err != nil {
 		logger.Error("Database error", zap.Error(err))
 		return err
 	}
@@ -128,7 +145,12 @@ func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
 
 	// Score new jobs immediately after fetching
 	logger.Info("Scoring newly fetched jobs")
-	if err := j.ScoreNewJobs(fetchCtx); err != nil {
+
+	// Create a separate context for scoring operations
+	scoreCtx, scoreCancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer scoreCancel()
+
+	if err := j.ScoreNewJobs(scoreCtx); err != nil {
 		logger.Error("Scoring error", zap.Error(err))
 		return err
 	}

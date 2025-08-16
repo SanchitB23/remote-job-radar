@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/handlers"
@@ -82,10 +83,19 @@ func (a *App) Cleanup() {
 	}
 
 	if a.Store != nil && a.Store.DB != nil {
-		if err := a.Store.DB.Close(); err != nil {
-			logger.Error("Error closing database connection", zap.Error(err))
+		// Use a timeout for database cleanup to prevent hanging
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		// Try to ping first to check if connection is alive
+		if err := a.Store.DB.PingContext(ctx); err != nil {
+			logger.Warn("Database connection already closed or unavailable", zap.Error(err))
 		} else {
-			logger.Info("Database connection closed")
+			if err := a.Store.DB.Close(); err != nil {
+				logger.Error("Error closing database connection", zap.Error(err))
+			} else {
+				logger.Info("Database connection closed")
+			}
 		}
 	}
 

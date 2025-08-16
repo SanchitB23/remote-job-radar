@@ -69,7 +69,7 @@ func Load() (*Config, error) {
 		// Scheduling defaults
 		FetchInterval: getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
 		ScoreInterval: getDurationWithDefault("SCORE_INTERVAL", 4*time.Hour),
-		FetchTimeout:  getDurationWithDefault("FETCH_TIMEOUT", 30*time.Second),
+		FetchTimeout:  getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
 	}
 
 	logger.Info("Configuration loaded successfully",

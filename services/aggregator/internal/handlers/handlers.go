@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -50,8 +51,10 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
 
 	// Run fetch in background to avoid blocking the HTTP response
+	// Use context.Background() instead of r.Context() to prevent cancellation
 	go func() {
-		if err := h.jobService.FetchAndProcessJobs(r.Context()); err != nil {
+		ctx := context.Background()
+		if err := h.jobService.FetchAndProcessJobs(ctx); err != nil {
 			logger.Error("Manual fetch failed", zap.Error(err))
 		}
 	}()
