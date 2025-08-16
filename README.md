@@ -77,10 +77,12 @@ remote-job-radar/
 #### Job Aggregator (`services/aggregator`)
 
 - **Language**: Go 1.24.5
-- **HTTP Router**: Chi
+- **HTTP Router**: Chi with middleware
 - **Database**: Direct PostgreSQL connection
-- **Scheduling**: Built-in cron for job fetching
+- **Architecture**: Clean architecture with dependency injection
+- **Scheduling**: Background job scheduler with graceful shutdown
 - **APIs**: Remotive integration (more sources planned)
+- **Structure**: Modular design with separated concerns
 
 #### ML Service (`services/embedder`)
 
@@ -147,6 +149,10 @@ DB_DSN="host=localhost user=postgres password=local dbname=postgres sslmode=disa
 SKILLS_FILE="skills.yml"
 EMBEDDER_URL="http://localhost:8000"
 PORT="8080"
+# Optional: Override default intervals
+FETCH_INTERVAL="2h"
+SCORE_INTERVAL="4h"
+FETCH_TIMEOUT="30s"
 ```
 
 ### 4. Set Up Your Skills Profile
@@ -261,8 +267,11 @@ subscription NewJobs($minFit: Float!) {
 
 #### Job Aggregator Service
 
-- `GET /health` - Health check
+- `GET /health` - General health check
+- `GET /health/db` - Database connectivity check  
 - `POST /fetch` - Trigger manual job fetch
+
+For more details on the aggregator service architecture, see [`services/aggregator/README.md`](./services/aggregator/README.md).
 
 ## 📊 Database Schema
 
@@ -307,10 +316,11 @@ cd apps/api
 npm run dev          # API server with hot reload
 npm run build        # TypeScript compilation
 
-# Aggregator
+# Aggregator (restructured with clean architecture)
 cd services/aggregator
 npm run dev          # Go development server
 npm run build        # Build binary
+go run cmd/serve/main.go  # Direct execution
 ```
 
 ### Project Structure
@@ -329,9 +339,19 @@ npm run build        # Build binary
 │       ├── prisma/        # Database schema & migrations
 │       └── resolvers/     # GraphQL resolvers
 ├── services/
-│   ├── aggregator/        # Go job fetching service
-│   │   ├── cmd/          # CLI commands
-│   │   └── internal/     # Go packages
+│   ├── aggregator/        # Go job fetching service (restructured)
+│   │   ├── cmd/          # Application entry point
+│   │   │   └── serve/    # Main server command
+│   │   └── internal/     # Clean architecture packages
+│   │       ├── app/      # Application setup & DI
+│   │       ├── config/   # Configuration management
+│   │       ├── handlers/ # HTTP handlers & routes
+│   │       ├── services/ # Business logic
+│   │       ├── scheduler/# Background job scheduling
+│   │       ├── fetch/    # External API clients
+│   │       ├── scorer/   # ML scoring logic
+│   │       ├── storage/  # Database operations
+│   │       └── logger/   # Logging configuration
 │   └── embedder/         # Python ML service
 └── infra/
     └── docker-compose.yml # Development infrastructure
@@ -370,6 +390,19 @@ docker-compose -f docker-compose.prod.yml up -d
 - Use Prettier for code formatting
 - Write tests for new features
 - Update documentation for API changes
+
+### Recent Improvements
+
+#### ✅ Aggregator Service Restructuring (August 2025)
+
+The Go aggregator service has been completely restructured to follow clean architecture principles:
+
+- **Before**: Monolithic `main.go` with 180+ lines handling everything
+- **After**: Clean architecture with dependency injection, separated concerns, and improved testability
+- **Benefits**: Better maintainability, easier testing, clearer code organization
+- **Backward Compatible**: No breaking changes to external APIs or deployment
+
+See [`services/aggregator/README.md`](./services/aggregator/README.md) for detailed architecture documentation.
 
 ## 🔮 Roadmap
 
