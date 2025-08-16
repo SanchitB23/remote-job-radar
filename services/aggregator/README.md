@@ -106,8 +106,26 @@ Manages all configuration:
 
 Business logic layer:
 
-- **JobService**: Handles job fetching and processing
+- **JobService**: Handles job fetching and processing from multiple sources
 - **SkillsService**: Manages skills loading and vector generation
+
+### Job Sources (`internal/fetch/`)
+
+External API integrations:
+
+- **Remotive**: Always enabled, fetches remote job listings
+- **Adzuna**: Optional, fetches software jobs when credentials are provided
+- **Extensible**: Easy to add new job sources by implementing the same pattern
+
+#### Adding New Job Sources
+
+To add a new job source:
+
+1. Create a new file in `internal/fetch/` (e.g., `linkedin.go`)
+2. Implement a function that returns `[]storage.JobRow`
+3. Add configuration for the new source in `internal/config/`
+4. Update `JobService.fetchFromAllSources()` to include the new source
+5. Update environment examples and documentation
 
 ### Handlers (`internal/handlers/`)
 
@@ -134,6 +152,8 @@ The service supports the following environment variables:
 | `DB_DSN` | Yes | - | Database connection string |
 | `EMBEDDER_URL` | Yes | - | Embedder service URL |
 | `SKILLS_FILE` | Yes | - | Path to skills YAML file |
+| `ADZUNA_APP_ID` | No | - | Adzuna API application ID |
+| `ADZUNA_APP_KEY` | No | - | Adzuna API application key |
 | `PORT` | No | `8080` | HTTP server port |
 | `FETCH_INTERVAL` | No | `2h` | Job fetch interval |
 | `SCORE_INTERVAL` | No | `4h` | Scoring interval |

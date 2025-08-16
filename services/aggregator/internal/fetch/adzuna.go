@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 )
@@ -29,10 +28,14 @@ type adzResp struct {
 	} `json:"results"`
 }
 
-func FetchAdzuna(page int) ([]storage.JobRow, error) {
+func FetchAdzuna(page int, appID, appKey string) ([]storage.JobRow, error) {
+	if appID == "" || appKey == "" {
+		return nil, fmt.Errorf("adzuna API credentials are required")
+	}
+
 	q := url.Values{
-		"app_id":           {os.Getenv("ADZUNA_APP_ID")},
-		"app_key":          {os.Getenv("ADZUNA_APP_KEY")},
+		"app_id":           {appID},
+		"app_key":          {appKey},
 		"results_per_page": {"50"},
 		"page":             {fmt.Sprintf("%d", page)},
 		"what":             {"software"}, // filter optional

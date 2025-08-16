@@ -20,6 +20,10 @@ type Config struct {
 	// External services
 	EmbedderURL string
 
+	// Job Sources
+	AdzunaAppID  string
+	AdzunaAppKey string
+
 	// Skills
 	SkillsFile string
 
@@ -56,6 +60,10 @@ func Load() (*Config, error) {
 		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
 		Environment: getEnvWithDefault("ENV", "development"),
 
+		// Job Sources (optional)
+		AdzunaAppID:  os.Getenv("ADZUNA_APP_ID"),
+		AdzunaAppKey: os.Getenv("ADZUNA_APP_KEY"),
+
 		// Scheduling defaults
 		FetchInterval: getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
 		ScoreInterval: getDurationWithDefault("SCORE_INTERVAL", 4*time.Hour),
@@ -66,7 +74,8 @@ func Load() (*Config, error) {
 		zap.String("port", cfg.Port),
 		zap.String("environment", cfg.Environment),
 		zap.Duration("fetchInterval", cfg.FetchInterval),
-		zap.Duration("scoreInterval", cfg.ScoreInterval))
+		zap.Duration("scoreInterval", cfg.ScoreInterval),
+		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""))
 
 	return cfg, nil
 }
@@ -106,4 +115,9 @@ func getDurationWithDefault(key string, defaultValue time.Duration) time.Duratio
 		zap.String("value", value),
 		zap.Duration("default", defaultValue))
 	return defaultValue
+}
+
+// IsAdzunaEnabled returns true if Adzuna API credentials are configured
+func (c *Config) IsAdzunaEnabled() bool {
+	return c.AdzunaAppID != "" && c.AdzunaAppKey != ""
 }
