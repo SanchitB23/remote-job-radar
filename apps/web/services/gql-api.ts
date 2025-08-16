@@ -28,8 +28,13 @@ export async function executeGraphQLQuery<T = unknown>(
     return await client.request<T>(query, variables);
   } catch (error) {
     // Enhanced error handling with GraphQLClient
-    const operationTypeMatch = query.trim().match(/^(mutation|query|subscription)\b/i);
-    const operationType = operationTypeMatch ? operationTypeMatch[1][0].toUpperCase() + operationTypeMatch[1].slice(1).toLowerCase() : "Query";
+    const operationTypeMatch = query
+      .trim()
+      .match(/^(mutation|query|subscription)\b/i);
+    const operationType = operationTypeMatch
+      ? operationTypeMatch[1][0].toUpperCase() +
+        operationTypeMatch[1].slice(1).toLowerCase()
+      : "Query";
     console.error(`GraphQL ${operationType} failed:`, {
       query,
       variables,
