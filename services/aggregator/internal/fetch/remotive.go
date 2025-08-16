@@ -19,7 +19,8 @@ type remotiveResp struct {
 		Category    string `json:"category"`
 		Salary      string `json:"salary"` // "80k-100k USD"
 		URL         string `json:"url"`
-		PublicDate  string `json:"publication_date"` // "2025-08-06T08:00:30"
+		PublicDate  string `json:"publication_date"`            // "2025-08-06T08:00:30"
+		Location    string `json:"candidate_required_location"` // "Remote"
 	} `json:"jobs"`
 }
 
