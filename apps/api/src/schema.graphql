@@ -26,6 +26,8 @@ type Job {
   company: String!
   "Job location (if specified)"
   location: String
+  "Type/category of work (e.g. Software Development, Design, etc.)"
+  workType: String
   "Minimum salary in USD (if available)"
   salaryMin: Int
   "Maximum salary in USD (if available)"
@@ -70,6 +72,32 @@ type PipelineItem {
   position: Int!
 }
 
+"""
+Range metadata for numeric filters
+"""
+type NumericRange {
+  "Minimum value"
+  min: Float!
+  "Maximum value"
+  max: Float!
+}
+
+"""
+Metadata about available filter options based on current job data
+"""
+type FilterMetadata {
+  "Fit score range available in the database"
+  fitScore: NumericRange!
+  "Salary range available in the database"
+  salary: NumericRange!
+  "List of available job sources"
+  sources: [JobSource!]!
+  "List of most common job locations (top 50)"
+  locations: [String!]!
+  "List of available work types (top 50)"
+  workTypes: [String!]!
+}
+
 type Query {
   """
   Get remote job listings with optional filtering and pagination
@@ -83,6 +111,8 @@ type Query {
     minSalary: Int
     "Location filter (partial match, case insensitive)"
     location: String
+    "Work type filter (partial match, case insensitive)"
+    workType: String
     "List of job sources to include (e.g. [LINKEDIN, REMOTIVE])"
     sources: [JobSource!]
     "Sort order: 'fit' (default), 'date', or 'salary'"
@@ -101,6 +131,11 @@ type Query {
   Get the current user's job application pipeline (Kanban board)
   """
   pipeline: [PipelineItem!]!
+
+  """
+  Get metadata about available filter options (ranges, sources, locations)
+  """
+  filterMetadata: FilterMetadata!
 }
 
 type Mutation {

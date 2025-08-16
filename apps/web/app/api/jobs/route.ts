@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
     if (searchParams.get("search")) {
       params.search = searchParams.get("search")!;
     }
-    if (searchParams.get("location")) {
-      params.location = searchParams.get("location")!;
+    if (searchParams.get("workType")) {
+      params.workType = searchParams.get("workType")!;
     }
     if (searchParams.get("sortBy")) {
       params.sortBy = searchParams.get("sortBy")!;

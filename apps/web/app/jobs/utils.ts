@@ -14,7 +14,11 @@ export function getParamsFromUrl(
     minSalary: searchParams.get("minSalary")
       ? Number(searchParams.get("minSalary"))
       : undefined,
-    location: searchParams.get("location") || undefined,
+    workType: (() => {
+      const all = searchParams.getAll("workType");
+      if (all.length > 0) return all.join(","); // Join multiple work types with comma
+      return searchParams.get("workType") || undefined;
+    })(),
     sources: (() => {
       const all = searchParams.getAll("sources");
       if (all.length > 0) return all;

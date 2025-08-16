@@ -1,11 +1,12 @@
 export const JOBS_QUERY = `#graphql
-  query($minFit: Float, $first: Int, $search: String, $minSalary: Int, $location: String, $sources: [JobSource!], $sortBy: String, $after: String, $bookmarked: Boolean, $isTracked: Boolean) {
-    jobs(minFit: $minFit, first: $first, search: $search, minSalary: $minSalary, location: $location, sources: $sources, sortBy: $sortBy, after: $after, bookmarked: $bookmarked, isTracked: $isTracked) {
+  query($minFit: Float, $first: Int, $search: String, $minSalary: Int, $location: String, $workType: String, $sources: [JobSource!], $sortBy: String, $after: String, $bookmarked: Boolean, $isTracked: Boolean) {
+    jobs(minFit: $minFit, first: $first, search: $search, minSalary: $minSalary, location: $location, workType: $workType, sources: $sources, sortBy: $sortBy, after: $after, bookmarked: $bookmarked, isTracked: $isTracked) {
       edges {
         id
         title
         company
         location
+        workType
         salaryMin
         salaryMax
         fitScore
@@ -58,6 +59,24 @@ export const NEW_JOB_SUBSCRIPTION = `#graphql
       company
       url
       fitScore
+    }
+  }
+`;
+
+export const FILTER_METADATA_QUERY = `#graphql
+  query GetFilterMetadata {
+    filterMetadata {
+      fitScore {
+        min
+        max
+      }
+      salary {
+        min
+        max
+      }
+      sources
+      locations
+      workTypes
     }
   }
 `;

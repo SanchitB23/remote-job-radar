@@ -5,8 +5,14 @@ import {
   BOOKMARK_MUTATION,
   PIPELINE_QUERY,
   PIPELINE_UPSERT_MUTATION,
+  FILTER_METADATA_QUERY,
 } from "@/constants/gqlQueries";
-import { FetchJobsParams, JobsConnection, PipelineItem } from "@/types/gql";
+import {
+  FetchJobsParams,
+  JobsConnection,
+  PipelineItem,
+  FilterMetadata,
+} from "@/types/gql";
 import { GraphQLClient } from "graphql-request";
 
 // Utility function to create a GraphQL client with consistent configuration
@@ -98,4 +104,14 @@ export async function upsertPipelineItemShared(
     { jobId, column, position },
     token
   );
+}
+
+// Shared filter metadata fetching logic
+export async function fetchFilterMetadataShared(
+  token?: string | null
+): Promise<FilterMetadata> {
+  const response = await executeGraphQLQuery<{
+    filterMetadata: FilterMetadata;
+  }>(FILTER_METADATA_QUERY, {}, token);
+  return response.filterMetadata;
 }

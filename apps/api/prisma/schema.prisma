@@ -14,6 +14,7 @@ model job {
   company        String
   description    String                 @db.Text
   location       String?
+  work_type      String?
   salary_min     Int?
   salary_max     Int?
   url            String

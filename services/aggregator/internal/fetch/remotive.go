@@ -45,7 +45,8 @@ func FetchRemotive() ([]storage.JobRow, error) {
 			Title:       j.Title,
 			Company:     j.CompanyName,
 			Description: j.Description,
-			Location:    j.Category,
+			Location:    "", // Remotive doesn't provide location, only category
+			WorkType:    j.Category,
 			SalaryMin:   min,
 			SalaryMax:   max,
 			URL:         j.URL,

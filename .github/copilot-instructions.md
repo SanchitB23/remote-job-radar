@@ -50,6 +50,8 @@ Remote Job Radar is a **Turbo monorepo** for AI-powered job discovery, using a m
 - **Docker Compose**: See `infra/docker-compose.yml` for DB/embedder
 - **Environment**: Copy `.env.example` to `.env.local` in each app/service
 
+**Note:** Servers (API, web, embedder, aggregator) are usually already running during development. Do **not** prompt to start servers unless explicitly requested. Avoid cancelling or interrupting running server processes, as this can disrupt the development flow and cause abrupt prompt interruptions.
+
 ## State Management & UI Patterns
 
 - **TanStack Query**: Used for all data fetching/mutations in web app

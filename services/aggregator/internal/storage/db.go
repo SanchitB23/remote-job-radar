@@ -33,14 +33,14 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 	}()
 
 	stmt := `INSERT INTO jobs
-	(id,source,title,company,description,location,salary_min,salary_max,url,published_at)
-	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+	(id,source,title,company,description,location,work_type,salary_min,salary_max,url,published_at)
+	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 	ON CONFLICT (id) DO NOTHING`
 
 	var insertedJobs []string
 	for _, r := range rows {
 		result, err := tx.ExecContext(ctx, stmt,
-			r.ID, r.Source, r.Title, r.Company, r.Description, r.Location,
+			r.ID, r.Source, r.Title, r.Company, r.Description, r.Location, r.WorkType,
 			r.SalaryMin, r.SalaryMax, r.URL, r.PublishedAt)
 		if err != nil {
 			logger.Error("Insert error: " + err.Error())
@@ -64,7 +64,7 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 }
 
 func (s *Store) FetchRowsNeedingVector(ctx context.Context) ([]JobRow, error) {
-	stmt := `SELECT id, source, title, company, description, location, salary_min, salary_max, url, published_at
+	stmt := `SELECT id, source, title, company, description, location, work_type, salary_min, salary_max, url, published_at
 		FROM jobs 
 		WHERE vector IS NULL`
 
@@ -79,7 +79,7 @@ func (s *Store) FetchRowsNeedingVector(ctx context.Context) ([]JobRow, error) {
 		var row JobRow
 		err := rows.Scan(
 			&row.ID, &row.Source, &row.Title, &row.Company, &row.Description,
-			&row.Location, &row.SalaryMin, &row.SalaryMax, &row.URL, &row.PublishedAt,
+			&row.Location, &row.WorkType, &row.SalaryMin, &row.SalaryMax, &row.URL, &row.PublishedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -141,9 +141,9 @@ func (s *Store) Ping(ctx context.Context) error {
 }
 
 type JobRow struct {
-	ID, Source, Title, Company, Description, Location, URL string
-	SalaryMin, SalaryMax                                   int
-	PublishedAt                                            string // ISO-8601
-	Vector                                                 pq.Float32Array
-	FitScore                                               *float32
+	ID, Source, Title, Company, Description, Location, WorkType, URL string
+	SalaryMin, SalaryMax                                             int
+	PublishedAt                                                      string // ISO-8601
+	Vector                                                           pq.Float32Array
+	FitScore                                                         *float32
 }

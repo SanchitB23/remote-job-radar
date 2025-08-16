@@ -62,6 +62,7 @@ func FetchAdzuna(page int) ([]storage.JobRow, error) {
 			Company:     j.Company.DisplayName,
 			Description: j.Description,
 			Location:    j.Location.DisplayName,
+			WorkType:    "", // Adzuna doesn't provide work type category
 			SalaryMin:   int(j.SalaryMin),
 			SalaryMax:   int(j.SalaryMax),
 			URL:         j.RedirectURL,

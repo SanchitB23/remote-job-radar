@@ -8,7 +8,7 @@ import {
   HydrationBoundary,
 } from "@tanstack/react-query";
 import { getParamsFromUrl } from "./utils";
-import { fetchJobsShared } from "@/services/gql-api";
+import { fetchJobsShared, fetchFilterMetadataShared } from "@/services/gql-api";
 
 // Server component that prefetches data
 export default async function JobsPageServer({
@@ -53,6 +53,21 @@ export default async function JobsPageServer({
       return lastPage.hasNextPage ? lastPage.endCursor : undefined;
     },
   });
+
+  // Prefetch filter metadata to prevent hydration mismatch
+  try {
+    await queryClient.prefetchQuery({
+      queryKey: ["filter-metadata"],
+      queryFn: async () => {
+        return await fetchFilterMetadataShared(token || "");
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  } catch (error) {
+    // If filter metadata fails to load on server, log it but don't break the page
+    // The client will fall back to default values
+    console.warn("Failed to prefetch filter metadata:", error);
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
