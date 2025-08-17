@@ -19,7 +19,7 @@ func (h *Handlers) SetupRoutes() http.Handler {
 	r.Get("/health", h.Health)
 	r.Get("/health/db", h.HealthDB)
 	r.Post("/fetch", h.TriggerFetch)
-	r.Get("/healthz", h.HealthZ)
+	r.Get("/healthz", h.Healthz)
 
 	return r
 }
