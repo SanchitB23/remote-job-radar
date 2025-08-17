@@ -3,11 +3,11 @@
 import { Job } from "@/types/gql";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import { AddToPipelineButton } from "../../components/addToPipelineBtn";
-import { BookmarkButton } from "../../components/bookmarkBtn";
+import { AddToPipelineButton } from "./AddToPipelineBtn";
+import { BookmarkButton } from "./BookmarkBtn";
 import { useInfiniteJobs } from "../../lib/hooks";
 import JobCardSkeleton from "./JobCardSkeleton";
-import { getParamsFromUrl } from "./utils";
+import { parseUrlJobParams } from "./utils";
 
 function JobsError({ error }: { error: unknown }) {
   return (
@@ -27,7 +27,7 @@ function JobsError({ error }: { error: unknown }) {
 
 export function JobsPageClient() {
   const searchParams = useSearchParams();
-  const params = getParamsFromUrl(searchParams);
+  const params = parseUrlJobParams(searchParams);
 
   // Remove 'after' param before passing to useInfiniteJobs
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

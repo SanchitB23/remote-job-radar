@@ -1,13 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 
-import FilterSidebar from "@/components/filterSidebar";
+import FilterSidebar from "@/app/jobs/FilterSidebar";
 import { JobsPageClient } from "./JobsPageClient";
 import {
   QueryClient,
   dehydrate,
   HydrationBoundary,
 } from "@tanstack/react-query";
-import { getParamsFromUrl } from "./utils";
+import { parseUrlJobParams } from "./utils";
 import { fetchJobsShared, fetchFilterMetadataShared } from "@/services/gql-api";
 
 // Server component that prefetches data
@@ -26,7 +26,7 @@ export default async function JobsPageServer({
         : []
     )
   );
-  const params = getParamsFromUrl(urlSearchParams);
+  const params = parseUrlJobParams(urlSearchParams);
 
   const queryClient = new QueryClient();
   const authResult = await auth();

@@ -1,5 +1,5 @@
 import JobCardSkeleton from "./JobCardSkeleton";
-import FilterSidebarSkeleton from "../../components/FilterSidebarSkeleton";
+import FilterSidebarSkeleton from "./FilterSidebarSkeleton";
 
 export default function Loading() {
   return (

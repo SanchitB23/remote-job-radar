@@ -1,6 +1,16 @@
 import { FetchJobsParams } from "@/types/gql";
 
-export function getParamsFromUrl(
+/**
+ * Parses a URLSearchParams object and extracts job-related query parameters,
+ * converting them into a strongly-typed FetchJobsParams object.
+ *
+ * Handles conversion of numeric values, optional parameters, and supports
+ * multiple values for certain keys (e.g., workType, sources).
+ *
+ * @param searchParams - The URLSearchParams instance containing query parameters.
+ * @returns A FetchJobsParams object with the extracted and parsed parameters.
+ */
+export function parseUrlJobParams(
   searchParams: URLSearchParams
 ): FetchJobsParams {
   return {

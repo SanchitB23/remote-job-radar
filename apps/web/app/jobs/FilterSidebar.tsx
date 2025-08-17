@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useDebounce } from "../lib/useDebounce";
-import { useFilterMetadata } from "../lib/hooks";
+import { useDebounce } from "../../lib/useDebounce";
+import { useFilterMetadata } from "../../lib/hooks";
 import { toast } from "react-hot-toast";
 
 export default function FilterSidebar() {
@@ -18,7 +18,9 @@ export default function FilterSidebar() {
 
   // Default minFit changed from 10 to 0 for broader results; adjust DEFAULT_MIN_FIT to change this behavior.
   const DEFAULT_MIN_FIT = 0;
-  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? DEFAULT_MIN_FIT));
+  const [minFit, setMinFit] = useState(
+    Number(q.get("minFit") ?? DEFAULT_MIN_FIT)
+  );
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
   const [search, setSearch] = useState(q.get("search") ?? "");
   const [sources, setSources] = useState<string[]>(

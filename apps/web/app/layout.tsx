@@ -10,10 +10,10 @@ import {
 } from "@clerk/nextjs";
 import Link from "next/link";
 import "./globals.css";
-import JobAlerts from "@/components/jobAlertToast";
+import JobAlerts from "@/components/JobAlertToast";
 import { Toaster } from "react-hot-toast";
 import { dark } from "@clerk/themes";
-import { ReactQueryProvider } from "@/components/providers";
+import { ReactQueryProvider } from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
