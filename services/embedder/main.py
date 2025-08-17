@@ -42,15 +42,19 @@ async def healthz():
 @app.post("/embed")
 async def embed(r: Req, request: Request):
     text_hash = hashlib.sha256(r.text.encode("utf-8")).hexdigest()
+    
+    # Extract first 100 chars for identification
+    text_preview = r.text[:100].replace('\n', ' ').replace('\r', '')
+    
     logging.info(
-        f"/embed called from {request.client.host} with text length: {len(r.text)}, sha256: {text_hash}"
+        f"[EMBED_START] from {request.client.host} | text_length: {len(r.text)} | sha256: {text_hash} | preview: '{text_preview}...'"
     )
     try:
         # FastEmbed returns a generator; get the first vector
         vec = next(model.embed([r.text]))
         # Ensure plain Python list of floats
-        logging.info(f"Embedding successful for input length {len(r.text)}")
+        logging.info(f"[EMBED_SUCCESS] text_length: {len(r.text)} | vector_dim: {len(vec)} | sha256: {text_hash}")
         return {"vector": list(map(float, vec))}
     except Exception as e:
-        logging.error(f"Embedding failed: {e}")
+        logging.error(f"[EMBED_FAILED] text_length: {len(r.text)} | sha256: {text_hash} | error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
