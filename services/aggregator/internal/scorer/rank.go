@@ -124,7 +124,7 @@ func (wp *WorkerPool) ProcessJobsConcurrently(ctx context.Context, rows []storag
 		wg.Add(1)
 		go func(workerID int) {
 			defer wg.Done()
-			logger.Debug("Worker started", zap.Int("workerID", workerID))
+			logger.Info("Worker started", zap.Int("workerID", workerID))
 
 			for row := range jobChan {
 				select {
@@ -139,7 +139,7 @@ func (wp *WorkerPool) ProcessJobsConcurrently(ctx context.Context, rows []storag
 					}
 				}
 			}
-			logger.Debug("Worker finished", zap.Int("workerID", workerID))
+			logger.Info("Worker finished", zap.Int("workerID", workerID))
 		}(i)
 	}
 

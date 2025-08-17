@@ -7,11 +7,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"html"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/utils"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
@@ -62,66 +62,9 @@ func minInt(a, b int) int {
 	return b
 }
 
-// Precompiled regex patterns for HTML to text conversion
-var (
-	htmlDetectionRegex = regexp.MustCompile(`<[a-zA-Z][^>]*>`)
-	blockElements      = regexp.MustCompile(`(?i)</(div|p|br|h[1-6]|li|tr)>`)
-	listItems          = regexp.MustCompile(`(?i)<li[^>]*>`)
-	htmlTagRegex       = regexp.MustCompile(`<[^>]*>`)
-	whitespaceRegex    = regexp.MustCompile(`[ \t]+`)
-	lineBreakRegex     = regexp.MustCompile(`\n\s*\n`)
-)
-
-// preprocessText cleans and prepares text for embedding
-func preprocessText(text string, maxTextLength int) (string, bool) {
-	if text == "" {
-		return "", false
-	}
-
-	var wasHTML bool
-	// Convert HTML to plain text if it appears to contain HTML
-	if htmlDetectionRegex.MatchString(text) {
-		text = convertHTMLToText(text)
-		wasHTML = true
-	}
-
-	// Truncate very long text to prevent extremely long processing times
-	if len(text) > maxTextLength {
-		text = text[:maxTextLength]
-	}
-
-	return strings.TrimSpace(text), wasHTML
-}
-
-// convertHTMLToText converts HTML content to plain text
-func convertHTMLToText(htmlContent string) string {
-	// First, unescape HTML entities
-	text := html.UnescapeString(htmlContent)
-
-	// Replace common block elements with line breaks for better readability
-	text = blockElements.ReplaceAllString(text, "\n")
-
-	// Replace list items with bullet points
-	text = listItems.ReplaceAllString(text, "\n• ")
-
-	// Remove all remaining HTML tags
-	text = htmlTagRegex.ReplaceAllString(text, " ")
-
-	// Clean up multiple whitespace characters but preserve line breaks
-	text = whitespaceRegex.ReplaceAllString(text, " ")
-
-	// Clean up multiple line breaks
-	text = lineBreakRegex.ReplaceAllString(text, "\n")
-
-	// Remove leading/trailing whitespace
-	text = strings.TrimSpace(text)
-
-	return text
-}
-
 func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
-	// Preprocess the text
-	processedText, wasHTML := preprocessText(text, e.Config.EmbedderMaxTextLength)
+	// Preprocess the text using shared utils
+	processedText, wasHTML := utils.PreprocessText(text, e.Config.EmbedderMaxTextLength)
 	if processedText == "" {
 		return nil, fmt.Errorf("empty text provided for embedding")
 	}

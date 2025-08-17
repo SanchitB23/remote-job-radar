@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/utils"
 
 	"github.com/lib/pq"
 	"go.uber.org/zap"
@@ -64,8 +65,11 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 			default:
 			}
 
+			// Sanitize description: convert HTML to text if needed
+			description, _ := utils.PreprocessText(r.Description, 0)
+
 			result, err := tx.ExecContext(ctx, stmt,
-				r.ID, r.Source, r.Title, r.Company, r.Description, r.Location, r.WorkType,
+				r.ID, r.Source, r.Title, r.Company, description, r.Location, r.WorkType,
 				r.SalaryMin, r.SalaryMax, r.URL, r.PublishedAt)
 			if err != nil {
 				logger.Error("Insert error: " + err.Error())
