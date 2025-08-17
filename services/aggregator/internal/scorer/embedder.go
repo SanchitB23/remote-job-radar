@@ -71,6 +71,9 @@ var (
 	lineBreakRegex     = regexp.MustCompile(`\n\s*\n`)
 )
 
+// MaxTextLength defines the maximum number of characters allowed for embedding text
+const MaxTextLength = 10000 // 10k characters should be plenty for job descriptions
+
 // preprocessText cleans and prepares text for embedding
 func preprocessText(text string) (string, bool) {
 	if text == "" {
@@ -85,9 +88,8 @@ func preprocessText(text string) (string, bool) {
 	}
 
 	// Truncate very long text to prevent extremely long processing times
-	const maxTextLength = 10000 // 10k characters should be plenty for job descriptions
-	if len(text) > maxTextLength {
-		text = text[:maxTextLength]
+	if len(text) > MaxTextLength {
+		text = text[:MaxTextLength]
 	}
 
 	return strings.TrimSpace(text), wasHTML
@@ -168,7 +170,7 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 		default:
 		}
 
-		result, status, err := e.attemptRequest(ctx, body, textHash)
+		result, status, err := e.attemptRequest(ctx, body)
 		if err == nil {
 			// Success case
 			logger.Info("[EMBED_SUCCESS] Received embedding response",
@@ -211,10 +213,11 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 	return nil, fmt.Errorf("embedder service failed with status %d after %d attempts", lastStatus, maxRetries)
 }
 
-// attemptRequest performs a single HTTP request attempt
-func (e *Embedder) attemptRequest(ctx context.Context, body []byte, textHash string) ([]float32, int, error) {
+const embedderRequestTimeout = 3 * time.Minute
+
+func (e *Embedder) attemptRequest(ctx context.Context, body []byte) ([]float32, int, error) {
 	// Create request context that respects parent but extends timeout
-	requestCtx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+	requestCtx, cancel := context.WithTimeout(ctx, embedderRequestTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(requestCtx, "POST", e.URL, bytes.NewReader(body))
