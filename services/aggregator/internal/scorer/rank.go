@@ -41,7 +41,7 @@ func ScoreNewRows(ctx context.Context, st *storage.Store, skillVec []float32) er
 	logger.Info("Processing jobs for scoring", zap.Int("count", len(rows)))
 
 	for i, r := range rows {
-		logger.Debug("Processing job",
+		logger.Info("Processing job",
 			zap.Int("current", i+1),
 			zap.Int("total", len(rows)),
 			zap.String("jobId", r.ID))

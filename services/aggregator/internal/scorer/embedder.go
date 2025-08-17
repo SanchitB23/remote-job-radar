@@ -70,7 +70,7 @@ func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
 
 		httpResp, err := e.Client.Do(req)
 		if err != nil {
-			logger.Error("Failed to call embedder service", zap.Error(err))
+			logger.Error("Failed to call embedder service", zap.Error(err), zap.ByteString("requestBody", body))
 			lastRespError = fmt.Errorf("failed to call embedder service: %w", err)
 			break
 		}
