@@ -146,9 +146,9 @@ func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
 	// Score new jobs immediately after fetching
 	logger.Info("Scoring newly fetched jobs")
 
-	// Create a separate context for scoring operations
-	scoreCtx, scoreCancel := context.WithTimeout(context.Background(), 3*time.Minute)
-	defer scoreCancel()
+	// For large batches, use a very long timeout or no timeout for background processing
+	// Create a separate context for scoring operations with no timeout for background jobs
+	scoreCtx := context.Background()
 
 	if err := j.ScoreNewJobs(scoreCtx); err != nil {
 		logger.Error("Scoring error", zap.Error(err))
@@ -162,7 +162,7 @@ func (j *JobService) ScoreNewJobs(ctx context.Context) error {
 	scoringStartTime := time.Now()
 	logger.Info("Starting job scoring operation")
 
-	if err := scorer.ScoreNewRows(ctx, j.store, j.skillVec); err != nil {
+	if err := scorer.ScoreNewRows(ctx, j.store, j.skillVec, j.config); err != nil {
 		logger.Error("Scoring error", zap.Error(err))
 		return err
 	}

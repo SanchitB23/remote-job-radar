@@ -45,7 +45,7 @@ func NewApp() (*App, error) {
 	logger.Info("Database connection established")
 
 	// Initialize embedder
-	embedder, err := scorer.NewEmbedder()
+	embedder, err := scorer.NewEmbedder(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize embedder: %w", err)
 	}

@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"go.uber.org/zap"
 )
@@ -21,6 +21,7 @@ import (
 type Embedder struct {
 	URL    string
 	Client *http.Client
+	Config *config.Config
 }
 
 // EmbedRequest represents the request payload for embedding
@@ -33,16 +34,16 @@ type EmbedResponse struct {
 	Vector []float32 `json:"vector"`
 }
 
-func NewEmbedder() (*Embedder, error) {
-	embedderURL := os.Getenv("EMBEDDER_URL")
-	if embedderURL == "" {
-		logger.Error("EMBEDDER_URL environment variable not set")
-		return nil, fmt.Errorf("EMBEDDER_URL environment variable not set")
+func NewEmbedder(cfg *config.Config) (*Embedder, error) {
+	if cfg.EmbedderURL == "" {
+		logger.Error("EMBEDDER_URL not configured")
+		return nil, fmt.Errorf("EMBEDDER_URL not configured")
 	}
 	return &Embedder{
-		URL: embedderURL,
+		URL:    cfg.EmbedderURL,
+		Config: cfg,
 		Client: &http.Client{
-			Timeout: 5 * time.Minute, // Very generous timeout for background jobs
+			Timeout: cfg.EmbedderClientTimeout,
 		},
 	}, nil
 }
@@ -71,11 +72,8 @@ var (
 	lineBreakRegex     = regexp.MustCompile(`\n\s*\n`)
 )
 
-// MaxTextLength defines the maximum number of characters allowed for embedding text
-const MaxTextLength = 10000 // 10k characters should be plenty for job descriptions
-
 // preprocessText cleans and prepares text for embedding
-func preprocessText(text string) (string, bool) {
+func preprocessText(text string, maxTextLength int) (string, bool) {
 	if text == "" {
 		return "", false
 	}
@@ -88,8 +86,8 @@ func preprocessText(text string) (string, bool) {
 	}
 
 	// Truncate very long text to prevent extremely long processing times
-	if len(text) > MaxTextLength {
-		text = text[:MaxTextLength]
+	if len(text) > maxTextLength {
+		text = text[:maxTextLength]
 	}
 
 	return strings.TrimSpace(text), wasHTML
@@ -123,7 +121,7 @@ func convertHTMLToText(htmlContent string) string {
 
 func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
 	// Preprocess the text
-	processedText, wasHTML := preprocessText(text)
+	processedText, wasHTML := preprocessText(text, e.Config.EmbedderMaxTextLength)
 	if processedText == "" {
 		return nil, fmt.Errorf("empty text provided for embedding")
 	}
@@ -163,14 +161,20 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 	var lastStatus int
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		// Check if the original context was cancelled before attempting
-		select {
-		case <-ctx.Done():
-			return nil, fmt.Errorf("context cancelled before attempt %d: %w", attempt+1, ctx.Err())
-		default:
+		// For background jobs, if the context is already cancelled, create a fresh one
+		// This allows embeddings to complete even if the parent operation times out
+		workingCtx := ctx
+		if ctx.Err() != nil {
+			logger.Warn("Parent context cancelled, creating independent context for background embedding",
+				zap.String("parentError", ctx.Err().Error()),
+				zap.Int("attempt", attempt+1))
+			// Create a completely independent context for this operation
+			independentCtx, cancel := context.WithTimeout(context.Background(), e.Config.EmbedderRequestTimeout)
+			defer cancel()
+			workingCtx = independentCtx
 		}
 
-		result, status, err := e.attemptRequest(ctx, body)
+		result, status, err := e.attemptRequest(workingCtx, body)
 		if err == nil {
 			// Success case
 			logger.Info("[EMBED_SUCCESS] Received embedding response",
@@ -185,7 +189,7 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 		lastStatus = status
 
 		// Determine if we should retry
-		shouldRetry := e.shouldRetryError(status, err)
+		shouldRetry := e.shouldRetryError(status)
 		if !shouldRetry || attempt == maxRetries-1 {
 			break
 		}
@@ -198,11 +202,12 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 			zap.Duration("delay", delay),
 			zap.Error(err))
 
+		// Use working context for delay as well
 		select {
 		case <-time.After(delay):
 			continue
-		case <-ctx.Done():
-			return nil, fmt.Errorf("context cancelled during retry delay: %w", ctx.Err())
+		case <-workingCtx.Done():
+			return nil, fmt.Errorf("context cancelled during retry delay: %w", workingCtx.Err())
 		}
 	}
 
@@ -248,9 +253,9 @@ func (e *Embedder) attemptRequest(ctx context.Context, body []byte) ([]float32, 
 	return embedResp.Vector, resp.StatusCode, nil
 }
 
-// shouldRetryError determines if an error/status code should trigger a retry
-func (e *Embedder) shouldRetryError(statusCode int, err error) bool {
-	// Always retry on network/timeout errors
+// shouldRetryError determines if a given HTTP status code should trigger a retry
+func (e *Embedder) shouldRetryError(statusCode int) bool {
+	// Always retry on unknown status (e.g., network/timeout errors are represented as statusCode == 0)
 	if statusCode == 0 {
 		return true
 	}

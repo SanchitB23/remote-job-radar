@@ -33,6 +33,16 @@ type Config struct {
 	ScoreInterval time.Duration
 	FetchTimeout  time.Duration
 
+	// Embedder Configuration
+	EmbedderTimeout        time.Duration
+	EmbedderMaxRetries     int
+	EmbedderBaseDelay      time.Duration
+	EmbedderMaxDelay       time.Duration
+	EmbedderRequestTimeout time.Duration
+	EmbedderClientTimeout  time.Duration
+	EmbedderMaxTextLength  int
+	EmbedderWorkerCount    int
+
 	// Environment
 	Environment string
 }
@@ -70,6 +80,16 @@ func Load() (*Config, error) {
 		FetchInterval: getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
 		ScoreInterval: getDurationWithDefault("SCORE_INTERVAL", 4*time.Hour),
 		FetchTimeout:  getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
+
+		// Embedder Configuration
+		EmbedderTimeout:        getDurationWithDefault("EMBEDDER_TIMEOUT", 10*time.Minute),
+		EmbedderMaxRetries:     getIntEnvWithDefault("EMBEDDER_MAX_RETRIES", 10),
+		EmbedderBaseDelay:      getDurationWithDefault("EMBEDDER_BASE_DELAY", 1*time.Second),
+		EmbedderMaxDelay:       getDurationWithDefault("EMBEDDER_MAX_DELAY", 30*time.Second),
+		EmbedderRequestTimeout: getDurationWithDefault("EMBEDDER_REQUEST_TIMEOUT", 3*time.Minute),
+		EmbedderClientTimeout:  getDurationWithDefault("EMBEDDER_CLIENT_TIMEOUT", 5*time.Minute),
+		EmbedderMaxTextLength:  getIntEnvWithDefault("EMBEDDER_MAX_TEXT_LENGTH", 10000),
+		EmbedderWorkerCount:    getIntEnvWithDefault("EMBEDDER_WORKER_COUNT", 5),
 	}
 
 	logger.Info("Configuration loaded successfully",
@@ -77,7 +97,12 @@ func Load() (*Config, error) {
 		zap.String("environment", cfg.Environment),
 		zap.Duration("fetchInterval", cfg.FetchInterval),
 		zap.Duration("scoreInterval", cfg.ScoreInterval),
-		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""))
+		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""),
+		zap.Duration("embedderTimeout", cfg.EmbedderTimeout),
+		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
+		zap.Duration("embedderRequestTimeout", cfg.EmbedderRequestTimeout),
+		zap.Int("embedderWorkerCount", cfg.EmbedderWorkerCount),
+		zap.Int("embedderMaxTextLength", cfg.EmbedderMaxTextLength))
 
 	return cfg, nil
 }
