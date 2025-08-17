@@ -16,7 +16,9 @@ export default function FilterSidebar() {
     refetch: refetchFilterMetadata,
   } = useFilterMetadata();
 
-  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? 0));
+  // Default minFit changed from 10 to 0 for broader results; adjust DEFAULT_MIN_FIT to change this behavior.
+  const DEFAULT_MIN_FIT = 0;
+  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? DEFAULT_MIN_FIT));
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
   const [search, setSearch] = useState(q.get("search") ?? "");
   const [sources, setSources] = useState<string[]>(

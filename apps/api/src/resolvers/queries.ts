@@ -39,7 +39,7 @@ export function getQueryResolvers(prisma: any) {
           workType,
           sources,
           sortBy = "FIT",
-          first = 10,
+          first = 50,
           after,
           bookmarked,
           isTracked,
