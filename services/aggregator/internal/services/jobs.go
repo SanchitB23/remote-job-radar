@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
@@ -28,23 +29,32 @@ func NewJobService(store *storage.Store, skillVec []float32, timeout time.Durati
 	}
 }
 
-// fetchFromAllSources fetches jobs from all configured sources
-func (j *JobService) fetchFromAllSources(ctx context.Context) ([]storage.JobRow, error) {
+// fetchFromSources fetches jobs from specified sources, or all if sources is nil/empty
+func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]storage.JobRow, error) {
 	var allJobs []storage.JobRow
 
-	// Fetch jobs from Remotive (always enabled)
-	logger.Info("Fetching jobs from Remotive API")
-	remotiveJobs, err := fetch.FetchRemotive()
-	if err != nil {
-		logger.Error("Remotive fetch error", zap.Error(err))
-		// Don't return here - continue with other sources
-	} else {
-		logger.Info("Retrieved jobs from Remotive", zap.Int("count", len(remotiveJobs)))
-		allJobs = append(allJobs, remotiveJobs...)
+	// Create a map for quick source lookup
+	sourceMap := make(map[string]bool)
+	fetchAll := len(sources) == 0
+	for _, source := range sources {
+		sourceMap[strings.ToLower(source)] = true
 	}
 
-	// Fetch jobs from Adzuna if configured
-	if j.config.IsAdzunaEnabled() {
+	// Fetch jobs from Remotive if requested or if fetching all
+	if fetchAll || sourceMap["remotive"] {
+		logger.Info("Fetching jobs from Remotive API")
+		remotiveJobs, err := fetch.FetchRemotive()
+		if err != nil {
+			logger.Error("Remotive fetch error", zap.Error(err))
+			// Don't return here - continue with other sources
+		} else {
+			logger.Info("Retrieved jobs from Remotive", zap.Int("count", len(remotiveJobs)))
+			allJobs = append(allJobs, remotiveJobs...)
+		}
+	}
+
+	// Fetch jobs from Adzuna if configured and requested
+	if j.config.IsAdzunaEnabled() && (fetchAll || sourceMap["adzuna"]) {
 		adzunaJobs, err := j.fetchFromAdzuna(ctx)
 		if err != nil {
 			logger.Error("Adzuna fetch failed", zap.Error(err))
@@ -53,7 +63,7 @@ func (j *JobService) fetchFromAllSources(ctx context.Context) ([]storage.JobRow,
 			logger.Info("Retrieved jobs from Adzuna", zap.Int("count", len(adzunaJobs)))
 			allJobs = append(allJobs, adzunaJobs...)
 		}
-	} else {
+	} else if !j.config.IsAdzunaEnabled() && (fetchAll || sourceMap["adzuna"]) {
 		logger.Info("Adzuna API not configured, skipping")
 	}
 
@@ -107,22 +117,34 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 }
 
 func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
+	return j.FetchAndProcessJobsFromSources(ctx, nil)
+}
+
+func (j *JobService) FetchAndProcessJobsFromSources(ctx context.Context, sources []string) error {
 	startTime := time.Now()
-	logger.Info("Starting job fetch operation")
+	if len(sources) > 0 {
+		logger.Info("Starting job fetch operation from specific sources", zap.Strings("sources", sources))
+	} else {
+		logger.Info("Starting job fetch operation from all sources")
+	}
 
 	// Create context with timeout
 	fetchCtx, cancel := context.WithTimeout(ctx, j.timeout)
 	defer cancel()
 
-	// Fetch jobs from all configured sources
-	allJobs, err := j.fetchFromAllSources(fetchCtx)
+	// Fetch jobs from specified sources (or all if sources is nil)
+	allJobs, err := j.fetchFromSources(fetchCtx, sources)
 	if err != nil {
 		logger.Error("Error fetching from sources", zap.Error(err))
 		return err
 	}
 
 	if len(allJobs) == 0 {
-		logger.Warn("No jobs fetched from any source")
+		if len(sources) > 0 {
+			logger.Warn("No jobs fetched from specified sources", zap.Strings("sources", sources))
+		} else {
+			logger.Warn("No jobs fetched from any source")
+		}
 		return nil
 	}
 
@@ -139,9 +161,16 @@ func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
 	}
 
 	duration := time.Since(startTime)
-	logger.Info("Successfully upserted jobs from all sources",
-		zap.Int("count", len(allJobs)),
-		zap.Duration("duration", duration))
+	if len(sources) > 0 {
+		logger.Info("Successfully upserted jobs from specified sources",
+			zap.Strings("sources", sources),
+			zap.Int("count", len(allJobs)),
+			zap.Duration("duration", duration))
+	} else {
+		logger.Info("Successfully upserted jobs from all sources",
+			zap.Int("count", len(allJobs)),
+			zap.Duration("duration", duration))
+	}
 
 	// Score new jobs immediately after fetching
 	logger.Info("Scoring newly fetched jobs")

@@ -6,7 +6,6 @@ The aggregator service has been restructured to follow Go best practices and imp
 
 ## New Directory Structure
 
-
 ```
 services/aggregator/
 ├── cmd/serve/           # Application entry point
@@ -124,7 +123,7 @@ To add a new job source:
 1. Create a new file in `internal/fetch/` (e.g., `linkedin.go`)
 2. Implement a function that returns `[]storage.JobRow`
 3. Add configuration for the new source in `internal/config/`
-4. Update `JobService.fetchFromAllSources()` to include the new source
+4. Update `JobService.fetchFromSources()` to include the new source
 5. Update environment examples and documentation
 
 ### Handlers (`internal/handlers/`)
@@ -159,6 +158,55 @@ The service supports the following environment variables:
 | `SCORE_INTERVAL` | No | `4h` | Scoring interval |
 | `FETCH_TIMEOUT` | No | `30s` | Fetch operation timeout |
 | `ENV` | No | - | Environment name |
+
+## API Endpoints
+
+### Manual Fetch
+
+The service provides an endpoint to manually trigger job fetching:
+
+**Endpoint:** `POST /fetch`
+
+**Query Parameters:**
+
+- `sources` (optional): Comma-separated list of job sources to fetch from. If not provided, fetches from all configured sources.
+
+**Available Sources:**
+
+- `remotive`: Fetch jobs from Remotive API (always available)
+- `adzuna`: Fetch jobs from Adzuna API (requires configuration)
+
+**Examples:**
+
+```bash
+# Fetch from all sources
+curl -X POST http://localhost:8080/fetch
+
+# Fetch only from Remotive
+curl -X POST "http://localhost:8080/fetch?sources=remotive"
+
+# Fetch only from Adzuna
+curl -X POST "http://localhost:8080/fetch?sources=adzuna"
+
+# Fetch from both specific sources
+curl -X POST "http://localhost:8080/fetch?sources=remotive,adzuna"
+```
+
+**Response:**
+
+```json
+{
+  "ok": true,
+  "message": "fetch triggered for sources: remotive, adzuna",
+  "sources": ["remotive", "adzuna"]
+}
+```
+
+**Notes:**
+
+- The fetch operation runs in the background, so the response is immediate
+- Check the service logs for fetch progress and completion status
+- If Adzuna is requested but not configured, it will be skipped with a warning in the logs
 
 ## Benefits of the New Structure
 

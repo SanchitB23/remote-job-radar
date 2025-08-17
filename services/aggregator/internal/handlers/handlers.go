@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/services"
@@ -55,18 +57,40 @@ func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
 
+	// Parse sources parameter from query string
+	var sources []string
+	if sourcesParam := r.URL.Query().Get("sources"); sourcesParam != "" {
+		// Split comma-separated sources and build sources slice directly
+		for _, source := range strings.Split(sourcesParam, ",") {
+			trimmed := strings.TrimSpace(source)
+			if trimmed != "" {
+				sources = append(sources, trimmed)
+			}
+		}
+	}
+
+	logger.Info("Manual fetch with sources", 
+		zap.Strings("sources", sources),
+		zap.String("remote_addr", r.RemoteAddr))
+
 	// Run fetch in background to avoid blocking the HTTP response
 	// Use context.Background() instead of r.Context() to prevent cancellation
 	go func() {
 		ctx := context.Background()
-		if err := h.jobService.FetchAndProcessJobs(ctx); err != nil {
+		if err := h.jobService.FetchAndProcessJobsFromSources(ctx, sources); err != nil {
 			logger.Error("Manual fetch failed", zap.Error(err))
 		}
 	}()
 
+	message := "fetch triggered"
+	if len(sources) > 0 {
+		message = fmt.Sprintf("fetch triggered for sources: %s", strings.Join(sources, ", "))
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"ok":      true,
-		"message": "fetch triggered",
+		"message": message,
+		"sources": sources,
 	})
 }
