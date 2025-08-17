@@ -1,15 +1,13 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { Job } from "@/types/gql";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import { AddToPipelineButton } from "../../components/addToPipelineBtn";
 import { BookmarkButton } from "../../components/bookmarkBtn";
-
 import { useInfiniteJobs } from "../../lib/hooks";
-import { getParamsFromUrl } from "./utils";
-
-import { Job } from "@/types/gql";
 import JobCardSkeleton from "./JobCardSkeleton";
+import { getParamsFromUrl } from "./utils";
 
 function JobsError({ error }: { error: unknown }) {
   return (
@@ -28,32 +26,12 @@ function JobsError({ error }: { error: unknown }) {
 }
 
 export function JobsPageClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const params = getParamsFromUrl(searchParams);
 
-  // On first mount, update URL params if missing (set all defaults from FetchJobsParams)
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    let changed = false;
-    if (!url.searchParams.get("minFit")) {
-      url.searchParams.set("minFit", "1");
-      changed = true;
-    }
-    if (!url.searchParams.get("first")) {
-      url.searchParams.set("first", "10");
-      changed = true;
-    }
-    // Add more defaults here if needed, e.g.:
-    // if (!url.searchParams.get("sortBy")) { url.searchParams.set("sortBy", "relevance"); changed = true; }
-    if (changed) {
-      router.replace(url.pathname + "?" + url.searchParams.toString());
-    }
-  }, [router]);
-
-  // Remove 'after' from params since it's handled by infinite query
+  // Remove 'after' param before passing to useInfiniteJobs
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { after: _, ...infiniteParams } = params;
+  const { after, ...infiniteParams } = params;
 
   const {
     data,
@@ -81,7 +59,6 @@ export function JobsPageClient() {
   // Infinite scroll effect with throttling to improve performance
   useEffect(() => {
     let throttleTimeout: NodeJS.Timeout | null = null;
-
     const throttledHandleScroll = () => {
       if (throttleTimeout) return;
       throttleTimeout = setTimeout(() => {
@@ -92,9 +69,8 @@ export function JobsPageClient() {
         ) {
           handleLoadMore();
         }
-      }, 200); // Adjust throttle delay as needed
+      }, 200);
     };
-
     window.addEventListener("scroll", throttledHandleScroll);
     return () => {
       window.removeEventListener("scroll", throttledHandleScroll);
@@ -155,8 +131,16 @@ export function JobsPageClient() {
                   {j.title}
                 </h3>
                 <p className="text-gray-600 dark:text-zinc-300">{j.company}</p>
-                <p className="text-sm text-green-600 dark:text-green-400">
-                  Fit Score: {Math.round(j.fitScore)}%
+                <p
+                  className={
+                    "text-sm " +
+                    (j.fitScore === 0
+                      ? "text-gray-400 dark:text-gray-500"
+                      : "text-green-600 dark:text-green-400")
+                  }
+                >
+                  Fit Score:{" "}
+                  {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
                 </p>
               </div>
               <span

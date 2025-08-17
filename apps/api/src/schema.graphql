@@ -98,13 +98,22 @@ type FilterMetadata {
   workTypes: [String!]!
 }
 
+enum SortBy {
+  "Sort by AI fit score (default)"
+  FIT
+  "Sort by most recently published jobs"
+  DATE
+  "Sort by highest minimum salary"
+  SALARY
+}
+
 type Query {
   """
   Get remote job listings with optional filtering and pagination
   """
   jobs(
     "Minimum fit score (0-100) to filter jobs"
-    minFit: Float = 0
+    minFit: Float
     "Search term to match against job title or description"
     search: String
     "Minimum salary in USD"
@@ -115,8 +124,8 @@ type Query {
     workType: String
     "List of job sources to include (e.g. [LINKEDIN, REMOTIVE])"
     sources: [JobSource!]
-    "Sort order: 'fit' (default), 'date', or 'salary'"
-    sortBy: String = "fit"
+    "Sort order: FIT (default), DATE, or SALARY"
+    sortBy: SortBy = FIT
     "Pagination cursor (base64 id of last item from previous page)"
     after: String
     "Number of jobs to return (max 50)"

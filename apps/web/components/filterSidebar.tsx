@@ -16,7 +16,7 @@ export default function FilterSidebar() {
     refetch: refetchFilterMetadata,
   } = useFilterMetadata();
 
-  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? 10));
+  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? 0));
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
   const [search, setSearch] = useState(q.get("search") ?? "");
   const [sources, setSources] = useState<string[]>(
@@ -25,7 +25,16 @@ export default function FilterSidebar() {
   const [workTypes, setWorkTypes] = useState<string[]>(
     q.getAll("workType").length ? q.getAll("workType") : []
   );
-  const [sortBy, setSortBy] = useState(q.get("sortBy") ?? "fit");
+  // Use enum values for sortBy (FIT, DATE, SALARY)
+  const [sortBy, setSortBy] = useState(() => {
+    const param = q.get("sortBy");
+    if (param === "DATE" || param === "SALARY" || param === "FIT") return param;
+    // Support legacy values for backward compatibility
+    if (param === "date") return "DATE";
+    if (param === "salary") return "SALARY";
+    if (param === "fit") return "FIT";
+    return "FIT";
+  });
 
   // Track if we're applying filters (for UX feedback)
   const [isApplyingFilters, setIsApplyingFilters] = useState(false);
@@ -60,7 +69,7 @@ export default function FilterSidebar() {
     if (workTypes.length > 0) {
       workTypes.forEach((w) => params.append("workType", w));
     }
-    if (sortBy && sortBy !== "fit") params.set("sortBy", sortBy);
+    if (sortBy && sortBy !== "FIT") params.set("sortBy", sortBy);
 
     // Add bookmark filter
     if (bookmarked !== null) {
@@ -306,11 +315,13 @@ export default function FilterSidebar() {
             className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={sortBy}
             disabled={isApplyingFilters || isLoadingMetadata}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) =>
+              setSortBy(e.target.value as "FIT" | "DATE" | "SALARY")
+            }
           >
-            <option value="fit">Fit (desc)</option>
-            <option value="date">Newest</option>
-            <option value="salary">Salary (desc)</option>
+            <option value="FIT">Fit (desc)</option>
+            <option value="DATE">Newest</option>
+            <option value="SALARY">Salary (desc)</option>
           </select>
         </div>
         <div className="col-span-2">

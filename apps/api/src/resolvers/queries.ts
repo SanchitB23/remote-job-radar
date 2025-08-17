@@ -32,14 +32,14 @@ export function getQueryResolvers(prisma: any) {
       }
       try {
         const {
-          minFit = 0,
+          minFit,
           search,
           minSalary,
           location,
           workType,
           sources,
-          sortBy = "fit",
-          first = 50,
+          sortBy = "FIT",
+          first = 10,
           after,
           bookmarked,
           isTracked,
@@ -56,9 +56,11 @@ export function getQueryResolvers(prisma: any) {
             : undefined;
 
         let whereClause: Prisma.jobWhereInput = {
-          fit_score: { gte: minFit },
           ...cursorFilter,
         };
+        if (minFit !== undefined && minFit !== null) {
+          whereClause.fit_score = { gte: minFit };
+        }
 
         if (minSalary !== undefined) {
           whereClause.salary_min = { gte: minSalary };
@@ -90,15 +92,23 @@ export function getQueryResolvers(prisma: any) {
             some: { user_id: ctx.userId },
           };
         }
+        // Map enum value to DB field
+        const sortFieldMap: Record<string, string> = {
+          FIT: "fit_score",
+          DATE: "published_at",
+          SALARY: "salary_min",
+        };
 
         const result = await ctx.prisma.job.findMany({
           where: whereClause,
-          orderBy: Object.hasOwnProperty.call(orderMap, sortBy)
-            ? orderMap[sortBy]
-            : orderMap.fit,
+          orderBy: {
+            [sortFieldMap[sortBy] || "fit_score"]: {
+              sort: "desc",
+              nulls: "last",
+            },
+          },
           take: first + 1, // fetch one extra to check hasNextPage
         });
-
         const edges = result.slice(0, first);
         const endCursor = edges.length
           ? Buffer.from(edges[edges.length - 1].id).toString("base64")
@@ -120,7 +130,7 @@ export function getQueryResolvers(prisma: any) {
             url: job.url,
             publishedAt: job.published_at,
             vector: job.vector,
-            fitScore: job.fit_score,
+            fitScore: job.fit_score ?? 0,
           })),
           endCursor,
           hasNextPage,
@@ -220,9 +230,7 @@ export function getQueryResolvers(prisma: any) {
               salaryStats._max.salary_max ?? 0
             ),
           },
-          sources: sources
-            .map((s: string) => s.toUpperCase())
-            .filter(Boolean),
+          sources: sources.map((s: string) => s.toUpperCase()).filter(Boolean),
           locations: locations.map((l: any) => l.location).filter(Boolean),
           workTypes: workTypes.map((w: any) => w.work_type).filter(Boolean),
         };
