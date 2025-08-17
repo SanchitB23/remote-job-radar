@@ -29,6 +29,11 @@ func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
 
+func (h *Handlers) Healthz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+}
+
 func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
 	logger.Info("DB health check requested", zap.String("remote_addr", r.RemoteAddr))
 	w.Header().Set("Content-Type", "application/json")

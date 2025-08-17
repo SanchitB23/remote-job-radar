@@ -35,6 +35,9 @@ async def health(request: Request):
     logging.info(f"Health check from {request.client.host}")
     return {"ok": True, "model": MODEL_NAME}
 
+@app.get("/healthz")
+async def healthz():
+    return {"ok": True}
 
 @app.post("/embed")
 async def embed(r: Req, request: Request):
