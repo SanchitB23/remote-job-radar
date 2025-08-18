@@ -1,11 +1,15 @@
 "use client";
 
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,10 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 import { useFilterMetadata } from "../../lib/hooks";
 import { useDebounce } from "../../lib/useDebounce";
@@ -145,15 +146,13 @@ export function FilterSidebar(): JSX.Element {
   const availableWorkTypes = filterMetadata?.workTypes ?? [];
 
   // Error component
-  const FilterErrorComponent = () => (
+  const FilterErrorComponent = (): JSX.Element => (
     <Alert variant="destructive">
       <ExclamationTriangleIcon className="h-4 w-4" />
       <AlertDescription>
         <div className="text-center">
           <div className="font-medium mb-1">Unable to load filter options</div>
-          <p className="text-sm mb-3">
-            Using default values. Some filter options may be limited.
-          </p>
+          <p className="text-sm mb-3">Using default values. Some filter options may be limited.</p>
           <Button
             variant="outline"
             size="sm"
@@ -202,7 +201,7 @@ export function FilterSidebar(): JSX.Element {
               max={fitScoreMax}
               step={1}
               disabled={isApplyingFilters || isLoadingMetadata}
-              onValueChange={(value) => setMinFit(value[0])}
+              onValueChange={(value) => setMinFit(value[0] ?? 0)}
               className="mt-2"
             />
             <div className="text-sm text-muted-foreground mt-1">
@@ -228,8 +227,7 @@ export function FilterSidebar(): JSX.Element {
               className="mt-1"
             />
             <div className="text-xs text-muted-foreground mt-1">
-              {filterMetadataError ? "Est. max: " : "Max in data: "}$
-              {salaryMax.toLocaleString()}
+              {filterMetadataError ? "Est. max: " : "Max in data: "}${salaryMax.toLocaleString()}
             </div>
           </div>
           <div className="col-span-2">
@@ -263,9 +261,7 @@ export function FilterSidebar(): JSX.Element {
                   <Label
                     htmlFor={`source-${s}`}
                     className={`text-sm cursor-pointer ${
-                      isApplyingFilters || isLoadingMetadata
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
+                      isApplyingFilters || isLoadingMetadata ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
                     {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -308,9 +304,7 @@ export function FilterSidebar(): JSX.Element {
               </div>
             ) : (
               <div className="text-xs text-muted-foreground italic">
-                {filterMetadataError
-                  ? "Unable to load work types"
-                  : "No work types available"}
+                {filterMetadataError ? "Unable to load work types" : "No work types available"}
               </div>
             )}
           </div>
@@ -319,9 +313,7 @@ export function FilterSidebar(): JSX.Element {
             <Select
               value={sortBy}
               disabled={isApplyingFilters || isLoadingMetadata}
-              onValueChange={(value) =>
-                setSortBy(value as "FIT" | "DATE" | "SALARY")
-              }
+              onValueChange={(value) => setSortBy(value as "FIT" | "DATE" | "SALARY")}
             >
               <SelectTrigger className="mt-1 w-full">
                 <SelectValue />
@@ -336,21 +328,11 @@ export function FilterSidebar(): JSX.Element {
           <div className="col-span-2">
             <Label className="text-sm">Bookmarks</Label>
             <Select
-              value={
-                bookmarked === null
-                  ? "all"
-                  : bookmarked
-                  ? "bookmarked"
-                  : "unbookmarked"
-              }
+              value={bookmarked === null ? "all" : bookmarked ? "bookmarked" : "unbookmarked"}
               disabled={isApplyingFilters || isLoadingMetadata}
               onValueChange={(value) => {
                 setBookmarked(
-                  value === "bookmarked"
-                    ? true
-                    : value === "unbookmarked"
-                    ? false
-                    : null
+                  value === "bookmarked" ? true : value === "unbookmarked" ? false : null,
                 );
               }}
             >
@@ -367,18 +349,10 @@ export function FilterSidebar(): JSX.Element {
           <div className="col-span-2">
             <Label className="text-sm">Tracking Status</Label>
             <Select
-              value={
-                isTracked === null ? "all" : isTracked ? "tracked" : "untracked"
-              }
+              value={isTracked === null ? "all" : isTracked ? "tracked" : "untracked"}
               disabled={isApplyingFilters || isLoadingMetadata}
               onValueChange={(value) => {
-                setIsTracked(
-                  value === "tracked"
-                    ? true
-                    : value === "untracked"
-                    ? false
-                    : null
-                );
+                setIsTracked(value === "tracked" ? true : value === "untracked" ? false : null);
               }}
             >
               <SelectTrigger className="mt-1 w-full">

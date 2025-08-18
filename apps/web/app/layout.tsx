@@ -1,5 +1,4 @@
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 
 import {
   ClerkProvider,
@@ -11,7 +10,6 @@ import {
 } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Analytics } from "@vercel/analytics/next";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -21,6 +19,8 @@ import { Toaster } from "react-hot-toast";
 
 import JobAlerts from "@/components/jobAlertToast";
 import { ReactQueryProvider } from "@/components/providers";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { CLERK_PUBLISHABLE_KEY } from "@/constants";
 
 const geistSans = Geist({

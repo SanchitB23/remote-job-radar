@@ -76,12 +76,21 @@ const config = [
       "**/app/**/route.ts",
       "**/app/**/loading.tsx",
       "**/app/**/error.tsx",
+      "**/app/**/not-found.tsx",
       "**/pages/**/*",
       "**/middleware.ts",
       "**/next.config.ts",
       "**/components/**/*.tsx", // Allow default exports in components
     ],
     rules: {
+      "import/no-default-export": "off",
+    },
+  },
+  // Relax rules for UI components (generated code)
+  {
+    files: ["**/components/ui/**/*.tsx"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
       "import/no-default-export": "off",
     },
   },

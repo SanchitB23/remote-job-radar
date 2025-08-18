@@ -1,10 +1,10 @@
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
 import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card, CardContent } from "@/components/ui/card";
 import type { JSX } from "react";
 import React from "react";
 
+import { Card, CardContent } from "@/components/ui/card";
 import type { PipelineItem } from "@/types/gql";
 
 export function KanbanCard({
@@ -47,9 +47,7 @@ export function KanbanCard({
               {item.job.title}
             </a>
           </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            {item.job.company}
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">{item.job.company}</p>
         </CardContent>
       </Card>
     );

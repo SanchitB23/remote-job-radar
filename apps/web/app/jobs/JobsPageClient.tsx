@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Job, JobsConnection } from "@/types/gql";
 
 import { useInfiniteJobs } from "../../lib/hooks";
@@ -12,9 +15,6 @@ import { AddToPipelineButton } from "./AddToPipelineBtn";
 import { BookmarkButton } from "./BookmarkBtn";
 import { JobCardSkeleton } from "./JobCardSkeleton";
 import { parseUrlJobParams } from "./utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 function JobsError({ error }: { error: unknown }): JSX.Element {
   return (
@@ -128,33 +128,16 @@ export function JobsPageClient(): JSX.Element {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{j.title}</h3>
                     <p className="text-muted-foreground">{j.company}</p>
-                    <Badge
-                      variant={j.fitScore === 0 ? "secondary" : "default"}
-                      className="mt-2"
-                    >
-                      Fit Score:{" "}
-                      {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
+                    <Badge variant={j.fitScore === 0 ? "secondary" : "default"} className="mt-2">
+                      Fit Score: {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
                     </Badge>
                   </div>
-                  <span
-                    className="ml-2 z-20 pointer-events-auto flex gap-2"
-                    data-bookmark-btn
-                  >
-                    <span
-                      title={
-                        j.bookmarked ? "Remove bookmark" : "Bookmark this job"
-                      }
-                    >
-                      <BookmarkButton
-                        id={j.id}
-                        bookmarked={j.bookmarked ?? false}
-                      />
+                  <span className="ml-2 z-20 pointer-events-auto flex gap-2" data-bookmark-btn>
+                    <span title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}>
+                      <BookmarkButton id={j.id} bookmarked={j.bookmarked ?? false} />
                     </span>
                     <span title="Add to Pipeline (Wishlist)">
-                      <AddToPipelineButton
-                        jobId={j.id}
-                        inPipeline={j.isTracked}
-                      />
+                      <AddToPipelineButton jobId={j.id} inPipeline={j.isTracked} />
                     </span>
                   </span>
                 </div>

@@ -2,17 +2,12 @@
 import type { DragEndEvent } from "@dnd-kit/core";
 import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-
-
 import { Card, CardContent } from "@/components/ui/card";
-
-
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
 import type { PipelineItem } from "@/types/gql";
 
@@ -84,9 +79,7 @@ export default function Kanban(): JSX.Element {
               Failed to load pipeline.
             </p>
             <p className="mt-2 text-muted-foreground text-sm">
-              {error instanceof Error
-                ? error.message
-                : "An unknown error occurred"}
+              {error instanceof Error ? error.message : "An unknown error occurred"}
             </p>
           </CardContent>
         </Card>
@@ -136,20 +129,18 @@ export default function Kanban(): JSX.Element {
         {KANBAN_COLUMNS.map((column) => (
           <Card key={column} className="h-[80vh] bg-muted/50 flex flex-col">
             <CardContent className="p-4 flex flex-col h-full">
-              <h2 className="font-semibold capitalize mb-4 text-lg">
-                {column}
-              </h2>
+              <h2 className="font-semibold capitalize mb-4 text-lg">{column}</h2>
               <KanbanColumnDroppable id={column}>
                 <SortableContext
                   id={column}
-                  items={items[column].map((item) => item.job.id)}
+                  items={items[column]?.map((item) => item.job.id) ?? []}
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-3 min-h-[40px] flex-1 overflow-y-auto pr-1">
-                    {items[column].map((item: PipelineItem) => (
+                    {items[column]?.map((item: PipelineItem) => (
                       <KanbanCard key={item.id} item={item} />
                     ))}
-                    {items[column].length === 0 && (
+                    {(items[column]?.length ?? 0) === 0 && (
                       <div className="text-center py-8 text-muted-foreground text-sm">
                         No jobs in {column}
                       </div>

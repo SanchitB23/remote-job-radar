@@ -1,10 +1,10 @@
 "use client";
 
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 export default function Error({
   error,
@@ -20,9 +20,7 @@ export default function Error({
           <div className="flex justify-center mb-4">
             <ExclamationTriangleIcon className="h-12 w-12 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">
-            Something went wrong
-          </h1>
+          <h1 className="text-2xl font-bold mb-4 text-red-600">Something went wrong</h1>
           <p className="mb-6 text-muted-foreground">
             {error.message ||
               "An unexpected error occurred while loading jobs or updating bookmarks."}

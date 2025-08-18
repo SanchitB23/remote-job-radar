@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import type { JSX } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -12,10 +13,8 @@ export default function Home(): JSX.Element {
           Remote Job Radar
         </h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Discover remote job opportunities that match your skills with
-          AI-powered recommendations.
+          Discover remote job opportunities that match your skills with AI-powered recommendations.
         </p>
-
 
         <SignedOut>
           <div className="space-y-4">
@@ -44,12 +43,10 @@ export default function Home(): JSX.Element {
         <div className="mt-16 grid md:grid-cols-3 gap-8 text-left">
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-2">
-                AI-Powered Matching
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">AI-Powered Matching</h3>
               <p className="text-muted-foreground">
-                Our intelligent algorithm analyzes job requirements against your
-                skills to find the best matches.
+                Our intelligent algorithm analyzes job requirements against your skills to find the
+                best matches.
               </p>
             </CardContent>
           </Card>
@@ -57,8 +54,8 @@ export default function Home(): JSX.Element {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Remote-First</h3>
               <p className="text-muted-foreground">
-                Focus exclusively on remote and distributed work opportunities
-                from companies worldwide.
+                Focus exclusively on remote and distributed work opportunities from companies
+                worldwide.
               </p>
             </CardContent>
           </Card>
@@ -66,8 +63,8 @@ export default function Home(): JSX.Element {
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Real-Time Updates</h3>
               <p className="text-muted-foreground">
-                Get fresh job postings and opportunities as they become
-                available across multiple platforms.
+                Get fresh job postings and opportunities as they become available across multiple
+                platforms.
               </p>
             </CardContent>
           </Card>

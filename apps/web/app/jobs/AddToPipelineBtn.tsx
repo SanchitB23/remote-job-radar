@@ -1,12 +1,12 @@
 "use client";
 
+import { CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { usePipelineUpsertMutation } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { usePipelineUpsertMutation } from "@/lib/hooks";
 
 export function AddToPipelineButton({
   jobId,

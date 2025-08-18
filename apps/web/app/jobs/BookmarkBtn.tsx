@@ -1,13 +1,13 @@
 "use client";
 
+import { StarIcon } from "@heroicons/react/24/outline";
+import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { useBookmarkMutation } from "@/lib/hooks";
 import { Button } from "@/components/ui/button";
-import { StarIcon } from "@heroicons/react/24/outline";
-import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
+import { useBookmarkMutation } from "@/lib/hooks";
 
 type Props = { id: string; bookmarked: boolean };
 
