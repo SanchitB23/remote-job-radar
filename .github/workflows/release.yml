@@ -1,9 +1,7 @@
 name: Release
-
 on:
   push:
-    branches: [main]
-
+    branches: [main, develop]
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -15,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 } # semantic-release needs full history
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: "npm" }
+        with: { node-version: 20 }
       - run: npm ci
       # Optional: keep your quality gates before releasing
       - name: Install ruff
