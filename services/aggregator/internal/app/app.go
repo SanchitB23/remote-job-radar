@@ -65,7 +65,7 @@ func NewApp() (*App, error) {
 	handlers := handlers.NewHandlers(store, jobService)
 
 	// Initialize scheduler
-	scheduler := scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval)
+	scheduler := scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
 
 	return &App{
 		Config:    cfg,

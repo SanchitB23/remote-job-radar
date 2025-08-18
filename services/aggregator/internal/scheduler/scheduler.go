@@ -11,20 +11,22 @@ import (
 )
 
 type Scheduler struct {
-	jobService    *services.JobService
-	fetchInterval time.Duration
-	scoreInterval time.Duration
+	jobService      *services.JobService
+	fetchInterval   time.Duration
+	scoreInterval   time.Duration
+	runInitialFetch bool
 
 	// For graceful shutdown
 	cancel context.CancelFunc
 	wg     sync.WaitGroup
 }
 
-func NewScheduler(jobService *services.JobService, fetchInterval, scoreInterval time.Duration) *Scheduler {
+func NewScheduler(jobService *services.JobService, fetchInterval, scoreInterval time.Duration, runInitialFetch bool) *Scheduler {
 	return &Scheduler{
-		jobService:    jobService,
-		fetchInterval: fetchInterval,
-		scoreInterval: scoreInterval,
+		jobService:      jobService,
+		fetchInterval:   fetchInterval,
+		scoreInterval:   scoreInterval,
+		runInitialFetch: runInitialFetch,
 	}
 }
 
@@ -35,19 +37,24 @@ func (s *Scheduler) Start(ctx context.Context) {
 
 	logger.Info("Starting scheduler",
 		zap.Duration("fetchInterval", s.fetchInterval),
-		zap.Duration("scoreInterval", s.scoreInterval))
+		zap.Duration("scoreInterval", s.scoreInterval),
+		zap.Bool("runInitialFetch", s.runInitialFetch))
 
-	// Run initial fetch
-	logger.Info("Running initial fetch")
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		if err := s.jobService.FetchAndProcessJobs(schedulerCtx); err != nil {
-			logger.Error("Initial fetch failed", zap.Error(err))
-		} else {
-			logger.Info("Initial fetch completed")
-		}
-	}()
+	// Run initial fetch only if enabled
+	if s.runInitialFetch {
+		logger.Info("Running initial fetch")
+		s.wg.Add(1)
+		go func() {
+			defer s.wg.Done()
+			if err := s.jobService.FetchAndProcessJobs(schedulerCtx); err != nil {
+				logger.Error("Initial fetch failed", zap.Error(err))
+			} else {
+				logger.Info("Initial fetch completed")
+			}
+		}()
+	} else {
+		logger.Info("Skipping initial fetch (disabled by configuration)")
+	}
 
 	// Schedule periodic fetch jobs
 	s.wg.Add(1)

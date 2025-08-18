@@ -157,7 +157,23 @@ The service supports the following environment variables:
 | `FETCH_INTERVAL` | No | `2h` | Job fetch interval |
 | `SCORE_INTERVAL` | No | `4h` | Scoring interval |
 | `FETCH_TIMEOUT` | No | `30s` | Fetch operation timeout |
+| `RUN_INITIAL_FETCH` | No | `false` | Run initial job fetch on startup |
 | `ENV` | No | - | Environment name |
+
+## Development Commands
+
+The service uses npm scripts for consistency with the monorepo:
+
+```bash
+# Development (with hot reload)
+npm run dev
+
+# Build the binary
+npm run build
+
+# Run the built binary
+npm run start
+```
 
 ## API Endpoints
 
