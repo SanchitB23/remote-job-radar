@@ -19,7 +19,7 @@ export default function Home(): JSX.Element {
         <SignedOut>
           <div className="space-y-4">
             <SignInButton mode="modal">
-              <Button size="lg" className="text-lg">
+              <Button size="lg" className="text-lg cursor-pointer">
                 Get Started
               </Button>
             </SignInButton>
@@ -31,7 +31,7 @@ export default function Home(): JSX.Element {
 
         <SignedIn>
           <div className="space-y-4">
-            <Button asChild size="lg" className="text-lg">
+            <Button asChild size="lg" className="text-lg cursor-pointer">
               <Link href="/jobs">View Your Job Recommendations</Link>
             </Button>
             <p className="text-sm text-muted-foreground">

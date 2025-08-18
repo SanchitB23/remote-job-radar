@@ -1,6 +1,7 @@
 "use client";
 
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import capitalize from "lodash/capitalize";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
@@ -22,7 +23,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 
 import { useFilterMetadata } from "../../lib/hooks";
-import { useDebounce } from "../../lib/useDebounce";
 
 export function FilterSidebar(): JSX.Element {
   const router = useRouter();
@@ -37,8 +37,24 @@ export function FilterSidebar(): JSX.Element {
   // Default minFit changed from 10 to 0 for broader results; adjust DEFAULT_MIN_FIT to change this behavior.
   const DEFAULT_MIN_FIT = 0;
   const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? DEFAULT_MIN_FIT));
+  const [debouncedMinFit, setDebouncedMinFit] = useState(minFit);
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
+  const [debouncedMinSalary, setDebouncedMinSalary] = useState(minSalary);
   const [search, setSearch] = useState(q.get("search") ?? "");
+  // Debounced search state for URL param update
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>): void {
+    setSearch(e.target.value);
+  }
+
+  // Debounce effect: update debouncedSearch only after user stops typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
   const [sources, setSources] = useState<string[]>(
     q.getAll("source").length ? q.getAll("source") : [],
   );
@@ -69,12 +85,21 @@ export function FilterSidebar(): JSX.Element {
     return param === "true" ? true : param === "false" ? false : null;
   });
 
-  // Debounce only text/number inputs that change frequently
-  const debouncedMinFit = useDebounce(minFit, 300);
-  const debouncedMinSalary = useDebounce(minSalary, 300);
-  // Using 300ms debounce for more responsive filtering UX; increase to 500ms if API load is a concern
-  const debouncedSearch = useDebounce(search, 300);
-  // No debouncing needed for click-based filters: sources, workTypes, sortBy, bookmarked, isTracked
+  // Debounce minFit slider
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMinFit(minFit);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [minFit]);
+
+  // Debounce minSalary slider
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedMinSalary(minSalary);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [minSalary]);
 
   useEffect(() => {
     setIsApplyingFilters(true);
@@ -141,6 +166,9 @@ export function FilterSidebar(): JSX.Element {
   // Get dynamic values with fallbacks
   const fitScoreMin = filterMetadata?.fitScore?.min ?? 0;
   const fitScoreMax = filterMetadata?.fitScore?.max ?? 100;
+  // Format fitScore min/max to 1 decimal places for display, with % suffix
+  const fitScoreMinDisplay = Number(fitScoreMin).toFixed(1).replace(/\.0$/, "") + "%";
+  const fitScoreMaxDisplay = Number(fitScoreMax).toFixed(1).replace(/\.0$/, "") + "%";
   const salaryMax = filterMetadata?.salary?.max ?? 200000;
   const availableSources = filterMetadata?.sources ?? ["remotive", "adzuna"];
   const availableWorkTypes = filterMetadata?.workTypes ?? [];
@@ -205,7 +233,8 @@ export function FilterSidebar(): JSX.Element {
               className="mt-2"
             />
             <div className="text-sm text-muted-foreground mt-1">
-              {minFit}% (range: {fitScoreMin}-{fitScoreMax})
+              {Number(minFit).toFixed(1).replace(/\.0$/, "")}% (range: {fitScoreMinDisplay}-
+              {fitScoreMaxDisplay})
             </div>
           </div>
           <div>
@@ -217,17 +246,17 @@ export function FilterSidebar(): JSX.Element {
                 </span>
               )}
             </Label>
-            <Input
-              type="number"
-              value={minSalary}
+            <Slider
+              value={[minSalary]}
               min={0}
               max={salaryMax}
+              step={1000}
               disabled={isApplyingFilters || isLoadingMetadata}
-              onChange={(e) => setMinSalary(Number(e.target.value))}
-              className="mt-1"
+              onValueChange={(value) => setMinSalary(value[0] ?? 0)}
+              className="mt-2"
             />
-            <div className="text-xs text-muted-foreground mt-1">
-              {filterMetadataError ? "Est. max: " : "Max in data: "}${salaryMax.toLocaleString()}
+            <div className="text-sm text-muted-foreground mt-1">
+              ${minSalary.toLocaleString()} (max: ${salaryMax.toLocaleString()})
             </div>
           </div>
           <div className="col-span-2">
@@ -235,7 +264,7 @@ export function FilterSidebar(): JSX.Element {
             <Input
               value={search}
               disabled={isApplyingFilters || isLoadingMetadata}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Search jobs..."
               className="mt-1"
             />
@@ -250,24 +279,28 @@ export function FilterSidebar(): JSX.Element {
               )}
             </Label>
             <div className="space-y-2">
-              {availableSources.map((s) => (
-                <div key={s} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`source-${s}`}
-                    checked={sources.includes(s)}
-                    disabled={isApplyingFilters || isLoadingMetadata}
-                    onCheckedChange={() => toggleSource(s)}
-                  />
-                  <Label
-                    htmlFor={`source-${s}`}
-                    className={`text-sm cursor-pointer ${
-                      isApplyingFilters || isLoadingMetadata ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </Label>
-                </div>
-              ))}
+              {availableSources.map((s) => {
+                return (
+                  <div key={s} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`source-${s}`}
+                      checked={sources.includes(s)}
+                      disabled={isApplyingFilters || isLoadingMetadata}
+                      onCheckedChange={() => toggleSource(s)}
+                    />
+                    <Label
+                      htmlFor={`source-${s}`}
+                      className={`text-sm cursor-pointer ${
+                        isApplyingFilters || isLoadingMetadata
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      {capitalize(s)}
+                    </Label>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="col-span-2">
