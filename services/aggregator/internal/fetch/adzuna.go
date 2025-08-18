@@ -33,7 +33,7 @@ type adzResp struct {
 	} `json:"results"`
 }
 
-func FetchAdzuna(ctx context.Context, page int, appID, appKey string) ([]storage.JobRow, error) {
+func Adzuna(ctx context.Context, page int, appID, appKey string) ([]storage.JobRow, error) {
 	if appID == "" || appKey == "" {
 		return nil, fmt.Errorf("adzuna API credentials are required")
 	}

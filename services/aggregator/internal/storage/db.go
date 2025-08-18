@@ -34,7 +34,7 @@ func (s *Store) UpsertJobs(ctx context.Context, rows []JobRow) error {
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 		}
 	}()
 
@@ -135,7 +135,7 @@ func (s *Store) UpdateVectorAndFit(ctx context.Context, id string, vector []floa
 	}
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 		}
 	}()
 

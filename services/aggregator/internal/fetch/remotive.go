@@ -24,7 +24,7 @@ type remotiveResp struct {
 	} `json:"jobs"`
 }
 
-func FetchRemotive() ([]storage.JobRow, error) {
+func Remotive() ([]storage.JobRow, error) {
 	resp, err := http.Get(remotiveURL)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func FetchRemotive() ([]storage.JobRow, error) {
 	for _, j := range data.Jobs {
 		// Use source ID with prefix to prevent duplicates within source
 		id := fmt.Sprintf("remotive-%d", j.ID)
-		min, max := parseSalary(j.Salary)
+		minSal, maxSal := parseSalary(j.Salary)
 		rows = append(rows, storage.JobRow{
 			ID:          id,
 			Source:      "remotive",
@@ -49,8 +49,8 @@ func FetchRemotive() ([]storage.JobRow, error) {
 			Description: j.Description,
 			Location:    "", // Remotive doesn't provide location, only category
 			WorkType:    j.Category,
-			SalaryMin:   min,
-			SalaryMax:   max,
+			SalaryMin:   minSal,
+			SalaryMax:   maxSal,
 			URL:         j.URL,
 			PublishedAt: j.PublicDate,
 		})
@@ -58,9 +58,12 @@ func FetchRemotive() ([]storage.JobRow, error) {
 	return rows, nil
 }
 
-func parseSalary(s string) (min, max int) {
+func parseSalary(s string) (minSal, maxSal int) {
 	// crude "80k-100k" -> 80_000,100_000 parser (skips currency)
 	var low, high int
-	fmt.Sscanf(s, "%dk-%dk", &low, &high)
+	_, err := fmt.Sscanf(s, "%dk-%dk", &low, &high)
+	if err != nil {
+		return 0, 0
+	}
 	return low * 1000, high * 1000
 }

@@ -28,12 +28,12 @@ func NewHandlers(store *storage.Store, jobService *services.JobService) *Handler
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Health check requested", zap.String("remote_addr", r.RemoteAddr))
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
 
-func (h *Handlers) Healthz(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Healthz(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
 
 func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
@@ -44,14 +44,14 @@ func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error("DB health check failed", zap.Error(err))
 		w.WriteHeader(http.StatusServiceUnavailable)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"ok":    false,
 			"error": err.Error(),
 		})
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	_ = json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
 
 func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logger.Info("Manual fetch with sources", 
+	logger.Info("Manual fetch with sources",
 		zap.Strings("sources", sources),
 		zap.String("remote_addr", r.RemoteAddr))
 
@@ -88,7 +88,7 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"ok":      true,
 		"message": message,
 		"sources": sources,

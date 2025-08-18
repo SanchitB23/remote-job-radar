@@ -54,7 +54,7 @@ func InitLogger() error {
 // Sync flushes any buffered log entries
 func Sync() {
 	if Logger != nil {
-		Logger.Sync()
+		_ = Logger.Sync()
 	}
 }
 

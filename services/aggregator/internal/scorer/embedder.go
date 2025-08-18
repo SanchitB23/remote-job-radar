@@ -48,7 +48,7 @@ func NewEmbedder(cfg *config.Config) (*Embedder, error) {
 	}, nil
 }
 
-func min(a, b time.Duration) time.Duration {
+func minDuration(a, b time.Duration) time.Duration {
 	if a < b {
 		return a
 	}
@@ -138,7 +138,7 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 		}
 
 		// Wait before retrying with exponential backoff
-		delay := min(baseDelay*(1<<attempt), maxDelay)
+		delay := minDuration(baseDelay*(1<<attempt), maxDelay)
 		logger.Warn("Retrying embedder call",
 			zap.Int("attempt", attempt+1),
 			zap.Int("maxRetries", maxRetries),
