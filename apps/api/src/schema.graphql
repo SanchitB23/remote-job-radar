@@ -1,0 +1,190 @@
+"""
+Possible sources of job listings
+"""
+enum JobSource {
+  "LinkedIn job source"
+  LINKEDIN
+  "Indeed job source"
+  INDEED
+  "Remotive job source"
+  REMOTIVE
+  "Adzuna job source"
+  ADZUNA
+  "Other/unknown job source"
+  OTHER
+}
+
+"""
+A remote job posting with AI-generated fit score
+"""
+type Job {
+  "Unique identifier for the job"
+  id: ID!
+  "Job title"
+  title: String!
+  "Company name"
+  company: String!
+  "Job location (if specified)"
+  location: String
+  "Type/category of work (e.g. Software Development, Design, etc.)"
+  workType: String
+  "Full job description (may include HTML)"
+  description: String!
+  "Minimum salary in USD (if available)"
+  salaryMin: Int
+  "Maximum salary in USD (if available)"
+  salaryMax: Int
+  "AI-calculated fit score from 0-100 based on skills match"
+  fitScore: Float!
+  "Direct URL to the job posting"
+  url: String!
+  "When the job was originally published (ISO 8601 date string)"
+  publishedAt: String!
+  "Whether the current user has bookmarked this job (calculated per-user)"
+  bookmarked: Boolean!
+  "Source of the job listing (e.g. LinkedIn, Indeed, Remotive, Adzuna, Other)"
+  source: JobSource!
+  "Whether the current user has the job in their pipeline (tracked)"
+  isTracked: Boolean!
+}
+
+"""
+Paginated connection for jobs, following Relay-style pagination
+"""
+type JobsConnection {
+  "List of job edges in this page"
+  edges: [Job!]!
+  "Cursor for the last item in the current page (for pagination)"
+  endCursor: String
+  "Whether there are more pages after this one"
+  hasNextPage: Boolean!
+}
+
+"""
+An item in the user's job application pipeline (e.g. Kanban column)
+"""
+type PipelineItem {
+  "Unique identifier for the pipeline item"
+  id: ID!
+  "The job associated with this pipeline item"
+  job: Job!
+  "The column this item is in (e.g. 'applied', 'interview', etc.)"
+  column: String!
+  "Position/order of the item within the column"
+  position: Int!
+}
+
+"""
+Range metadata for numeric filters
+"""
+type NumericRange {
+  "Minimum value"
+  min: Float!
+  "Maximum value"
+  max: Float!
+}
+
+"""
+Metadata about available filter options based on current job data
+"""
+type FilterMetadata {
+  "Fit score range available in the database"
+  fitScore: NumericRange!
+  "Salary range available in the database"
+  salary: NumericRange!
+  "List of available job sources"
+  sources: [JobSource!]!
+  "List of most common job locations (top 50)"
+  locations: [String!]!
+  "List of available work types (top 50)"
+  workTypes: [String!]!
+}
+
+enum SortBy {
+  "Sort by AI fit score (default)"
+  FIT
+  "Sort by most recently published jobs"
+  DATE
+  "Sort by highest minimum salary"
+  SALARY
+}
+
+type Query {
+  """
+  Get remote job listings with optional filtering and pagination
+  """
+  jobs(
+    "Minimum fit score (0-100) to filter jobs"
+    minFit: Float
+    "Search term to match against job title or description"
+    search: String
+    "Minimum salary in USD"
+    minSalary: Int
+    "Location filter (partial match, case insensitive)"
+    location: String
+    "Work type filter (partial match, case insensitive)"
+    workType: String
+    "List of job sources to include (e.g. [LINKEDIN, REMOTIVE])"
+    sources: [JobSource!]
+    "Sort order: FIT (default), DATE, or SALARY"
+    sortBy: SortBy = FIT
+    "Pagination cursor (base64 id of last item from previous page)"
+    after: String
+    "Number of jobs to return (max 50)"
+    first: Int = 50
+    "Only return jobs bookmarked by the current user"
+    bookmarked: Boolean
+    "Only return jobs tracked (in pipeline) by the current user"
+    isTracked: Boolean
+  ): JobsConnection!
+
+  """
+  Get the current user's job application pipeline (Kanban board)
+  """
+  pipeline: [PipelineItem!]!
+
+  """
+  Get metadata about available filter options (ranges, sources, locations)
+  """
+  filterMetadata: FilterMetadata!
+}
+
+type Mutation {
+  """
+  Bookmark or unbookmark a job for the authenticated user
+  Returns true if the operation succeeded.
+  """
+  bookmark("Job ID to bookmark or unbookmark" id: ID!): Boolean!
+
+  """
+  Add or update a job in the user's pipeline (move to column/position)
+  Returns true if the operation succeeded.
+  """
+  pipelineUpsert(
+    "Job ID to add or update in the pipeline"
+    jobId: ID!
+    "Target column name"
+    column: String!
+    "Target position in the column"
+    position: Int!
+  ): Boolean!
+
+  """
+  Reorder jobs in the user's pipeline column
+  Returns true if the operation succeeded.
+  """
+  pipelineReorder(
+    "List of pipeline item IDs in new order"
+    ids: [ID!]!
+    "List of new positions for each item"
+    positions: [Int!]!
+  ): Boolean!
+}
+
+type Subscription {
+  """
+  Subscribe to new jobs that meet the minimum fit score criteria
+  Notifies in real-time when a new job is added that matches the filter.
+  """
+  newJob("Only notify for jobs with fit score >= this value (default: 10)" minFit: Float = 10): Job!
+}
