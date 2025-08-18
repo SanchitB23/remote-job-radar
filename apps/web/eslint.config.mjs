@@ -79,7 +79,8 @@ const config = [
       "**/pages/**/*",
       "**/middleware.ts",
       "**/next.config.ts",
-      "**/components/**/*.tsx", // Allow default exports in components
+      "**/app/**/not-found.tsx", // Allow default export in not-found.tsx
+      "**/components/ui/**/*.tsx", // Allow default exports in ui components
     ],
     rules: {
       "import/no-default-export": "off",

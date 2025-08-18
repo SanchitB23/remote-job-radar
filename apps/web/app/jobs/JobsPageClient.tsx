@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import type { Job, JobsConnection } from "@/types/gql";
 
 import { useInfiniteJobs } from "../../lib/hooks";
@@ -92,7 +95,7 @@ export function JobsPageClient(): JSX.Element {
     <div>
       {/* Jobs info header */}
       {jobs.length > 0 && (
-        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
           Showing {jobs.length} job{jobs.length !== 1 ? "s" : ""}
           {hasNextPage && " (loading more as you scroll)"}
         </div>
@@ -100,52 +103,59 @@ export function JobsPageClient(): JSX.Element {
 
       <ul className="space-y-2">
         {jobs.map((j: Job) => (
-          <li
-            key={j.id}
-            className="relative border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer group"
-            onClick={(e) => {
-              const target = e.target as HTMLElement;
-              if (target.closest("[data-bookmark-btn]")) return;
-              window.open(j.url, "_blank", "noopener");
-            }}
-            tabIndex={0}
-            role="button"
-            aria-label={j.title}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
+          <li key={j.id}>
+            <Card
+              className="transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-alias group"
+              onClick={(e) => {
                 const target = e.target as HTMLElement;
                 if (target.closest("[data-bookmark-btn]")) return;
                 window.open(j.url, "_blank", "noopener");
-              }
-            }}
-          >
-            <div className="relative z-10 flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">
-                  {j.title}
-                </h3>
-                <p className="text-gray-600 dark:text-zinc-300">{j.company}</p>
-                <p
-                  className={
-                    "text-sm " +
-                    (j.fitScore === 0
-                      ? "text-gray-400 dark:text-gray-500"
-                      : "text-green-600 dark:text-green-400")
-                  }
-                >
-                  Fit Score: {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
-                </p>
-              </div>
-              <span className="ml-2 z-20 pointer-events-auto flex gap-2" data-bookmark-btn>
-                <span title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}>
-                  <BookmarkButton id={j.id} bookmarked={j.bookmarked ?? false} />
-                </span>
-                <span title="Add to Pipeline (Wishlist)">
-                  <AddToPipelineButton jobId={j.id} inPipeline={j.isTracked} />
-                </span>
-              </span>
-            </div>
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={j.title}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  const target = e.target as HTMLElement;
+                  if (target.closest("[data-bookmark-btn]")) return;
+                  window.open(j.url, "_blank", "noopener");
+                }
+              }}
+            >
+              <CardContent className="p-4">
+                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex-1 w-full">
+                    <h3 className="font-semibold text-lg">{j.title}</h3>
+                    <p className="text-muted-foreground">{j.company}</p>
+                    <Badge variant={j.fitScore === 0 ? "secondary" : "default"} className="mt-2">
+                      Fit Score: {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
+                    </Badge>
+                  </div>
+                  <span
+                    className="z-20 pointer-events-auto flex flex-row gap-3 justify-center items-center w-full sm:w-auto mt-4 sm:mt-0"
+                    data-bookmark-btn
+                  >
+                    <span title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}>
+                      <BookmarkButton
+                        id={j.id}
+                        bookmarked={j.bookmarked ?? false}
+                        size="lg"
+                        variant="cta"
+                      />
+                    </span>
+                    <span title="Add to Pipeline (Wishlist)">
+                      <AddToPipelineButton
+                        jobId={j.id}
+                        inPipeline={j.isTracked}
+                        size="lg"
+                        variant="cta"
+                      />
+                    </span>
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
           </li>
         ))}
       </ul>
@@ -164,12 +174,9 @@ export function JobsPageClient(): JSX.Element {
       {/* Load more button as fallback */}
       {hasNextPage && !isFetchingNextPage && (
         <div className="mt-6 text-center">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
+          <Button onClick={handleLoadMore} className="px-6 py-2">
             Load More Jobs
-          </button>
+          </Button>
         </div>
       )}
 
