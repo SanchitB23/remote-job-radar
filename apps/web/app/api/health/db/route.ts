@@ -1,5 +1,6 @@
-import { HealthResponse } from "@/types/api/health";
 import { NextResponse } from "next/server";
+
+import type { HealthResponse } from "@/types/api/health";
 
 /**
   // The fallback URLs for cronUrl and gqlUrl are intentionally identical.
@@ -13,7 +14,7 @@ import { NextResponse } from "next/server";
  *   status: number
  * }
  */
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   const cronUrl = process.env.CRON_SERVER_BASE_URL || "http://localhost:4000";
   const gqlUrl = process.env.GRAPHQL_SERVER_BASE_URL || "http://localhost:4000";
   const timestamp = new Date().toISOString();
@@ -26,7 +27,7 @@ export async function GET() {
 
   const success = results.find(
     (r): r is PromiseFulfilledResult<HealthResponse & { status: number }> =>
-      isFulfilled(r) && r.value.ok
+      isFulfilled(r) && r.value.ok,
   );
 
   const result =
@@ -46,7 +47,7 @@ const fetchHealth = async (
   baseUrl: string,
   path = "/health/db",
   timeout = 5000, // 5 seconds timeout
-  timestamp: string
+  timestamp: string,
 ): Promise<HealthResponse & { status: number }> => {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
@@ -72,6 +73,5 @@ const fetchHealth = async (
 };
 
 const isFulfilled = (
-  r: PromiseSettledResult<HealthResponse & { status: number }>
-): r is PromiseFulfilledResult<HealthResponse & { status: number }> =>
-  r.status === "fulfilled";
+  r: PromiseSettledResult<HealthResponse & { status: number }>,
+): r is PromiseFulfilledResult<HealthResponse & { status: number }> => r.status === "fulfilled";

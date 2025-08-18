@@ -1,12 +1,10 @@
-import { PipelineItem } from "@/types/gql";
-import {
-  useSortable,
-  AnimateLayoutChanges,
-  defaultAnimateLayoutChanges,
-} from "@dnd-kit/sortable";
+import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
+import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
+import type { JSX } from "react";
 import React from "react";
+
+import type { PipelineItem } from "@/types/gql";
 
 export function KanbanCard({
   item,
@@ -14,7 +12,7 @@ export function KanbanCard({
 }: {
   item: PipelineItem;
   isOverlay?: boolean;
-}) {
+}): JSX.Element {
   // Custom animateLayoutChanges for smoother transitions
   const animateLayoutChanges: AnimateLayoutChanges = (args) => {
     if (args.isSorting || args.wasDragging) {
@@ -23,14 +21,7 @@ export function KanbanCard({
     return defaultAnimateLayoutChanges(args);
   };
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.job.id,
     animateLayoutChanges,
   });
@@ -54,9 +45,7 @@ export function KanbanCard({
             {item.job.title}
           </a>
         </h3>
-        <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">
-          {item.job.company}
-        </p>
+        <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">{item.job.company}</p>
       </div>
     );
   }
@@ -87,9 +76,7 @@ export function KanbanCard({
           {item.job.title}
         </a>
       </h3>
-      <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">
-        {item.job.company}
-      </p>
+      <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">{item.job.company}</p>
     </div>
   );
 }

@@ -1,42 +1,34 @@
 import { auth } from "@clerk/nextjs/server";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import type { JSX } from "react";
 
-import FilterSidebar from "@/app/jobs/FilterSidebar";
+import { FilterSidebar } from "@/app/jobs/FilterSidebar";
+import { fetchFilterMetadataShared, fetchJobsShared } from "@/services/gql-api";
+
 import { JobsPageClient } from "./JobsPageClient";
-import {
-  QueryClient,
-  dehydrate,
-  HydrationBoundary,
-} from "@tanstack/react-query";
 import { parseUrlJobParams } from "./utils";
-import { fetchJobsShared, fetchFilterMetadataShared } from "@/services/gql-api";
 
 // Server component that prefetches data
 export default async function JobsPageServer({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
+}): Promise<JSX.Element> {
   const sp = await searchParams;
   const urlSearchParams = new URLSearchParams(
     Object.entries(sp).flatMap(([key, value]) =>
-      Array.isArray(value)
-        ? value.map((v) => [key, v])
-        : value !== undefined
-        ? [[key, value]]
-        : []
-    )
+      Array.isArray(value) ? value.map((v) => [key, v]) : value !== undefined ? [[key, value]] : [],
+    ),
   );
   const params = parseUrlJobParams(urlSearchParams);
 
   const queryClient = new QueryClient();
   const authResult = await auth();
   const getToken = authResult?.getToken;
-  const token = getToken
-    ? await getToken({ template: "remote-job-radar" })
-    : undefined;
+  const token = getToken ? await getToken({ template: "remote-job-radar" }) : undefined;
 
   // Remove 'after' from params since it's handled by infinite query
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const { after: _, ...infiniteParams } = params;
 
   // Prefetch the first page of infinite query
@@ -46,10 +38,7 @@ export default async function JobsPageServer({
       return await fetchJobsShared(infiniteParams, token || "");
     },
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: {
-      hasNextPage: boolean;
-      endCursor?: string;
-    }) => {
+    getNextPageParam: (lastPage: { hasNextPage: boolean; endCursor?: string }) => {
       return lastPage.hasNextPage ? lastPage.endCursor : undefined;
     },
   });

@@ -1,6 +1,6 @@
-import React from "react";
+import type { JSX } from "react";
 
-export default function JobCardSkeleton() {
+export function JobCardSkeleton(): JSX.Element {
   return (
     <li className="relative border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 rounded-lg animate-pulse">
       <div className="flex items-start justify-between">

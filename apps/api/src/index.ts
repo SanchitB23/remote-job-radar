@@ -1,15 +1,17 @@
 import { readFileSync } from "node:fs";
 import http from "node:http";
-import { WebSocketServer } from "ws";
+
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import express from "express";
-import cors from "cors";
-import { PrismaClient } from "@prisma/client";
-import { getResolvers } from "./resolvers/index.js";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { getUserId, getUserIdFromToken } from "./auth.js";
+import { PrismaClient } from "@prisma/client";
+import cors from "cors";
+import express from "express";
 import { useServer } from "graphql-ws/use/ws";
+import { WebSocketServer } from "ws";
+
+import { getUserId, getUserIdFromToken } from "./auth.js";
+import { getResolvers } from "./resolvers/index.js";
 
 const prisma = new PrismaClient();
 
@@ -55,23 +57,18 @@ useServer(
     context: async (ctx: WebSocketContext) => {
       // Restore JWT auth for WebSocket context
       const connectionParams = ctx.connectionParams || {};
-      const authHeader =
-        connectionParams.Authorization || connectionParams.authorization;
+      const authHeader = connectionParams.Authorization || connectionParams.authorization;
       let userId = null;
       if (authHeader) {
         userId = await getUserIdFromToken(authHeader as string);
-        console.log(
-          `[WS] WebSocket connection established. userId: ${
-            userId ?? "anonymous"
-          }`
-        );
+        console.log(`[WS] WebSocket connection established. userId: ${userId ?? "anonymous"}`);
       } else {
         console.log("[WS] WebSocket connection established. No auth header.");
       }
       return { prisma, userId };
     },
   },
-  wsServer
+  wsServer,
 );
 
 // 3. Set up Express middleware
@@ -83,16 +80,14 @@ const allowedOrigins = process.env.CORS_ORIGIN
   : undefined;
 
 if (!allowedOrigins || allowedOrigins.length === 0) {
-  throw new Error(
-    "CORS_ORIGIN environment variable must be set with at least one allowed origin."
-  );
+  throw new Error("CORS_ORIGIN environment variable must be set with at least one allowed origin.");
 }
 
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
@@ -112,11 +107,9 @@ app.use(
         return { prisma, userId: null };
       }
     },
-  })
+  }),
 );
 
 const PORT = 4000;
 const DEPLOYED_URL = process.env.DEPLOYED_URL || `http://localhost:${PORT}`;
-httpServer.listen(PORT, () =>
-  console.log(`🚀 GraphQL ready at ${DEPLOYED_URL}/graphql`)
-);
+httpServer.listen(PORT, () => console.log(`🚀 GraphQL ready at ${DEPLOYED_URL}/graphql`));

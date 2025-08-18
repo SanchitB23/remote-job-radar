@@ -1,4 +1,4 @@
-import { FetchJobsParams, JobsConnection, PipelineItem } from "@/types/gql";
+import type { FetchJobsParams, JobsConnection, PipelineItem } from "@/types/gql";
 
 // Base API URL for the Next.js app
 const API_BASE_URL = "/api";
@@ -7,17 +7,13 @@ const API_BASE_URL = "/api";
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.error || `HTTP ${response.status}: ${response.statusText}`
-    );
+    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
   }
   return response.json();
 }
 
 // Fetch jobs using Next.js API route
-export async function fetchJobsApi(
-  params: FetchJobsParams
-): Promise<JobsConnection> {
+export async function fetchJobsApi(params: FetchJobsParams): Promise<JobsConnection> {
   const queryParams = new URLSearchParams();
 
   // Add parameters to query string
@@ -31,16 +27,12 @@ export async function fetchJobsApi(
     }
   });
 
-  const response = await fetch(
-    `${API_BASE_URL}/jobs?${queryParams.toString()}`
-  );
+  const response = await fetch(`${API_BASE_URL}/jobs?${queryParams.toString()}`);
   return handleApiResponse<JobsConnection>(response);
 }
 
 // Toggle bookmark using Next.js API route
-export async function toggleBookmarkApi(
-  jobId: string
-): Promise<{ bookmark: boolean }> {
+export async function toggleBookmarkApi(jobId: string): Promise<{ bookmark: boolean }> {
   const response = await fetch(`${API_BASE_URL}/bookmarks`, {
     method: "POST",
     headers: {
@@ -61,7 +53,7 @@ export async function fetchPipelineApi(): Promise<PipelineItem[]> {
 export async function upsertPipelineItemApi(
   jobId: string,
   column: string,
-  position: number
+  position: number,
 ): Promise<{ pipelineUpsert: boolean }> {
   const response = await fetch(`${API_BASE_URL}/pipeline`, {
     method: "POST",

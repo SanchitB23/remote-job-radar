@@ -1,8 +1,10 @@
 "use client";
 
-import { usePipelineUpsertMutation } from "@/lib/hooks";
+import type { JSX } from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
+import { usePipelineUpsertMutation } from "@/lib/hooks";
 
 export function AddToPipelineButton({
   jobId,
@@ -10,7 +12,7 @@ export function AddToPipelineButton({
 }: {
   jobId: string;
   inPipeline?: boolean;
-}) {
+}): JSX.Element {
   const mutation = usePipelineUpsertMutation();
   const [optimisticInPipeline, setOptimisticInPipeline] = useState(inPipeline);
   const [clicked, setClicked] = useState(false);
@@ -19,7 +21,7 @@ export function AddToPipelineButton({
   // (If you want to support live updates from parent, uncomment below)
   // useEffect(() => { setOptimisticInPipeline(inPipeline); }, [inPipeline]);
 
-  const handleClick = async () => {
+  const handleClick = async (): Promise<void> => {
     // Only allow adding if not already in pipeline
     if (optimisticInPipeline) return;
     setClicked(true);
@@ -42,25 +44,15 @@ export function AddToPipelineButton({
   return (
     <button
       disabled={mutation.isPending || clicked || optimisticInPipeline}
-      aria-label={
-        optimisticInPipeline
-          ? "In Pipeline (Wishlist)"
-          : "Add to Pipeline (Wishlist)"
-      }
-      title={
-        optimisticInPipeline
-          ? "Already in Pipeline (Wishlist)"
-          : "Add to Pipeline (Wishlist)"
-      }
+      aria-label={optimisticInPipeline ? "In Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
+      title={optimisticInPipeline ? "Already in Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
       className={`ml-2 text-lg cursor-pointer align-middle transition-colors duration-150
         ${
           optimisticInPipeline
             ? "text-blue-500 dark:text-blue-400"
             : "text-gray-400 hover:text-blue-600 dark:hover:text-blue-300"
         }
-        ${
-          mutation.isPending || clicked ? "opacity-60" : ""
-        } focus:outline-none`}
+        ${mutation.isPending || clicked ? "opacity-60" : ""} focus:outline-none`}
       onClick={handleClick}
       style={{
         background: "none",

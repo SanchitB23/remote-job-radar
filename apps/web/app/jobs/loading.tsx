@@ -1,7 +1,9 @@
-import JobCardSkeleton from "./JobCardSkeleton";
-import FilterSidebarSkeleton from "./FilterSidebarSkeleton";
+import type { JSX } from "react";
 
-export default function Loading() {
+import { FilterSidebarSkeleton } from "./FilterSidebarSkeleton";
+import { JobCardSkeleton } from "./JobCardSkeleton";
+
+export default function Loading(): JSX.Element {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 items-start pt-0 lg:pt-0">
       <div className="lg:col-span-1 lg:sticky lg:top-4">

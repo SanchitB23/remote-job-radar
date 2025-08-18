@@ -1,21 +1,28 @@
 "use client";
 
 import {
-  useMutation,
-  useQueryClient,
   useInfiniteQuery,
+  type UseInfiniteQueryResult,
+  useMutation,
+  type UseMutationResult,
   useQuery,
+  useQueryClient,
+  type UseQueryResult,
 } from "@tanstack/react-query";
+
+import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } from "@/types/gql";
+
 import {
   fetchJobsApi,
-  toggleBookmarkApi,
   fetchPipelineApi,
+  toggleBookmarkApi,
   upsertPipelineItemApi,
 } from "../services/api-client";
-import { FetchJobsParams, JobsConnection, FilterMetadata } from "@/types/gql";
 
 // Custom hook for infinite pagination of jobs
-export function useInfiniteJobs(params: Omit<FetchJobsParams, "after"> = {}) {
+export function useInfiniteJobs(
+  params: Omit<FetchJobsParams, "after"> = {},
+): UseInfiniteQueryResult<JobsConnection, Error> {
   return useInfiniteQuery({
     queryKey: ["jobs-infinite", params],
     queryFn: async ({ pageParam }) => {
@@ -32,7 +39,12 @@ export function useInfiniteJobs(params: Omit<FetchJobsParams, "after"> = {}) {
 }
 
 // Custom hook for bookmark mutation
-export function useBookmarkMutation() {
+export function useBookmarkMutation(): UseMutationResult<
+  { bookmark: boolean },
+  Error,
+  string,
+  unknown
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -51,7 +63,7 @@ export function useBookmarkMutation() {
 }
 
 // Custom hook for fetching pipeline data
-export function usePipeline() {
+export function usePipeline(): UseQueryResult<PipelineItem[], Error> {
   return useQuery({
     queryKey: ["pipeline"],
     queryFn: async () => {
@@ -63,7 +75,12 @@ export function usePipeline() {
 }
 
 // Custom hook for pipeline upsert mutation
-export function usePipelineUpsertMutation() {
+export function usePipelineUpsertMutation(): UseMutationResult<
+  { pipelineUpsert: boolean },
+  Error,
+  { jobId: string; column: string; position: number },
+  unknown
+> {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -89,18 +106,14 @@ export function usePipelineUpsertMutation() {
 }
 
 // Custom hook for fetching filter metadata
-export function useFilterMetadata() {
+export function useFilterMetadata(): UseQueryResult<FilterMetadata, Error> {
   return useQuery({
     queryKey: ["filter-metadata"],
     queryFn: async (): Promise<FilterMetadata> => {
       const response = await fetch("/api/filters");
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Unknown error" }));
-        throw new Error(
-          errorData.error || `HTTP ${response.status}: ${response.statusText}`
-        );
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
       return response.json();
     },

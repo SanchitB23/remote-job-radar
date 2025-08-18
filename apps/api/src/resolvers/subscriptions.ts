@@ -1,13 +1,15 @@
 import { withFilter } from "graphql-subscriptions";
 
-export function getSubscriptionResolvers(pubsub: any, NEW_JOB: string) {
+import type { NewJobSubscriptionArgs, PubSubInterface } from "../types/resolvers.js";
+
+export function getSubscriptionResolvers(pubsub: PubSubInterface, NEW_JOB: string): any {
   return {
     newJob: {
       subscribe: withFilter(
         () => pubsub.asyncIterator(NEW_JOB),
-        (payload: any, variables: any) => {
+        (payload: { newJob: { fitScore: number } }, variables: NewJobSubscriptionArgs) => {
           return payload.newJob.fitScore >= (variables.minFit || 0);
-        }
+        },
       ),
     },
   };

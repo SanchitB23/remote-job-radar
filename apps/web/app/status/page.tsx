@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueries } from "@tanstack/react-query";
+import type { JSX } from "react";
 
 // List of health API endpoints in /api/health
 const HEALTH_APIS = [
@@ -27,7 +28,7 @@ async function fetchHealthApi(path: string): Promise<HealthApiStatus> {
   }
 }
 
-export default function StatusPage() {
+export default function StatusPage(): JSX.Element {
   const results = useQueries({
     queries: HEALTH_APIS.map((api) => ({
       queryKey: ["health-api", api.name],
@@ -43,20 +44,15 @@ export default function StatusPage() {
       <div className="space-y-4">
         {HEALTH_APIS.map((api, idx) => {
           const query = results[idx];
+          if (!query) return null;
           return (
-            <div
-              key={api.name}
-              className="flex items-center justify-between p-4 border rounded-lg"
-            >
+            <div key={api.name} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
                 <div className="font-semibold">{api.name}</div>
-                <div className="text-xs text-gray-500 break-all">
-                  {api.path}
-                </div>
+                <div className="text-xs text-gray-500 break-all">{api.path}</div>
                 {query.data?.timestamp && (
                   <div className="text-xs text-gray-400">
-                    Last checked:{" "}
-                    {new Date(query.data.timestamp).toLocaleString()}
+                    Last checked: {new Date(query.data.timestamp).toLocaleString()}
                   </div>
                 )}
               </div>
@@ -69,9 +65,7 @@ export default function StatusPage() {
                   <>
                     <span className="text-red-600 font-bold">DOWN</span>
                     {query.data?.error && (
-                      <div className="text-xs text-red-400">
-                        {query.data.error}
-                      </div>
+                      <div className="text-xs text-red-400">{query.data.error}</div>
                     )}
                   </>
                 )}

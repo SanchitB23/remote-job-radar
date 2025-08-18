@@ -1,4 +1,6 @@
-export default function FilterSidebarSkeleton() {
+import type { JSX } from "react";
+
+export function FilterSidebarSkeleton(): JSX.Element {
   return (
     <aside
       className="border bg-white dark:bg-zinc-900 dark:border-zinc-800 p-3 flex flex-col gap-3 w-full mb-4

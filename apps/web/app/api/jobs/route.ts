@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { fetchJobsShared } from "@/services/gql-api";
-import { FetchJobsParams } from "@/types/gql";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+import { fetchJobsShared } from "@/services/gql-api";
+import type { FetchJobsParams } from "@/types/gql";
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Get authentication token
     const { getToken } = await auth();
@@ -48,21 +50,13 @@ export async function GET(request: NextRequest) {
     const bookmarkedParam = searchParams.get("bookmarked");
     if (bookmarkedParam !== null) {
       params.bookmarked =
-        bookmarkedParam === "true"
-          ? true
-          : bookmarkedParam === "false"
-          ? false
-          : null;
+        bookmarkedParam === "true" ? true : bookmarkedParam === "false" ? false : null;
     }
 
     const isTrackedParam = searchParams.get("isTracked");
     if (isTrackedParam !== null) {
       params.isTracked =
-        isTrackedParam === "true"
-          ? true
-          : isTrackedParam === "false"
-          ? false
-          : null;
+        isTrackedParam === "true" ? true : isTrackedParam === "false" ? false : null;
     }
 
     // Call the GraphQL backend
@@ -76,7 +70,7 @@ export async function GET(request: NextRequest) {
         error: "Failed to fetch jobs",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

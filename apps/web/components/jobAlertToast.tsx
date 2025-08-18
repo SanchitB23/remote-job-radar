@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
-import toast from "react-hot-toast";
-import { getWSClient, subscribeToNewJobs } from "@/services/gql-sub";
 import type { Client } from "graphql-ws";
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
+
+import { getWSClient, subscribeToNewJobs } from "@/services/gql-sub";
 
 // Configurable minimum fit score for job alerts
 const MIN_FIT_SCORE = 8;
@@ -19,7 +20,7 @@ interface NewJobData {
   };
 }
 
-export default function JobAlerts() {
+export default function JobAlerts(): null {
   const { getToken } = useAuth();
 
   const wsClientRef = useRef<Client | null>(null);
@@ -40,7 +41,7 @@ export default function JobAlerts() {
               toast.success(
                 <a href={job.url} target="_blank" rel="noopener noreferrer">
                   New match ({job.fitScore}%): {job.title} — {job.company}
-                </a>
+                </a>,
               );
             }
           },

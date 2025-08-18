@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import {
-  fetchPipelineShared,
-  upsertPipelineItemShared,
-} from "@/services/gql-api";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET() {
+import { fetchPipelineShared, upsertPipelineItemShared } from "@/services/gql-api";
+
+export async function GET(): Promise<NextResponse> {
   try {
     // Get authentication token
     const { getToken } = await auth();
@@ -22,12 +21,12 @@ export async function GET() {
         error: "Failed to fetch pipeline",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get authentication token
     const { getToken } = await auth();
@@ -39,17 +38,12 @@ export async function POST(request: NextRequest) {
     if (!jobId || !column || position === undefined) {
       return NextResponse.json(
         { error: "Job ID, column, and position are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Call the GraphQL backend
-    const result = await upsertPipelineItemShared(
-      jobId,
-      column,
-      position,
-      token
-    );
+    const result = await upsertPipelineItemShared(jobId, column, position, token);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -59,7 +53,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to upsert pipeline item",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

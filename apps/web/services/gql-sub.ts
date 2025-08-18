@@ -1,9 +1,10 @@
 "use client";
 
-import { GRAPHQL_WS_ENDPOINT } from "@/constants";
-import { NEW_JOB_SUBSCRIPTION } from "@/constants/gqlQueries";
 import type { Client, Sink } from "graphql-ws";
 import { createClient } from "graphql-ws";
+
+import { GRAPHQL_WS_ENDPOINT } from "@/constants";
+import { NEW_JOB_SUBSCRIPTION } from "@/constants/gqlQueries";
 
 // Utility to subscribe to new jobs via WebSocket
 export function subscribeToNewJobs({
@@ -18,7 +19,7 @@ export function subscribeToNewJobs({
   next: Sink["next"];
   error?: Sink["error"];
   complete?: Sink["complete"];
-}) {
+}): () => void {
   return wsClient.subscribe(
     {
       query: NEW_JOB_SUBSCRIPTION,
@@ -26,9 +27,17 @@ export function subscribeToNewJobs({
     },
     {
       next,
-      error: error || ((err) => { console.error("GraphQL subscription error:", err); }),
-      complete: complete || (() => { console.log("Subscription completed."); }),
-    }
+      error:
+        error ||
+        ((err) => {
+          console.error("GraphQL subscription error:", err);
+        }),
+      complete:
+        complete ||
+        (() => {
+          console.log("Subscription completed.");
+        }),
+    },
   );
 }
 
@@ -52,7 +61,7 @@ export function subscribeToNewJobs({
 //   return toggleBookmarkShared(jobId, token);
 // }
 
-export async function getWSClient(jwt?: string) {
+export async function getWSClient(jwt?: string): Promise<Client> {
   const connectionParams = jwt ? { Authorization: `Bearer ${jwt}` } : {};
 
   return createClient({

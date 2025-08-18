@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useDebounce } from "../../lib/useDebounce";
-import { useFilterMetadata } from "../../lib/hooks";
+import type { JSX } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-export default function FilterSidebar() {
+import { useFilterMetadata } from "../../lib/hooks";
+import { useDebounce } from "../../lib/useDebounce";
+
+export function FilterSidebar(): JSX.Element {
   const router = useRouter();
   const q = useSearchParams();
   const {
@@ -18,16 +20,14 @@ export default function FilterSidebar() {
 
   // Default minFit changed from 10 to 0 for broader results; adjust DEFAULT_MIN_FIT to change this behavior.
   const DEFAULT_MIN_FIT = 0;
-  const [minFit, setMinFit] = useState(
-    Number(q.get("minFit") ?? DEFAULT_MIN_FIT)
-  );
+  const [minFit, setMinFit] = useState(Number(q.get("minFit") ?? DEFAULT_MIN_FIT));
   const [minSalary, setMinSalary] = useState(Number(q.get("minSalary") ?? 0));
   const [search, setSearch] = useState(q.get("search") ?? "");
   const [sources, setSources] = useState<string[]>(
-    q.getAll("source").length ? q.getAll("source") : []
+    q.getAll("source").length ? q.getAll("source") : [],
   );
   const [workTypes, setWorkTypes] = useState<string[]>(
-    q.getAll("workType").length ? q.getAll("workType") : []
+    q.getAll("workType").length ? q.getAll("workType") : [],
   );
   // Use enum values for sortBy (FIT, DATE, SALARY)
   const [sortBy, setSortBy] = useState(() => {
@@ -114,16 +114,12 @@ export default function FilterSidebar() {
     }
   }, [filterMetadataError]);
 
-  function toggleSource(s: string) {
-    setSources((prev) =>
-      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]
-    );
+  function toggleSource(s: string): void {
+    setSources((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
   }
 
-  function toggleWorkType(w: string) {
-    setWorkTypes((prev) =>
-      prev.includes(w) ? prev.filter((x) => x !== w) : [...prev, w]
-    );
+  function toggleWorkType(w: string): void {
+    setWorkTypes((prev) => (prev.includes(w) ? prev.filter((x) => x !== w) : [...prev, w]));
   }
 
   // Get dynamic values with fallbacks
@@ -134,7 +130,7 @@ export default function FilterSidebar() {
   const availableWorkTypes = filterMetadata?.workTypes ?? [];
 
   // Error component
-  const FilterErrorComponent = () => (
+  const FilterErrorComponent = (): JSX.Element => (
     <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
       <div className="flex items-center justify-center mb-2">
         <svg
@@ -230,14 +226,11 @@ export default function FilterSidebar() {
             onChange={(e) => setMinSalary(Number(e.target.value))}
           />
           <div className="text-xs text-zinc-600 dark:text-zinc-400">
-            {filterMetadataError ? "Est. max: " : "Max in data: "}$
-            {salaryMax.toLocaleString()}
+            {filterMetadataError ? "Est. max: " : "Max in data: "}${salaryMax.toLocaleString()}
           </div>
         </div>
         <div className="col-span-2">
-          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
-            Search
-          </label>
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">Search</label>
           <input
             className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={search}
@@ -305,23 +298,17 @@ export default function FilterSidebar() {
             </div>
           ) : (
             <div className="text-xs text-zinc-500 dark:text-zinc-400 italic">
-              {filterMetadataError
-                ? "Unable to load work types"
-                : "No work types available"}
+              {filterMetadataError ? "Unable to load work types" : "No work types available"}
             </div>
           )}
         </div>
         <div className="col-span-2">
-          <label className="block text-sm text-zinc-700 dark:text-zinc-200">
-            Sort by
-          </label>
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200">Sort by</label>
           <select
             className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
             value={sortBy}
             disabled={isApplyingFilters || isLoadingMetadata}
-            onChange={(e) =>
-              setSortBy(e.target.value as "FIT" | "DATE" | "SALARY")
-            }
+            onChange={(e) => setSortBy(e.target.value as "FIT" | "DATE" | "SALARY")}
           >
             <option value="FIT">Fit (desc)</option>
             <option value="DATE">Newest</option>
@@ -329,27 +316,15 @@ export default function FilterSidebar() {
           </select>
         </div>
         <div className="col-span-2">
-          <label className="block text-sm text-zinc-700 dark:text-zinc-200 mb-1">
-            Bookmarks
-          </label>
+          <label className="block text-sm text-zinc-700 dark:text-zinc-200 mb-1">Bookmarks</label>
           <select
             className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            value={
-              bookmarked === null
-                ? "all"
-                : bookmarked
-                ? "bookmarked"
-                : "unbookmarked"
-            }
+            value={bookmarked === null ? "all" : bookmarked ? "bookmarked" : "unbookmarked"}
             disabled={isApplyingFilters || isLoadingMetadata}
             onChange={(e) => {
               const value = e.target.value;
               setBookmarked(
-                value === "bookmarked"
-                  ? true
-                  : value === "unbookmarked"
-                  ? false
-                  : null
+                value === "bookmarked" ? true : value === "unbookmarked" ? false : null,
               );
             }}
           >
@@ -364,19 +339,11 @@ export default function FilterSidebar() {
           </label>
           <select
             className="border p-1 w-full bg-white dark:bg-zinc-800 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            value={
-              isTracked === null ? "all" : isTracked ? "tracked" : "untracked"
-            }
+            value={isTracked === null ? "all" : isTracked ? "tracked" : "untracked"}
             disabled={isApplyingFilters || isLoadingMetadata}
             onChange={(e) => {
               const value = e.target.value;
-              setIsTracked(
-                value === "tracked"
-                  ? true
-                  : value === "untracked"
-                  ? false
-                  : null
-              );
+              setIsTracked(value === "tracked" ? true : value === "untracked" ? false : null);
             }}
           >
             <option value="all">All Jobs</option>

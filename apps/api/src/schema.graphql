@@ -184,8 +184,5 @@ type Subscription {
   Subscribe to new jobs that meet the minimum fit score criteria
   Notifies in real-time when a new job is added that matches the filter.
   """
-  newJob(
-    "Only notify for jobs with fit score >= this value (default: 10)"
-    minFit: Float = 10
-  ): Job!
+  newJob("Only notify for jobs with fit score >= this value (default: 10)" minFit: Float = 10): Job!
 }

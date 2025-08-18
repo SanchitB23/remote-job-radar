@@ -1,8 +1,15 @@
 import { GraphQLError } from "graphql";
 
-export function getMutationResolvers(prisma: any) {
+import type {
+  AuthenticatedGraphQLContext,
+  BookmarkArgs,
+  PipelineReorderArgs,
+  PipelineUpsertArgs,
+} from "../types/resolvers.js";
+
+export function getMutationResolvers(_prisma: unknown): any {
   return {
-    bookmark: async (_: any, { id }: any, ctx: any) => {
+    bookmark: async (_: unknown, { id }: BookmarkArgs, ctx: AuthenticatedGraphQLContext) => {
       if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
       try {
         const where = { user_id_job_id: { user_id: ctx.userId, job_id: id } };
@@ -21,9 +28,9 @@ export function getMutationResolvers(prisma: any) {
       }
     },
     pipelineUpsert: async (
-      _: any,
-      { jobId, column, position }: any,
-      ctx: any
+      _: unknown,
+      { jobId, column, position }: PipelineUpsertArgs,
+      ctx: AuthenticatedGraphQLContext,
     ) => {
       if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
       await ctx.prisma.pipelineItem.upsert({
@@ -33,15 +40,23 @@ export function getMutationResolvers(prisma: any) {
       });
       return true;
     },
-    pipelineReorder: async (_: any, { ids, positions }: any, ctx: any) => {
+    pipelineReorder: async (
+      _: unknown,
+      { ids, positions }: PipelineReorderArgs,
+      ctx: AuthenticatedGraphQLContext,
+    ) => {
       if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
       await ctx.prisma.$transaction(
-        ids.map((id: string, i: number) =>
-          ctx.prisma.pipelineItem.update({
+        ids.map((id: string, i: number) => {
+          const position = positions[i];
+          if (position === undefined) {
+            throw new Error(`Position at index ${i} is undefined`);
+          }
+          return ctx.prisma.pipelineItem.update({
             where: { id },
-            data: { position: positions[i] },
-          })
-        )
+            data: { position },
+          });
+        }),
       );
       return true;
     },

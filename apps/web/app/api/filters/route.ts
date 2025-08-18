@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { executeGraphQLQuery } from "@/services/gql-api";
-import { FilterMetadata } from "@/types/gql";
-import { FILTER_METADATA_QUERY } from "@/constants/gqlQueries";
+import { NextResponse } from "next/server";
 
-export async function GET() {
+import { FILTER_METADATA_QUERY } from "@/constants/gqlQueries";
+import { executeGraphQLQuery } from "@/services/gql-api";
+import type { FilterMetadata } from "@/types/gql";
+
+export async function GET(): Promise<NextResponse> {
   try {
     // Get authentication token
     const { getToken } = await auth();
@@ -26,7 +27,7 @@ export async function GET() {
         error: "Failed to fetch filter metadata",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
