@@ -1,12 +1,13 @@
 
+# Standard library imports
 import hashlib
 import logging
 import sys
 
+# Third-party imports
 from fastapi import FastAPI, HTTPException, Request
 from fastembed import TextEmbedding
 from pydantic import BaseModel
-
 
 # Load a lightweight 384-d model (fits in 512MB with room to spare)
 # Alternatives that are still small:
@@ -48,15 +49,16 @@ async def embed(r: Req, request: Request):
     text_preview = r.text[:100].replace('\n', ' ').replace('\r', '')
     
     logging.info(
-        f"[EMBED_START] from {request.client.host} | text_length: {len(r.text)} | sha256: {text_hash} | "
-        f"preview: '{text_preview}...'"
+        f"[EMBED_START] from {request.client.host} | text_length: {len(r.text)} | "
+        f"sha256: {text_hash} | preview: '{text_preview}...'"
     )
     try:
         # FastEmbed returns a generator; get the first vector
         vec = next(model.embed([r.text]))
         # Ensure plain Python list of floats
         logging.info(
-            f"[EMBED_SUCCESS] text_length: {len(r.text)} | vector_dim: {len(vec)} | sha256: {text_hash}"
+            f"[EMBED_SUCCESS] text_length: {len(r.text)} | vector_dim: {len(vec)} | "
+            f"sha256: {text_hash}"
         )
         return {"vector": list(map(float, vec))}
     except Exception as e:
