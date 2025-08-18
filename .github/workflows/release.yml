@@ -16,6 +16,9 @@ jobs:
         with: { node-version: 20 }
       - run: npm ci
       # Optional: keep your quality gates before releasing
+      - name: Install ruff
+        if: contains(matrix.service, 'embedder')
+        run: pip install ruff
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
