@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Clean npm cache
+        run: npm cache clean --force
       - run: npm ci
       - name: Set DATABASE_URL for API type generation
         if: matrix.workspace == 'apps/api'
