@@ -43,7 +43,7 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]
 	// Fetch jobs from Remotive if requested or if fetching all
 	if fetchAll || sourceMap["remotive"] {
 		logger.Info("Fetching jobs from Remotive API")
-		remotiveJobs, err := fetch.FetchRemotive()
+		remotiveJobs, err := fetch.Remotive()
 		if err != nil {
 			logger.Error("Remotive fetch error", zap.Error(err))
 			// Don't return here - continue with other sources
@@ -88,7 +88,7 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 
 		// Create a timeout for individual page fetch
 		pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-		adzunaJobs, err := fetch.FetchAdzuna(pageCtx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
+		adzunaJobs, err := fetch.Adzuna(pageCtx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey)
 		cancel()
 
 		if err != nil {

@@ -1,7 +1,7 @@
 // apps/api/src/auth.ts
-import jwksRsa from "jwks-rsa";
-import jwt from "jsonwebtoken";
 import type { Request } from "express";
+import jwt from "jsonwebtoken";
+import jwksRsa from "jwks-rsa";
 
 const jwkClient = jwksRsa({
   jwksUri: process.env.CLERK_JWK_URL!,
@@ -32,17 +32,12 @@ export async function getUserId(req: Request): Promise<string | null> {
     console.log("✅ JWT verified for user:", payload.sub);
     return payload.sub; // Clerk user ID
   } catch (error) {
-    console.warn(
-      "JWT verification failed:",
-      error instanceof Error ? error.message : error
-    );
+    console.warn("JWT verification failed:", error instanceof Error ? error.message : error);
     return null;
   }
 }
 
-export async function getUserIdFromToken(
-  token: string
-): Promise<string | null> {
+export async function getUserIdFromToken(token: string): Promise<string | null> {
   try {
     if (!token) return null;
 
@@ -66,10 +61,7 @@ export async function getUserIdFromToken(
     console.log("✅ JWT verified for user:", payload.sub);
     return payload.sub; // Clerk user ID
   } catch (error) {
-    console.warn(
-      "JWT verification failed:",
-      error instanceof Error ? error.message : error
-    );
+    console.warn("JWT verification failed:", error instanceof Error ? error.message : error);
     return null;
   }
 }

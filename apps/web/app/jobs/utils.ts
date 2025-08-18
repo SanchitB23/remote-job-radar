@@ -1,4 +1,4 @@
-import { FetchJobsParams } from "@/types/gql";
+import type { FetchJobsParams } from "@/types/gql";
 
 /**
  * Parses a URLSearchParams object and extracts job-related query parameters,
@@ -10,20 +10,12 @@ import { FetchJobsParams } from "@/types/gql";
  * @param searchParams - The URLSearchParams instance containing query parameters.
  * @returns A FetchJobsParams object with the extracted and parsed parameters.
  */
-export function parseUrlJobParams(
-  searchParams: URLSearchParams
-): FetchJobsParams {
+export function parseUrlJobParams(searchParams: URLSearchParams): FetchJobsParams {
   return {
-    minFit: searchParams.get("minFit")
-      ? Number(searchParams.get("minFit"))
-      : undefined,
-    first: searchParams.get("first")
-      ? Number(searchParams.get("first"))
-      : undefined,
+    minFit: searchParams.get("minFit") ? Number(searchParams.get("minFit")) : undefined,
+    first: searchParams.get("first") ? Number(searchParams.get("first")) : undefined,
     search: searchParams.get("search") || undefined,
-    minSalary: searchParams.get("minSalary")
-      ? Number(searchParams.get("minSalary"))
-      : undefined,
+    minSalary: searchParams.get("minSalary") ? Number(searchParams.get("minSalary")) : undefined,
     workType: (() => {
       const all = searchParams.getAll("workType");
       if (all.length > 0) return all.join(","); // Join multiple work types with comma

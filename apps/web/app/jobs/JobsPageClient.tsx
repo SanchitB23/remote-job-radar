@@ -1,23 +1,25 @@
 "use client";
 
-import { Job } from "@/types/gql";
+import type { InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import type { JSX } from "react";
 import { useCallback, useEffect } from "react";
+
+import type { Job, JobsConnection } from "@/types/gql";
+
+import { useInfiniteJobs } from "../../lib/hooks";
 import { AddToPipelineButton } from "./AddToPipelineBtn";
 import { BookmarkButton } from "./BookmarkBtn";
-import { useInfiniteJobs } from "../../lib/hooks";
-import JobCardSkeleton from "./JobCardSkeleton";
+import { JobCardSkeleton } from "./JobCardSkeleton";
 import { parseUrlJobParams } from "./utils";
 
-function JobsError({ error }: { error: unknown }) {
+function JobsError({ error }: { error: unknown }): JSX.Element {
   return (
     <div className="text-center py-12">
       <div className="rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto flex items-center justify-center text-3xl text-red-600">
         !
       </div>
-      <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">
-        Failed to load jobs.
-      </p>
+      <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">Failed to load jobs.</p>
       <p className="mt-2 text-gray-500 text-sm">
         {error instanceof Error ? error.message : "An unknown error occurred."}
       </p>
@@ -25,26 +27,19 @@ function JobsError({ error }: { error: unknown }) {
   );
 }
 
-export function JobsPageClient() {
+export function JobsPageClient(): JSX.Element {
   const searchParams = useSearchParams();
   const params = parseUrlJobParams(searchParams);
 
-  // Remove 'after' param before passing to useInfiniteJobs
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { after, ...infiniteParams } = params;
+  // Remove 'after' param before passing to useInfiniteJobs - using underscore prefix to indicate intentionally unused
+  const { after: _after, ...infiniteParams } = params;
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteJobs(infiniteParams);
+  const { data, isLoading, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteJobs(infiniteParams);
 
   // Flatten all jobs from all pages
-  const jobs: Job[] = data?.pages.flatMap((page) => page.edges) || [];
+  const jobs: Job[] =
+    (data as InfiniteData<JobsConnection> | undefined)?.pages.flatMap((page) => page.edges) || [];
 
   // Smart loading state: show skeletons for filter changes, not pagination
   const isFilterLoading = isFetching && !isFetchingNextPage && !isLoading;
@@ -59,7 +54,7 @@ export function JobsPageClient() {
   // Infinite scroll effect with throttling to improve performance
   useEffect(() => {
     let throttleTimeout: NodeJS.Timeout | null = null;
-    const throttledHandleScroll = () => {
+    const throttledHandleScroll = (): void => {
       if (throttleTimeout) return;
       throttleTimeout = setTimeout(() => {
         throttleTimeout = null;
@@ -139,21 +134,12 @@ export function JobsPageClient() {
                       : "text-green-600 dark:text-green-400")
                   }
                 >
-                  Fit Score:{" "}
-                  {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
+                  Fit Score: {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
                 </p>
               </div>
-              <span
-                className="ml-2 z-20 pointer-events-auto flex gap-2"
-                data-bookmark-btn
-              >
-                <span
-                  title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}
-                >
-                  <BookmarkButton
-                    id={j.id}
-                    bookmarked={j.bookmarked ?? false}
-                  />
+              <span className="ml-2 z-20 pointer-events-auto flex gap-2" data-bookmark-btn>
+                <span title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}>
+                  <BookmarkButton id={j.id} bookmarked={j.bookmarked ?? false} />
                 </span>
                 <span title="Add to Pipeline (Wishlist)">
                   <AddToPipelineButton jobId={j.id} inPipeline={j.isTracked} />
@@ -200,9 +186,7 @@ export function JobsPageClient() {
           <div className="rounded-full h-12 w-12 border-b-2 border-gray-300 mx-auto flex items-center justify-center text-3xl text-gray-400">
             📋
           </div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400 font-semibold">
-            No jobs found
-          </p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400 font-semibold">No jobs found</p>
           <p className="mt-2 text-gray-500 text-sm">
             Try adjusting your filters to see more results.
           </p>

@@ -1,15 +1,16 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { PubSub } from "graphql-subscriptions";
 import pg from "pg";
-import { getQueryResolvers } from "./queries.js";
-import { getMutationResolvers } from "./mutations.js";
-import { getSubscriptionResolvers } from "./subscriptions.js";
+
 import { getJobFieldResolvers } from "./job.js";
+import { getMutationResolvers } from "./mutations.js";
+import { getQueryResolvers } from "./queries.js";
+import { getSubscriptionResolvers } from "./subscriptions.js";
 
 const pubsub = new PubSub();
 const NEW_JOB = "NEW_JOB";
 
-export function getResolvers(prisma: PrismaClient) {
+export function getResolvers(prisma: PrismaClient): any {
   // --- hook Postgres NOTIFY to PubSub ---
   const listener = new pg.Client({
     connectionString: process.env.DATABASE_URL,

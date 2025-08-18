@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
 import { toggleBookmarkShared } from "@/services/gql-api";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Get authentication token
     const { getToken } = await auth();
@@ -12,10 +14,7 @@ export async function POST(request: NextRequest) {
     const { jobId } = await request.json();
 
     if (!jobId) {
-      return NextResponse.json(
-        { error: "Job ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
     // Call the GraphQL backend
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to toggle bookmark",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

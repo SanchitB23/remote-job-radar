@@ -1,19 +1,15 @@
 // Shared GraphQL utilities and types
+import { GraphQLClient } from "graphql-request";
+
 import { GRAPHQL_HTTP_ENDPOINT } from "@/constants";
 import {
-  JOBS_QUERY,
   BOOKMARK_MUTATION,
+  FILTER_METADATA_QUERY,
+  JOBS_QUERY,
   PIPELINE_QUERY,
   PIPELINE_UPSERT_MUTATION,
-  FILTER_METADATA_QUERY,
 } from "@/constants/gqlQueries";
-import {
-  FetchJobsParams,
-  JobsConnection,
-  PipelineItem,
-  FilterMetadata,
-} from "@/types/gql";
-import { GraphQLClient } from "graphql-request";
+import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } from "@/types/gql";
 
 // Utility function to create a GraphQL client with consistent configuration
 export function createGraphQLClient(token?: string | null): GraphQLClient {
@@ -26,7 +22,7 @@ export function createGraphQLClient(token?: string | null): GraphQLClient {
 export async function executeGraphQLQuery<T = unknown>(
   query: string,
   variables: Record<string, unknown> = {},
-  token?: string | null
+  token?: string | null,
 ): Promise<T> {
   const client = createGraphQLClient(token);
 
@@ -34,12 +30,9 @@ export async function executeGraphQLQuery<T = unknown>(
     return await client.request<T>(query, variables);
   } catch (error) {
     // Enhanced error handling with GraphQLClient
-    const operationTypeMatch = query
-      .trim()
-      .match(/^(mutation|query|subscription)\b/i);
-    const operationType = operationTypeMatch
-      ? operationTypeMatch[1][0].toUpperCase() +
-        operationTypeMatch[1].slice(1).toLowerCase()
+    const operationTypeMatch = query.trim().match(/^(mutation|query|subscription)\b/i);
+    const operationType = operationTypeMatch?.[1]
+      ? operationTypeMatch[1][0]?.toUpperCase() + operationTypeMatch[1].slice(1).toLowerCase()
       : "Query";
     console.error(`GraphQL ${operationType} failed:`, {
       query,
@@ -53,17 +46,17 @@ export async function executeGraphQLQuery<T = unknown>(
 // Shared jobs fetching logic
 export async function fetchJobsShared(
   params: FetchJobsParams,
-  token?: string | null
+  token?: string | null,
 ): Promise<JobsConnection> {
   // Filter out undefined values to keep the query clean
   const cleanParams = Object.fromEntries(
-    Object.entries(params).filter(([, value]) => value !== undefined)
+    Object.entries(params).filter(([, value]) => value !== undefined),
   );
 
   const response = await executeGraphQLQuery<{ jobs: JobsConnection }>(
     JOBS_QUERY,
     cleanParams,
-    token
+    token,
   );
   return response.jobs;
 }
@@ -71,23 +64,17 @@ export async function fetchJobsShared(
 // Shared bookmark toggle logic
 export async function toggleBookmarkShared(
   jobId: string,
-  token?: string | null
+  token?: string | null,
 ): Promise<{ bookmark: boolean }> {
-  return executeGraphQLQuery<{ bookmark: boolean }>(
-    BOOKMARK_MUTATION,
-    { id: jobId },
-    token
-  );
+  return executeGraphQLQuery<{ bookmark: boolean }>(BOOKMARK_MUTATION, { id: jobId }, token);
 }
 
 // Shared pipeline fetching logic
-export async function fetchPipelineShared(
-  token?: string | null
-): Promise<PipelineItem[]> {
+export async function fetchPipelineShared(token?: string | null): Promise<PipelineItem[]> {
   const response = await executeGraphQLQuery<{ pipeline: PipelineItem[] }>(
     PIPELINE_QUERY,
     {},
-    token
+    token,
   );
   return response.pipeline;
 }
@@ -97,19 +84,17 @@ export async function upsertPipelineItemShared(
   jobId: string,
   column: string,
   position: number,
-  token?: string | null
+  token?: string | null,
 ): Promise<{ pipelineUpsert: boolean }> {
   return executeGraphQLQuery<{ pipelineUpsert: boolean }>(
     PIPELINE_UPSERT_MUTATION,
     { jobId, column, position },
-    token
+    token,
   );
 }
 
 // Shared filter metadata fetching logic
-export async function fetchFilterMetadataShared(
-  token?: string | null
-): Promise<FilterMetadata> {
+export async function fetchFilterMetadataShared(token?: string | null): Promise<FilterMetadata> {
   const response = await executeGraphQLQuery<{
     filterMetadata: FilterMetadata;
   }>(FILTER_METADATA_QUERY, {}, token);

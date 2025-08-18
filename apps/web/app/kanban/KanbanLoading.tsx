@@ -1,8 +1,8 @@
-import React from "react";
+import type { JSX } from "react";
 
 import { KANBAN_COLUMNS } from "./constants";
 
-export default function KanbanLoading() {
+export function KanbanLoading(): JSX.Element {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-4">
       {KANBAN_COLUMNS.map((column) => (
