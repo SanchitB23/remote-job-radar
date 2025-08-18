@@ -2,10 +2,12 @@
 import type { DragEndEvent } from "@dnd-kit/core";
 import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
 import type { PipelineItem } from "@/types/gql";
 
@@ -68,15 +70,19 @@ export default function Kanban(): JSX.Element {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto flex items-center justify-center text-3xl text-red-600">
-          !
-        </div>
-        <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">
-          Failed to load pipeline.
-        </p>
-        <p className="mt-2 text-gray-500 text-sm">
-          {error instanceof Error ? error.message : "An unknown error occurred"}
-        </p>
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6">
+            <div className="flex justify-center mb-4">
+              <ExclamationTriangleIcon className="h-12 w-12 text-red-600" />
+            </div>
+            <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">
+              Failed to load pipeline.
+            </p>
+            <p className="mt-2 text-muted-foreground text-sm">
+              {error instanceof Error ? error.message : "An unknown error occurred"}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -121,32 +127,29 @@ export default function Kanban(): JSX.Element {
     >
       <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-4">
         {KANBAN_COLUMNS.map((column) => (
-          <div
-            key={column}
-            className="border border-zinc-200 dark:border-zinc-700 rounded-lg p-4 h-[80vh] bg-gray-50 dark:bg-zinc-800/50 flex flex-col"
-          >
-            <h2 className="font-semibold capitalize mb-4 text-zinc-900 dark:text-zinc-100 text-lg">
-              {column}
-            </h2>
-            <KanbanColumnDroppable id={column}>
-              <SortableContext
-                id={column}
-                items={items[column]?.map((item) => item.job?.id).filter(Boolean) ?? []}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-3 min-h-[40px] flex-1 overflow-y-auto pr-1">
-                  {items[column]?.map((item: PipelineItem) => (
-                    <KanbanCard key={item.id} item={item} />
-                  )) ?? null}
-                  {(items[column]?.length ?? 0) === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
-                      No jobs in {column}
-                    </div>
-                  )}
-                </div>
-              </SortableContext>
-            </KanbanColumnDroppable>
-          </div>
+          <Card key={column} className="h-[80vh] bg-muted/50 flex flex-col">
+            <CardContent className="p-4 flex flex-col h-full">
+              <h2 className="font-semibold capitalize mb-4 text-lg">{column}</h2>
+              <KanbanColumnDroppable id={column}>
+                <SortableContext
+                  id={column}
+                  items={items[column]?.map((item) => item.job.id) ?? []}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-3 min-h-[40px] flex-1 overflow-y-auto pr-1">
+                    {items[column]?.map((item: PipelineItem) => (
+                      <KanbanCard key={item.id} item={item} />
+                    ))}
+                    {(items[column]?.length ?? 0) === 0 && (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        No jobs in {column}
+                      </div>
+                    )}
+                  </div>
+                </SortableContext>
+              </KanbanColumnDroppable>
+            </CardContent>
+          </Card>
         ))}
       </div>
       <DragOverlay

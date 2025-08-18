@@ -2,6 +2,9 @@ import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from "next/link";
 import type { JSX } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
 export default function Home(): JSX.Element {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center">
@@ -16,11 +19,11 @@ export default function Home(): JSX.Element {
         <SignedOut>
           <div className="space-y-4">
             <SignInButton mode="modal">
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
+              <Button size="lg" className="text-lg">
                 Get Started
-              </button>
+              </Button>
             </SignInButton>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Sign in to access personalized job recommendations
             </p>
           </div>
@@ -28,38 +31,43 @@ export default function Home(): JSX.Element {
 
         <SignedIn>
           <div className="space-y-4">
-            <Link
-              href="/jobs"
-              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              View Your Job Recommendations
-            </Link>
-            <p className="text-sm text-gray-500">Ready to find your next remote opportunity?</p>
+            <Button asChild size="lg" className="text-lg">
+              <Link href="/jobs">View Your Job Recommendations</Link>
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Ready to find your next remote opportunity?
+            </p>
           </div>
         </SignedIn>
 
         <div className="mt-16 grid md:grid-cols-3 gap-8 text-left">
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">AI-Powered Matching</h3>
-            <p className="text-gray-600">
-              Our intelligent algorithm analyzes job requirements against your skills to find the
-              best matches.
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Remote-First</h3>
-            <p className="text-gray-600">
-              Focus exclusively on remote and distributed work opportunities from companies
-              worldwide.
-            </p>
-          </div>
-          <div className="p-6 border rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">Real-Time Updates</h3>
-            <p className="text-gray-600">
-              Get fresh job postings and opportunities as they become available across multiple
-              platforms.
-            </p>
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-2">AI-Powered Matching</h3>
+              <p className="text-muted-foreground">
+                Our intelligent algorithm analyzes job requirements against your skills to find the
+                best matches.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Remote-First</h3>
+              <p className="text-muted-foreground">
+                Focus exclusively on remote and distributed work opportunities from companies
+                worldwide.
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Real-Time Updates</h3>
+              <p className="text-muted-foreground">
+                Get fresh job postings and opportunities as they become available across multiple
+                platforms.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
