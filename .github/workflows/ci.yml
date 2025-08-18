@@ -15,22 +15,28 @@ jobs:
       matrix:
         workspace: [apps/web, apps/api]
     steps:
+      - name: Verify Node version
+        run: |
+          echo "Expected Node: 20.x"
+          node -v
+          if [ "$(node -v | cut -d. -f1)" != "v20" ]; then
+            echo "❌ Wrong Node version"; exit 1
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Clean npm cache
-        run: npm cache clean --force
-      - run: npm ci
+          cache: "npm"
+      - run: npm ci --workspace=${{ matrix.workspace }} --foreground-scripts
+      - name: Rebuild lightningcss for web
+        if: matrix.workspace == 'apps/web'
+        run: npm rebuild lightningcss --update-binary --workspace=apps/web
       - name: Set DATABASE_URL for API type generation
         if: matrix.workspace == 'apps/api'
         run: echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/dummy" >> $GITHUB_ENV
       - run: npm run typecheck --workspace ${{ matrix.workspace }}
       - run: npm run lint --workspace ${{ matrix.workspace }}
       - run: npm run format:check --workspace ${{ matrix.workspace }}
-      - name: Rebuild lightningcss for web
-        if: matrix.workspace == 'apps/web'
-        run: npm rebuild lightningcss --workspace=apps/web
       - run: npm run build --workspace ${{ matrix.workspace }}
 
   go:
