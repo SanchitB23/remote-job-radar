@@ -28,9 +28,9 @@ jobs:
       - run: npm run typecheck --workspace ${{ matrix.workspace }}
       - run: npm run lint --workspace ${{ matrix.workspace }}
       - run: npm run format:check --workspace ${{ matrix.workspace }}
-      - name: Rebuild native modules for web
+      - name: Rebuild lightningcss for web
         if: matrix.workspace == 'apps/web'
-        run: npm rebuild --workspace=apps/web
+        run: npm rebuild lightningcss --workspace=apps/web
       - run: npm run build --workspace ${{ matrix.workspace }}
 
   go:
