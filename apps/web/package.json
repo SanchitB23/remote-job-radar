@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "postinstall": "npm rebuild lightningcss || true"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.41.1",
