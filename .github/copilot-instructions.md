@@ -306,6 +306,7 @@ chore(deps): update Next.js to v15.4.5
 - **Error Handling**: Always include error boundaries and fallback states
 - **Performance**: Use React.memo, useMemo, and useCallback appropriately
 - **Accessibility**: Ensure components are accessible with proper ARIA labels
+- **Linting**: Always generate code that avoids lint issues and follows all linting rules (including import order, unused variables, and type annotations). Code should be ready to pass lint checks without manual fixes.
 
 **Development Practices:**
 
