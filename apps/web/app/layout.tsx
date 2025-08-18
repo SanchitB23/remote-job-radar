@@ -1,4 +1,5 @@
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import {
   ClerkProvider,
@@ -10,6 +11,7 @@ import {
 } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Analytics } from "@vercel/analytics/next";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -48,58 +50,66 @@ export default function RootLayout({
         baseTheme: dark,
       }}
     >
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <ReactQueryProvider>
-            <header className="border-b p-4">
-              <div className="max-w-7xl mx-auto flex justify-between items-center">
-                <div className="flex items-center gap-6">
-                  <Link
-                    href="/"
-                    className="text-xl font-bold hover:text-blue-600 transition-colors"
-                  >
-                    Remote Job Radar
-                  </Link>
-                  <SignedIn>
-                    <nav className="flex gap-4">
-                      <Link
-                        href="/jobs"
-                        className="text-gray-600 hover:text-blue-600 transition-colors"
-                      >
-                        Jobs
-                      </Link>
-                      <Link
-                        href="/kanban"
-                        className="text-gray-600 hover:text-blue-600 transition-colors"
-                      >
-                        Kanban
-                      </Link>
-                      <Link
-                        href="/status"
-                        className="text-gray-600 hover:text-blue-600 transition-colors"
-                      >
-                        Server Status
-                      </Link>
-                    </nav>
-                  </SignedIn>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ReactQueryProvider>
+              <header className="border-b p-4">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                  <div className="flex items-center gap-6">
+                    <Link
+                      href="/"
+                      className="text-xl font-bold hover:text-blue-600 transition-colors"
+                    >
+                      Remote Job Radar
+                    </Link>
+                    <SignedIn>
+                      <nav className="flex gap-4">
+                        <Link
+                          href="/jobs"
+                          className="text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                          Jobs
+                        </Link>
+                        <Link
+                          href="/kanban"
+                          className="text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                          Kanban
+                        </Link>
+                        <Link
+                          href="/status"
+                          className="text-gray-600 hover:text-blue-600 transition-colors"
+                        >
+                          Server Status
+                        </Link>
+                      </nav>
+                    </SignedIn>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <ThemeToggle />
+                    <SignedOut>
+                      <SignInButton />
+                      <SignUpButton />
+                    </SignedOut>
+                    <SignedIn>
+                      <UserButton />
+                    </SignedIn>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <SignedOut>
-                    <SignInButton />
-                    <SignUpButton />
-                  </SignedOut>
-                  <SignedIn>
-                    <UserButton />
-                  </SignedIn>
-                </div>
-              </div>
-            </header>
-            <main className="max-w-7xl mx-auto p-4">{children}</main>
-            <JobAlerts />
-            <Toaster position="top-right" />
-          </ReactQueryProvider>
-          <Analytics />
-          <SpeedInsights />
+              </header>
+              <main className="max-w-7xl mx-auto p-4">{children}</main>
+              <JobAlerts />
+              <Toaster position="top-right" />
+            </ReactQueryProvider>
+            <Analytics />
+            <SpeedInsights />
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useBookmarkMutation } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
+import { StarIcon } from "@heroicons/react/24/outline";
+import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 type Props = { id: string; bookmarked: boolean };
 
@@ -38,17 +41,21 @@ export function BookmarkButton({ id, bookmarked }: Props): JSX.Element {
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       aria-pressed={optimisticBookmarked}
       aria-label={optimisticBookmarked ? "Remove bookmark" : "Add bookmark"}
       title={optimisticBookmarked ? "Remove bookmark" : "Add bookmark"}
       disabled={bookmarkMutation.isPending}
-      className={`ml-2 text-lg cursor-pointer ${
-        optimisticBookmarked ? "text-yellow-500" : "text-gray-400"
-      } ${bookmarkMutation.isPending ? "opacity-60" : ""}`}
       onClick={handleToggle}
+      className="ml-2 p-2 h-auto cursor-pointer"
     >
-      {optimisticBookmarked ? "★" : "☆"}
-    </button>
+      {optimisticBookmarked ? (
+        <StarIconSolid className="h-4 w-4 text-yellow-500" />
+      ) : (
+        <StarIcon className="h-4 w-4 text-gray-400 hover:text-yellow-500" />
+      )}
+    </Button>
   );
 }

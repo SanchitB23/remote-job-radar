@@ -2,6 +2,10 @@
 
 import type { JSX } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+
 export default function Error({
   error,
   reset,
@@ -11,16 +15,23 @@ export default function Error({
 }): JSX.Element {
   return (
     <div className="text-center py-12">
-      <h1 className="text-2xl font-bold mb-4 text-red-600">Something went wrong</h1>
-      <p className="mb-4 text-gray-700">
-        {error.message || "An unexpected error occurred while loading jobs or updating bookmarks."}
-      </p>
-      <button
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        onClick={() => reset()}
-      >
-        Try Again
-      </button>
+      <Card className="max-w-md mx-auto">
+        <CardContent className="p-6">
+          <div className="flex justify-center mb-4">
+            <ExclamationTriangleIcon className="h-12 w-12 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold mb-4 text-red-600">
+            Something went wrong
+          </h1>
+          <p className="mb-6 text-muted-foreground">
+            {error.message ||
+              "An unexpected error occurred while loading jobs or updating bookmarks."}
+          </p>
+          <Button onClick={() => reset()} className="w-full">
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

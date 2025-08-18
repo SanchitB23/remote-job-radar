@@ -1,6 +1,7 @@
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
 import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Card, CardContent } from "@/components/ui/card";
 import type { JSX } from "react";
 import React from "react";
 
@@ -29,24 +30,28 @@ export function KanbanCard({
   if (isOverlay) {
     // Render a static card for DragOverlay (no drag handles, no listeners)
     return (
-      <div
-        className="border border-blue-400 dark:border-blue-500 rounded-lg p-3 bg-white dark:bg-zinc-900 shadow-lg"
+      <Card
+        className="border-blue-400 dark:border-blue-500 shadow-lg"
         style={{ opacity: 0.95, zIndex: 100, pointerEvents: "none" }}
       >
-        <h3 className="font-medium text-zinc-900 dark:text-zinc-100 text-sm line-clamp-2">
-          <a
-            href={item.job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-            tabIndex={-1}
-            onClick={(e) => e.preventDefault()}
-          >
-            {item.job.title}
-          </a>
-        </h3>
-        <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">{item.job.company}</p>
-      </div>
+        <CardContent className="p-3">
+          <h3 className="font-medium text-sm line-clamp-2">
+            <a
+              href={item.job.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+              tabIndex={-1}
+              onClick={(e) => e.preventDefault()}
+            >
+              {item.job.title}
+            </a>
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            {item.job.company}
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -58,25 +63,27 @@ export function KanbanCard({
   };
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
+      className="shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
     >
-      <h3 className="font-medium text-zinc-900 dark:text-zinc-100 text-sm line-clamp-2">
-        <a
-          href={item.job.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:underline"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {item.job.title}
-        </a>
-      </h3>
-      <p className="text-xs text-gray-600 dark:text-zinc-400 mt-1">{item.job.company}</p>
-    </div>
+      <CardContent className="p-3">
+        <h3 className="font-medium text-sm line-clamp-2">
+          <a
+            href={item.job.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {item.job.title}
+          </a>
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">{item.job.company}</p>
+      </CardContent>
+    </Card>
   );
 }

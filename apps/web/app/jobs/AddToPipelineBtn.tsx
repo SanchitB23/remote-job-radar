@@ -5,6 +5,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { usePipelineUpsertMutation } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
+import { PlusIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 export function AddToPipelineButton({
   jobId,
@@ -42,7 +44,9 @@ export function AddToPipelineButton({
   };
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
       disabled={mutation.isPending || clicked || optimisticInPipeline}
       aria-label={optimisticInPipeline ? "In Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
       title={optimisticInPipeline ? "Already in Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
@@ -54,25 +58,12 @@ export function AddToPipelineButton({
         }
         ${mutation.isPending || clicked ? "opacity-60" : ""} focus:outline-none`}
       onClick={handleClick}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 0,
-        verticalAlign: "middle",
-      }}
     >
-      <span
-        role="img"
-        aria-label={optimisticInPipeline ? "In Pipeline" : "Add to Pipeline"}
-        style={{
-          verticalAlign: "middle",
-          display: "inline-block",
-          lineHeight: 1,
-        }}
-        className="text-blue-500 dark:text-blue-400"
-      >
-        {optimisticInPipeline ? "✔️" : "➕"}
-      </span>
-    </button>
+      {optimisticInPipeline ? (
+        <CheckIcon className="h-4 w-4 text-blue-500" />
+      ) : (
+        <PlusIcon className="h-4 w-4 text-gray-400 hover:text-blue-500" />
+      )}
+    </Button>
   );
 }
