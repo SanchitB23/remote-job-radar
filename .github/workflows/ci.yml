@@ -9,6 +9,8 @@ jobs:
   js-ts:
     name: Web/API (Node)
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
     strategy:
       matrix:
         workspace: [apps/web, apps/api]

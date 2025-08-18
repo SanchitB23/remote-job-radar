@@ -37,7 +37,8 @@ class Req(BaseModel):
 
 @app.get("/health")
 async def health(request: Request):
-    logging.info(f"Health check from {request.client.host}")
+    client_host = request.client.host if request.client else "unknown"
+    logging.info(f"Health check from {client_host}")
     return {"ok": True, "model": MODEL_NAME}
 
 
@@ -53,13 +54,14 @@ async def embed(r: Req, request: Request):
     # Extract first 100 chars for identification
     text_preview = r.text[:100].replace("\n", " ").replace("\r", "")
 
+    client_host = request.client.host if request.client else "unknown"
     logging.info(
-        f"[EMBED_START] from {request.client.host} | text_length: {len(r.text)} | "
+        f"[EMBED_START] from {client_host} | text_length: {len(r.text)} | "
         f"sha256: {text_hash} | preview: '{text_preview}...'"
     )
     try:
         # FastEmbed returns a generator; get the first vector
-        vec = next(model.embed([r.text]))
+        vec = next(iter(model.embed([r.text])))
         # Ensure plain Python list of floats
         logging.info(
             f"[EMBED_SUCCESS] text_length: {len(r.text)} | vector_dim: {len(vec)} | "
