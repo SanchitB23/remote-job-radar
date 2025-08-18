@@ -1,16 +1,18 @@
 import { GraphQLError } from "graphql";
-import { Prisma } from "@prisma/client";
 
-const orderMap: Record<string, { [key: string]: "asc" | "desc" }> = {
-  fit: { fit_score: "desc" },
-  date: { published_at: "desc" },
-  salary: { salary_min: "desc" },
-};
+import type {
+  AuthenticatedGraphQLContext,
+  JobParent,
+  JobsQueryArgs,
+  LocationGroupResult,
+  SourceResult,
+  WorkTypeGroupResult,
+} from "../types/resolvers.js";
 
 /**
  * Returns an object containing GraphQL query resolvers for jobs and pipeline items.
  *
- * @param prisma - The Prisma client instance used for database operations.
+ * @param _prisma - The Prisma client instance used for database operations.
  * @returns An object with resolvers for the `jobs`, `pipeline`, and `filterMetadata` queries.
  *
  * @remarks
@@ -22,9 +24,9 @@ const orderMap: Record<string, { [key: string]: "asc" | "desc" }> = {
  * const resolvers = getQueryResolvers(prisma);
  * // Use resolvers.jobs, resolvers.pipeline, and resolvers.filterMetadata in your GraphQL schema
  */
-export function getQueryResolvers(prisma: any) {
+export function getQueryResolvers(_prisma: unknown): any {
   return {
-    jobs: async (_: any, args: any, ctx: any) => {
+    jobs: async (_: unknown, args: JobsQueryArgs, ctx: AuthenticatedGraphQLContext) => {
       if (!ctx.userId) {
         throw new GraphQLError("UNAUTHENTICATED", {
           extensions: { code: "UNAUTHENTICATED" },
@@ -51,11 +53,10 @@ export function getQueryResolvers(prisma: any) {
 
         // Normalize sources to lowercase for DB filtering
         const normalizedSources =
-          sources && sources.length
-            ? sources.map((s: string) => s.toLowerCase())
-            : undefined;
+          sources && sources.length ? sources.map((s: string) => s.toLowerCase()) : undefined;
 
-        let whereClause: Prisma.jobWhereInput = {
+        // Use a more specific but flexible type for the where clause
+        const whereClause: Record<string, unknown> = {
           ...cursorFilter,
         };
         if (minFit !== undefined && minFit !== null) {
@@ -79,7 +80,7 @@ export function getQueryResolvers(prisma: any) {
           whereClause.OR = [
             { title: { contains: search, mode: "insensitive" } },
             { description: { contains: search, mode: "insensitive" } },
-          ] as Prisma.jobWhereInput[];
+          ];
         }
 
         if (bookmarked) {
@@ -110,14 +111,13 @@ export function getQueryResolvers(prisma: any) {
           take: first + 1, // fetch one extra to check hasNextPage
         });
         const edges = result.slice(0, first);
-        const endCursor = edges.length
-          ? Buffer.from(edges[edges.length - 1].id).toString("base64")
-          : null;
+        const endCursor =
+          edges.length > 0 ? Buffer.from(edges[edges.length - 1]!.id).toString("base64") : null;
         const hasNextPage = result.length > first;
 
         // Convert snake_case to camelCase for each job
         return {
-          edges: edges.map((job: any) => ({
+          edges: edges.map((job: JobParent) => ({
             id: job.id,
             source: (job.source ?? "").toUpperCase(),
             title: job.title,
@@ -140,7 +140,7 @@ export function getQueryResolvers(prisma: any) {
         throw new GraphQLError("Failed to fetch jobs");
       }
     },
-    pipeline: async (_: any, __: any, ctx: any) => {
+    pipeline: async (_: unknown, __: unknown, ctx: AuthenticatedGraphQLContext) => {
       if (!ctx.userId) {
         throw new GraphQLError("UNAUTHENTICATED", {
           extensions: { code: "UNAUTHENTICATED" },
@@ -157,7 +157,7 @@ export function getQueryResolvers(prisma: any) {
         throw new GraphQLError("Failed to fetch pipeline items");
       }
     },
-    filterMetadata: async (_: any, __: any, ctx: any) => {
+    filterMetadata: async (_: unknown, __: unknown, ctx: AuthenticatedGraphQLContext) => {
       if (!ctx.userId) {
         throw new GraphQLError("UNAUTHENTICATED", {
           extensions: { code: "UNAUTHENTICATED" },
@@ -187,7 +187,7 @@ export function getQueryResolvers(prisma: any) {
         });
 
         const sources = sourceResults
-          .map((s: any) => s.source)
+          .map((s: SourceResult) => s.source)
           .filter((source: string) => source && source.trim() !== "");
 
         // Get top 50 most common locations
@@ -225,14 +225,11 @@ export function getQueryResolvers(prisma: any) {
           },
           salary: {
             min: salaryStats._min.salary_min ?? 0,
-            max: Math.max(
-              salaryStats._max.salary_min ?? 0,
-              salaryStats._max.salary_max ?? 0
-            ),
+            max: salaryStats._max.salary_max ?? 0,
           },
           sources: sources.map((s: string) => s.toUpperCase()).filter(Boolean),
-          locations: locations.map((l: any) => l.location).filter(Boolean),
-          workTypes: workTypes.map((w: any) => w.work_type).filter(Boolean),
+          locations: locations.map((l: LocationGroupResult) => l.location).filter(Boolean),
+          workTypes: workTypes.map((w: WorkTypeGroupResult) => w.work_type).filter(Boolean),
         };
       } catch (error) {
         console.error("Error in filterMetadata query:", error);

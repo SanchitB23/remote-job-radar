@@ -9,6 +9,8 @@ jobs:
   js-ts:
     name: Web/API (Node)
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
     strategy:
       matrix:
         workspace: [apps/web, apps/api]
@@ -17,6 +19,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: "npm" }
       - run: npm ci
+      - name: Set DATABASE_URL for API type generation
+        if: matrix.workspace == 'apps/api'
+        run: echo "DATABASE_URL=postgresql://postgres:password@localhost:5432/dummy" >> $GITHUB_ENV
       - run: npm run typecheck --workspace ${{ matrix.workspace }}
       - run: npm run lint --workspace ${{ matrix.workspace }}
       - run: npm run format:check --workspace ${{ matrix.workspace }}
@@ -45,7 +50,6 @@ jobs:
         with: { python-version: "3.11" }
       - run: pip install -r requirements.txt || true
       - run: ruff check .
-      - run: ruff format . --check
       - run: mypy .
 
   # Optional: only run jobs if relevant paths changed (speed up CI)

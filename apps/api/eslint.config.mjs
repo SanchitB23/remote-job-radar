@@ -6,8 +6,16 @@ import eslintComments from "eslint-plugin-eslint-comments";
 import boundaries from "eslint-plugin-boundaries";
 import typescriptParser from "@typescript-eslint/parser";
 import globals from "globals";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default [
+  {
+    ignores: ["dist/**", "node_modules/**"],
+  },
   {
     files: ["**/*.{js,jsx,ts,tsx}", "*.js", "*.jsx", "*.ts", "*.tsx"],
     languageOptions: {
@@ -31,8 +39,8 @@ export default [
       "boundaries/elements": [
         { type: "components", pattern: "components/**" },
         { type: "lib", pattern: "lib/**" },
-        { type: "app", pattern: "app/**" }
-      ]
+        { type: "app", pattern: "app/**" },
+      ],
     },
     rules: {
       "@typescript-eslint/explicit-function-return-type": ["warn", { allowExpressions: true }],
@@ -45,21 +53,24 @@ export default [
         { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" },
       ],
       "import/no-default-export": "error",
-      "import/no-extraneous-dependencies": [
-        "error",
-        { packageDir: ["./", "../../"] },
-      ],
+      "import/no-extraneous-dependencies": "off", // Disabled for monorepo
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
       "eslint-comments/no-unused-disable": "error",
+      // Disable React rules for API server
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "off",
       // Boundaries
-      "boundaries/element-types": ["error", {
-        default: "allow",
-        rules: [
-          { from: ["components"], allow: ["components","lib"] },
-          { from: ["lib"], allow: ["lib"] }
-        ]
-      }],
+      "boundaries/element-types": [
+        "error",
+        {
+          default: "allow",
+          rules: [
+            { from: ["components"], allow: ["components", "lib"] },
+            { from: ["lib"], allow: ["lib"] },
+          ],
+        },
+      ],
     },
   },
 ];

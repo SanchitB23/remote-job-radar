@@ -1,26 +1,20 @@
 "use client";
-
-import {
-  DndContext,
-  closestCorners,
-  DragEndEvent,
-  DragOverlay,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { KanbanCard } from "./KanbanCard";
-import { KanbanColumnDroppable } from "./KanbanColumnDroppable";
+import type { DragEndEvent } from "@dnd-kit/core";
+import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import type { JSX } from "react";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import KanbanLoading from "./KanbanLoading";
-import { KANBAN_COLUMNS } from "./constants";
 
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
-import { PipelineItem } from "@/types/gql";
+import type { PipelineItem } from "@/types/gql";
 
-export default function Kanban() {
+import { KANBAN_COLUMNS } from "./constants";
+import { KanbanCard } from "./KanbanCard";
+import { KanbanColumnDroppable } from "./KanbanColumnDroppable";
+import { KanbanLoading } from "./KanbanLoading";
+
+export default function Kanban(): JSX.Element {
   const { data: pipelineData, isLoading, error } = usePipeline();
   const pipelineUpsertMutation = usePipelineUpsertMutation();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -44,20 +38,20 @@ export default function Kanban() {
     };
 
     for (const item of pipelineData) {
-      if (grouped[item.column]) {
-        grouped[item.column].push(item);
+      if (item?.column && item.column in grouped) {
+        grouped[item.column]?.push(item);
       }
     }
 
     // Sort items by position within each column
     for (const column of KANBAN_COLUMNS) {
-      grouped[column].sort((a, b) => a.position - b.position);
+      grouped[column]?.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
     }
 
     return grouped;
   }, [pipelineData]);
 
-  async function moveTo(jobId: string, column: string, position: number) {
+  async function moveTo(jobId: string, column: string, position: number): Promise<void> {
     try {
       await pipelineUpsertMutation.mutateAsync({ jobId, column, position });
       // React Query will automatically refetch the pipeline data
@@ -101,7 +95,7 @@ export default function Kanban() {
         let targetColumn = "";
         let newIndex = 0;
         for (const col of KANBAN_COLUMNS) {
-          const idx = items[col].findIndex((it) => it.job.id === overId);
+          const idx = items[col]?.findIndex((it) => it.job?.id === overId) ?? -1;
           if (idx !== -1) {
             targetColumn = col;
             newIndex = idx;
@@ -113,7 +107,7 @@ export default function Kanban() {
           for (const col of KANBAN_COLUMNS) {
             if (overId === col) {
               targetColumn = col;
-              newIndex = items[col].length;
+              newIndex = items[col]?.length ?? 0;
               break;
             }
           }
@@ -137,14 +131,14 @@ export default function Kanban() {
             <KanbanColumnDroppable id={column}>
               <SortableContext
                 id={column}
-                items={items[column].map((item) => item.job.id)}
+                items={items[column]?.map((item) => item.job?.id).filter(Boolean) ?? []}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-3 min-h-[40px] flex-1 overflow-y-auto pr-1">
-                  {items[column].map((item: PipelineItem) => (
+                  {items[column]?.map((item: PipelineItem) => (
                     <KanbanCard key={item.id} item={item} />
-                  ))}
-                  {items[column].length === 0 && (
+                  )) ?? null}
+                  {(items[column]?.length ?? 0) === 0 && (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
                       No jobs in {column}
                     </div>
@@ -165,7 +159,7 @@ export default function Kanban() {
           ? (() => {
               const found = Object.values(items)
                 .flat()
-                .find((i) => i.job.id === activeId);
+                .find((i) => i?.job?.id === activeId);
               return found ? <KanbanCard item={found} isOverlay /> : null;
             })()
           : null}

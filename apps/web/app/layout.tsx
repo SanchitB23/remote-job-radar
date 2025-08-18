@@ -1,20 +1,24 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
+  SignInButton,
+  SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
-import Link from "next/link";
-import "./globals.css";
-import JobAlerts from "@/components/JobAlertToast";
-import { Toaster } from "react-hot-toast";
 import { dark } from "@clerk/themes";
-import { ReactQueryProvider } from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
+import type { JSX } from "react";
+import { Toaster } from "react-hot-toast";
+
+import JobAlerts from "@/components/jobAlertToast";
+import { ReactQueryProvider } from "@/components/providers";
+import { CLERK_PUBLISHABLE_KEY } from "@/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,17 +39,16 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>): JSX.Element {
   return (
     <ClerkProvider
+      publishableKey={CLERK_PUBLISHABLE_KEY}
       appearance={{
         baseTheme: dark,
       }}
     >
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <ReactQueryProvider>
             <header className="border-b p-4">
               <div className="max-w-7xl mx-auto flex justify-between items-center">

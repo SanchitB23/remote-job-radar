@@ -1,12 +1,14 @@
-export function getJobFieldResolvers() {
+import type { AuthenticatedGraphQLContext, JobParent } from "../types/resolvers.js";
+
+export function getJobFieldResolvers(): any {
   return {
-    bookmarked: async (parent: any, _: any, ctx: any) => {
+    bookmarked: async (parent: JobParent, _: unknown, ctx: AuthenticatedGraphQLContext) => {
       const count = await ctx.prisma.bookmark.count({
         where: { user_id: ctx.userId, job_id: parent.id },
       });
       return count > 0;
     },
-    isTracked: async (parent: any, _: any, ctx: any) => {
+    isTracked: async (parent: JobParent, _: unknown, ctx: AuthenticatedGraphQLContext) => {
       if (!ctx.userId) return false;
       const x = await ctx.prisma.pipelineItem.findUnique({
         where: {

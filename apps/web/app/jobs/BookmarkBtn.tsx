@@ -1,12 +1,14 @@
 "use client";
 
+import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
 import { useBookmarkMutation } from "@/lib/hooks";
 
 type Props = { id: string; bookmarked: boolean };
 
-export function BookmarkButton({ id, bookmarked }: Props) {
+export function BookmarkButton({ id, bookmarked }: Props): JSX.Element {
   const bookmarkMutation = useBookmarkMutation();
   const [optimisticBookmarked, setOptimisticBookmarked] = useState(bookmarked);
 
@@ -15,7 +17,7 @@ export function BookmarkButton({ id, bookmarked }: Props) {
     setOptimisticBookmarked(bookmarked);
   }, [bookmarked]);
 
-  async function handleToggle() {
+  async function handleToggle(): Promise<void> {
     const newState = !optimisticBookmarked;
     setOptimisticBookmarked(newState); // Optimistic update
 
