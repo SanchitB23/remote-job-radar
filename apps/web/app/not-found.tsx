@@ -2,7 +2,7 @@
 import Link from "next/link";
 import type { JSX } from "react";
 
-export function NotFound(): JSX.Element {
+export default function NotFound(): JSX.Element {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center py-16">
       <div className="text-7xl font-bold text-blue-600 mb-4">404</div>
