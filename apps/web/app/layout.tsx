@@ -18,7 +18,6 @@ import { Toaster } from "react-hot-toast";
 
 import JobAlerts from "@/components/jobAlertToast";
 import { ReactQueryProvider } from "@/components/providers";
-import { CLERK_PUBLISHABLE_KEY } from "@/constants";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +41,6 @@ export default function RootLayout({
 }>): JSX.Element {
   return (
     <ClerkProvider
-      publishableKey={CLERK_PUBLISHABLE_KEY}
       appearance={{
         baseTheme: dark,
       }}
