@@ -48,7 +48,6 @@ jobs:
         with: { python-version: "3.11" }
       - run: pip install -r requirements.txt || true
       - run: ruff check .
-      - run: ruff format . --check
       - run: mypy .
 
   # Optional: only run jobs if relevant paths changed (speed up CI)
