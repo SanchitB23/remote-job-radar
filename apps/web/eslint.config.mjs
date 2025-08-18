@@ -18,13 +18,7 @@ const compat = new FlatCompat({
 
 const config = [
   {
-    ignores: [
-      ".next/**", 
-      "node_modules/**", 
-      "dist/**", 
-      "build/**",
-      "**/.next/**",
-    ]
+    ignores: [".next/**", "node_modules/**", "dist/**", "build/**", "**/.next/**"],
   },
   // Extend Next.js ESLint config
   ...compat.extends("next/core-web-vitals"),
@@ -45,8 +39,8 @@ const config = [
       "boundaries/elements": [
         { type: "components", pattern: "components/**" },
         { type: "lib", pattern: "lib/**" },
-        { type: "app", pattern: "app/**" }
-      ]
+        { type: "app", pattern: "app/**" },
+      ],
     },
     rules: {
       // Disable rule that expects a /pages directory (for Next.js app dir)
@@ -77,18 +71,18 @@ const config = [
   // Allow default exports in Next.js pages/routes where needed
   {
     files: [
-      "**/app/**/page.tsx", 
-      "**/app/**/layout.tsx", 
-      "**/app/**/route.ts", 
+      "**/app/**/page.tsx",
+      "**/app/**/layout.tsx",
+      "**/app/**/route.ts",
       "**/app/**/loading.tsx",
       "**/app/**/error.tsx",
       "**/pages/**/*",
       "**/middleware.ts",
       "**/next.config.ts",
-      "**/components/**/*.tsx" // Allow default exports in components
+      "**/components/**/*.tsx", // Allow default exports in components
     ],
-    rules: { 
-      "import/no-default-export": "off" 
+    rules: {
+      "import/no-default-export": "off",
     },
   },
 ];
