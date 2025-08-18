@@ -28,6 +28,8 @@ type Job {
   location: String
   "Type/category of work (e.g. Software Development, Design, etc.)"
   workType: String
+  "Full job description (may include HTML)"
+  description: String!
   "Minimum salary in USD (if available)"
   salaryMin: Int
   "Maximum salary in USD (if available)"

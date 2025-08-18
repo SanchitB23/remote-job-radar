@@ -15,6 +15,7 @@ export const JOBS_QUERY = `#graphql
         bookmarked
         source
         isTracked
+        description
       }
       endCursor
       hasNextPage
