@@ -1,10 +1,11 @@
 "use client";
 
+import type { InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect } from "react";
 
-import type { Job } from "@/types/gql";
+import type { Job, JobsConnection } from "@/types/gql";
 
 import { useInfiniteJobs } from "../../lib/hooks";
 import { AddToPipelineButton } from "./AddToPipelineBtn";
@@ -37,7 +38,8 @@ export function JobsPageClient(): JSX.Element {
     useInfiniteJobs(infiniteParams);
 
   // Flatten all jobs from all pages
-  const jobs: Job[] = data?.pages.flatMap((page) => page.edges) || [];
+  const jobs: Job[] =
+    (data as InfiniteData<JobsConnection> | undefined)?.pages.flatMap((page) => page.edges) || [];
 
   // Smart loading state: show skeletons for filter changes, not pagination
   const isFilterLoading = isFetching && !isFetchingNextPage && !isLoading;
