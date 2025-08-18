@@ -10,7 +10,13 @@
       "persistent": true
     },
     "lint": {},
-    "test": {}
+    "typecheck": {
+      "dependsOn": ["db:generate"]
+    },
+    "test": {},
+    "db:generate": {
+      "cache": false
+    }
   },
   "globalDependencies": ["go.work", "**/*.go", "apps/api/.env"]
 }

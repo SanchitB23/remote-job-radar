@@ -1,4 +1,3 @@
-import type { Prisma } from "@prisma/client";
 import { GraphQLError } from "graphql";
 
 import type {
@@ -56,7 +55,8 @@ export function getQueryResolvers(_prisma: unknown): any {
         const normalizedSources =
           sources && sources.length ? sources.map((s: string) => s.toLowerCase()) : undefined;
 
-        let whereClause: Prisma.jobWhereInput = {
+        // Use a more specific but flexible type for the where clause
+        const whereClause: Record<string, unknown> = {
           ...cursorFilter,
         };
         if (minFit !== undefined && minFit !== null) {
@@ -80,7 +80,7 @@ export function getQueryResolvers(_prisma: unknown): any {
           whereClause.OR = [
             { title: { contains: search, mode: "insensitive" } },
             { description: { contains: search, mode: "insensitive" } },
-          ] as Prisma.jobWhereInput[];
+          ];
         }
 
         if (bookmarked) {
