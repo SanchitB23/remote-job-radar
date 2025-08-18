@@ -15,7 +15,12 @@
     "precommit:fast": "lint-staged",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "typecheck": "turbo run typecheck --parallel"
+    "typecheck": "turbo run typecheck --parallel",
+    "postinstall": "npm rebuild lightningcss --update-binary || true",
+    "vercel:build": "npm rebuild lightningcss --update-binary || true && npm run build --workspace @remote-job-radar/web"
+  },
+  "overrides": {
+    "lightningcss": "1.26.0"
   },
   "workspaces": [
     "apps/*",
@@ -50,6 +55,9 @@
   },
   "dependencies": {
     "@dnd-kit/sortable": "^10.0.0"
+  },
+  "optionalDependencies": {
+    "lightningcss": "^1.26.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
