@@ -1,0 +1,13 @@
+version: "1"
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gofmt
+    - goimports
+    - revive
+    - errcheck
+    - ineffassign
+    - gosimple
+    - unused

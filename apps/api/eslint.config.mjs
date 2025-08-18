@@ -5,12 +5,19 @@ import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintComments from "eslint-plugin-eslint-comments";
 import boundaries from "eslint-plugin-boundaries";
 import typescriptParser from "@typescript-eslint/parser";
+import globals from "globals";
 
 export default [
   {
     files: ["**/*.{js,jsx,ts,tsx}", "*.js", "*.jsx", "*.ts", "*.tsx"],
     languageOptions: {
       parser: typescriptParser,
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+      },
     },
     plugins: {
       "@typescript-eslint": typescriptEslint,
@@ -28,27 +35,22 @@ export default [
       ]
     },
     rules: {
-      // Typescript strictness
       "@typescript-eslint/explicit-function-return-type": ["warn", { allowExpressions: true }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/consistent-type-imports": "error",
-      "@typescript-eslint/no-unused-vars": "off", // use unused-imports instead
-      // Unused imports/vars cleaner
+      "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
         { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" },
       ],
-      // Import hygiene
       "import/no-default-export": "error",
       "import/no-extraneous-dependencies": [
         "error",
-        { packageDir: ["./", "../../"] }, // allow hoisted deps
+        { packageDir: ["./", "../../"] },
       ],
-      "import/order": "off",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
-      // Comments hygiene
       "eslint-comments/no-unused-disable": "error",
       // Boundaries
       "boundaries/element-types": ["error", {
@@ -58,13 +60,6 @@ export default [
           { from: ["lib"], allow: ["lib"] }
         ]
       }],
-    },
-  },
-  // Allow default exports in Next.js pages/routes where needed
-  {
-    files: ["app/**/page.tsx", "app/**/layout.tsx", "app/**/route.ts", "pages/**/*"],
-    rules: { 
-      "import/no-default-export": "off" 
     },
   },
 ];

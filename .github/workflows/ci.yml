@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  js-ts:
+    name: Web/API (Node)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace: [apps/web, apps/api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: "npm" }
+      - run: npm ci
+      - run: npm run typecheck --workspace ${{ matrix.workspace }}
+      - run: npm run lint --workspace ${{ matrix.workspace }}
+      - run: npm run format:check --workspace ${{ matrix.workspace }}
+      - run: npm run build --workspace ${{ matrix.workspace }}
+
+  go:
+    name: Aggregator (Go)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: services/aggregator } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: "1.22" }
+      - uses: golangci/golangci-lint-action@v6
+        with: { version: "latest", working-directory: services/aggregator }
+      - run: go vet ./...
+      - run: go test ./... -race -count=1
+
+  py:
+    name: Embedder (Python)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: services/embedder } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt || true
+      - run: ruff check .
+      - run: ruff format . --check
+      - run: mypy .
+
+  # Optional: only run jobs if relevant paths changed (speed up CI)
+  # You can switch to 'paths:' filters per job, or use dorny/paths-filter if needed.

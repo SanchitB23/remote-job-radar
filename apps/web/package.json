@@ -7,7 +7,11 @@
     "dev:clear": "rm -rf .next && NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint && eslint . --ext .ts,.tsx",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.41.1",
@@ -32,7 +36,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.4.5",
+    "eslint-config-next": "^15.4.5",
+    "eslint-plugin-boundaries": "^5.0.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

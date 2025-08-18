@@ -1,0 +1,11 @@
+{
+  "name": "@remote-job-radar/embedder",
+  "private": true,
+  "scripts": {
+    "lint": "ruff check .",
+    "format": "ruff format .",
+    "format:check": "ruff format . --check",
+    "typecheck": "mypy .",
+    "test": "echo \"no tests yet\""
+  }
+}
