@@ -10,6 +10,18 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 
+---
+
+## 📚 Subproject Documentation
+
+- [Web App](./apps/web/README.md)
+- [API Server](./apps/api/README.md)
+- [Aggregator Service](./services/aggregator/README.md)
+- [Embedder Service](./services/embedder/README.md)
+- [Infra Setup](./infra/README.md)
+
+---
+
 ## 🌟 Features
 
 ### 🎯 Smart Job Matching
@@ -54,7 +66,9 @@ remote-job-radar/
 └── infra/                # Docker infrastructure
 ```
 
-### 🔧 Tech Stack
+---
+
+## 🔧 Tech Stack
 
 #### Frontend (`apps/web`)
 
@@ -96,6 +110,8 @@ remote-job-radar/
 - **Primary**: PostgreSQL 15 with pgvector extension
 - **Vector Search**: Semantic similarity matching for job recommendations
 - **Migrations**: Prisma-managed schema evolution
+
+---
 
 ## 🚀 Quick Start
 
@@ -197,133 +213,43 @@ This will start:
 npm run dev:smokeTest
 ```
 
-## 📚 API Documentation
+---
 
-### GraphQL Endpoints
+## 🧑‍💻 Monorepo Conventions & Development Practices
 
-#### Queries
+- **Linting:** Run `npm run lint` (uses ESLint, Prettier, and strict TypeScript)
+- **Commit Style:** Follows [Conventional Commits](https://www.conventionalcommits.org/)
+- **Import Sorting:** Uses `simple-import-sort` for consistent imports
+- **Testing:** Write and run tests for all new features (`npm run test`)
+- **Code Quality:** Use Prettier for formatting, keep code modular and DRY
+- **Branching:** Use feature branches (`feat/`, `fix/`, `chore/` prefixes)
+- **Docs:** Update relevant subproject README files for any major changes
 
-```graphql
-# Get job listings with filters
-query GetJobs($minFit: Float, $search: String, $first: Int, $after: String) {
-  jobs(minFit: $minFit, search: $search, first: $first, after: $after) {
-    edges {
-      id
-      title
-      company
-      fitScore
-      bookmarked
-      isTracked
-    }
-    hasNextPage
-    endCursor
-  }
-}
+---
 
-# Get user's application pipeline
-query GetPipeline {
-  pipeline {
-    id
-    column
-    position
-    job {
-      id
-      title
-      company
-    }
-  }
-}
-```
+## 🧪 Testing
 
-#### Mutations
+- **Unit/Integration Tests:** Run `npm run test` at the root or in any subproject
+- **API Testing:** Use GraphQL Playground, `curl`, or `api-test.ts` in `apps/web`
+- **Prisma Studio:** Inspect and edit DB data (`npx prisma studio` in `apps/api`)
+- **Manual Service Testing:** Use health endpoints (`/health`) and smoke tests (`npm run dev:smokeTest`)
 
-```graphql
-# Bookmark a job
-mutation BookmarkJob($id: ID!) {
-  bookmark(id: $id)
-}
+---
 
-# Add job to pipeline
-mutation AddToPipeline($jobId: ID!, $column: String!, $position: Int!) {
-  pipelineUpsert(jobId: $jobId, column: $column, position: $position)
-}
-```
+## 🩺 Service Health & Troubleshooting
 
-#### Subscriptions
+- **/status:** Visit `/status` in the web app for real-time health of all services
+- **Aggregator:** `GET /health` and `POST /fetch` endpoints for status and manual fetch
+- **Embedder:** `GET /health` endpoint for ML service status
+- **Database:** Use `docker exec` or a DB client to check connectivity
+- **Common Issues:**
+  - Service not starting? Check `.env` files and Docker Compose logs
+  - Database errors? Ensure pgvector extension is enabled
+  - Embeddings not working? Check embedder logs and aggregator config
 
-```graphql
-# Subscribe to new high-fit jobs
-subscription NewJobs($minFit: Float!) {
-  newJob(minFit: $minFit) {
-    id
-    title
-    company
-    fitScore
-  }
-}
-```
+---
 
-### REST Endpoints
-
-#### Job Aggregator Service
-
-- `GET /health` - General health check
-- `GET /health/db` - Database connectivity check  
-- `POST /fetch` - Trigger manual job fetch
-
-For more details on the aggregator service architecture, see [`services/aggregator/README.md`](./services/aggregator/README.md).
-
-## 📊 Database Schema
-
-### Core Tables
-
-- **jobs**: Job listings with vector embeddings for similarity search
-- **bookmarks**: User job bookmarks
-- **PipelineItem**: Job application tracking in Kanban columns
-
-### Key Features
-
-- **pgvector**: Vector similarity search for job recommendations
-- **Prisma**: Type-safe database operations
-- **Migrations**: Version-controlled schema changes
-
-## 🔧 Development
-
-### Available Scripts
-
-#### Root Level
-
-```bash
-npm run dev          # Start all services in development
-npm run build        # Build all packages
-npm run lint         # Lint all packages
-npm run test         # Run all tests
-npm run dev:infra    # Start Docker services only
-npm run dev:all      # Start infrastructure + all services
-npm run dev:smokeTest # Run health checks
-```
-
-#### Per Package
-
-```bash
-# Web app
-cd apps/web
-npm run dev          # Next.js dev server
-npm run build        # Production build
-
-# API
-cd apps/api
-npm run dev          # API server with hot reload
-npm run build        # TypeScript compilation
-
-# Aggregator (restructured with clean architecture)
-cd services/aggregator
-npm run dev          # Go development server
-npm run build        # Build binary
-go run cmd/serve/main.go  # Direct execution
-```
-
-### Project Structure
+## 📈 Project Structure
 
 ```
 ├── apps/
@@ -357,6 +283,8 @@ go run cmd/serve/main.go  # Direct execution
     └── docker-compose.yml # Development infrastructure
 ```
 
+---
+
 ## 🚀 Deployment
 
 ### Environment Setup
@@ -376,6 +304,8 @@ docker-compose -f docker-compose.prod.yml build
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
+---
+
 ## 🤝 Contributing
 
 1. **Fork** the repository
@@ -391,7 +321,9 @@ docker-compose -f docker-compose.prod.yml up -d
 - Write tests for new features
 - Update documentation for API changes
 
-### Recent Improvements
+---
+
+## 📝 Recent Improvements
 
 #### ✅ Aggregator Service Restructuring (August 2025)
 
@@ -403,6 +335,8 @@ The Go aggregator service has been completely restructured to follow clean archi
 - **Backward Compatible**: No breaking changes to external APIs or deployment
 
 See [`services/aggregator/README.md`](./services/aggregator/README.md) for detailed architecture documentation.
+
+---
 
 ## 🔮 Roadmap
 
@@ -427,9 +361,13 @@ See [`services/aggregator/README.md`](./services/aggregator/README.md) for detai
 - [ ] **AI Resume Matching**: Resume optimization suggestions
 - [ ] **Team Features**: Collaborative job searching for teams
 
+---
+
 ## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
+
+---
 
 ## 🙏 Acknowledgments
 
@@ -438,6 +376,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE
 - **Clerk** for seamless authentication
 - **Vercel** for Next.js and deployment platform
 - **pgvector** for efficient vector similarity search
+
+---
 
 ## 📞 Support
 

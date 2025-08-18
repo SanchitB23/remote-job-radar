@@ -1,68 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Remote Job Radar – Web App
+
+This is the **Next.js 15 frontend** for Remote Job Radar, providing a modern, AI-powered job discovery and pipeline management experience.
+
+## Overview
+
+- **Framework:** Next.js 15 (App Router)
+- **UI:** shadcn/ui, Tailwind CSS, Heroicons
+- **State/Data:** TanStack Query, GraphQL, REST
+- **Auth:** Clerk
+- **Features:**
+  - Kanban pipeline with drag-and-drop (powered by @dnd-kit)
+  - Real-time job alerts and pipeline updates (GraphQL subscriptions)
+  - Advanced filtering, semantic job matching, and fit scoring
+  - Optimistic UI, skeleton loaders, and error boundaries
+  - Responsive, accessible, and themeable (dark/light mode)
 
 ## Getting Started
 
-### Environment Setup
+### 1. Environment Setup
 
-1. Copy the example environment file:
+Copy the example environment file and update with your values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-2. Update the environment variables in `.env.local` with your actual values:
-   - **Clerk Authentication**: Get your keys from [Clerk Dashboard](https://dashboard.clerk.com)
-   - **GraphQL Endpoints**: Update if your API server runs on different URLs
+**Required variables:**
 
-### Running the Development Server
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` – Clerk publishable key
+- `CLERK_SECRET_KEY` – Clerk secret key
+- `CLERK_JWT_KID` – JWT Key ID
+- `CLERK_JWT_ISSUER` – JWT issuer URL
+- `NEXT_PUBLIC_GRAPHQL_HTTP_ENDPOINT` – GraphQL HTTP endpoint (default: `http://localhost:4000/graphql`)
+- `NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT` – GraphQL WebSocket endpoint (default: `ws://localhost:4000/graphql`)
 
-First, run the development server:
+### 2. Development Workflow
+
+Start the web app (from this directory):
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> **Note:** In a monorepo setup, use `npm run dev:all` from the root to start all services (DB, API, embedder, aggregator, web).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Project Structure
 
-## Environment Variables
+- `app/` – Next.js App Router pages (jobs, kanban, status, etc.)
+- `components/` – UI components (job cards, toasts, spinners, etc.)
+- `lib/` – Client libraries and hooks
+- `services/` – API and GraphQL clients
+- `constants/` – Query and config constants
+- `types/` – TypeScript types (GraphQL, API)
 
-The following environment variables are required:
+### 4. UI/UX Stack
 
-### Authentication (Clerk)
+- **shadcn/ui** – Modern, accessible component library
+- **Tailwind CSS** – Utility-first styling
+- **Heroicons** – Consistent iconography
+- **@dnd-kit** – Drag-and-drop for Kanban
+- **TanStack Query** – Data fetching, caching, and optimistic updates
+- **Clerk** – Authentication and user management
 
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your Clerk publishable key
-- `CLERK_SECRET_KEY`: Your Clerk secret key
-- `CLERK_JWT_KID`: Your JWT Key ID
-- `CLERK_JWT_ISSUER`: Your JWT issuer URL
+### 5. Key Features
 
-### GraphQL API
+- **Kanban Board:** `/kanban` – Drag-and-drop job pipeline (wishlist, applied, interview, offer)
+- **Job Listings:** `/jobs` – Infinite scroll, advanced filters, fit score, bookmarking
+- **Real-time Updates:** GraphQL subscriptions for job alerts and pipeline changes
+- **Optimistic UI:** Instant feedback for bookmarks and pipeline actions
+- **Error Handling:** User-friendly error boundaries and fallback states
+- **Loading States:** Skeleton loaders and spinners
+- **Responsive Design:** Mobile-first, adaptive layouts
+- **Theme Support:** Dark/light mode
 
-- `NEXT_PUBLIC_GRAPHQL_HTTP_ENDPOINT`: GraphQL HTTP endpoint (default: `http://localhost:4000/graphql`)
-- `NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT`: GraphQL WebSocket endpoint (default: `ws://localhost:4000/graphql`)
+### 6. Testing & Debugging
 
-Copy `.env.example` to `.env.local` and update the values accordingly.
+- **API test:** See `api-test.ts` for sample queries
+- **Prisma Studio:** Use for DB inspection (run in API app)
+- **DevTools:** Use React DevTools and TanStack Query DevTools for debugging
 
-## Learn More
+### 7. Deployment
 
-To learn more about Next.js, take a look at the following resources:
+- Deploy on [Vercel](https://vercel.com/) or your preferred platform
+- Ensure all required environment variables are set in production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 8. More Info
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- See the main repo `README.md` and `.github/copilot-instructions.md` for full architecture and integration details
