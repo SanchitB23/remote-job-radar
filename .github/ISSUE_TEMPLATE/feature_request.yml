@@ -1,0 +1,45 @@
+name: "✨ Feature request"
+description: Propose a new capability
+title: "[FEAT] <short summary>"
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user pain are we solving?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: User story + acceptance criteria
+      placeholder: "As a <role>, I want <capability> so that <outcome>."
+  - type: textarea
+    id: scope
+    attributes:
+      label: Out of scope
+  - type: input
+    id: metric
+    attributes:
+      label: Success metric
+      placeholder: "e.g., reduce 95p latency from 600ms → 300ms"
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options: ["High", "Medium", "Low"]
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.
