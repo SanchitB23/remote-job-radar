@@ -1,0 +1,26 @@
+name: Sync labels
+
+on:
+  push:
+    branches:
+      - ${{ github.event.repository.default_branch }}
+    paths:
+      - ".github/labels.yml"
+      - ".github/workflows/labels.yml"
+  workflow_dispatch: {} # manual trigger
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # REQUIRED to update labels
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply labels
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          yaml-file: .github/labels.yml
+          skip-delete: false # true if you don't want to remove old labels
