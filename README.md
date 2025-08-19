@@ -142,7 +142,7 @@ npm run dev:infra
 #### API Configuration (`apps/api/.env`)
 
 ```env
-DATABASE_URL="postgresql://postgres:local@localhost:5432/postgres"
+PG_DATABASE_URL="postgresql://postgres:local@localhost:5432/postgres"
 CLERK_JWT_KID="your_clerk_jwt_kid"
 CLERK_JWT_ISSUER="your_clerk_issuer_url"
 ```
@@ -161,7 +161,7 @@ NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT="ws://localhost:4000/graphql"
 #### Aggregator Configuration (`services/aggregator/.env.local`)
 
 ```env
-DB_DSN="host=localhost user=postgres password=local dbname=postgres sslmode=disable"
+PG_DATABASE_URL="host=localhost user=postgres password=local dbname=postgres sslmode=disable"
 SKILLS_FILE="skills.yml"
 EMBEDDER_URL="http://localhost:8000"
 PORT="8080"
