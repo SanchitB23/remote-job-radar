@@ -73,8 +73,8 @@ useServer(
 
 // 3. Set up Express middleware
 // Parse allowed origins from environment variable (comma-separated)
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",")
+const allowedOrigins = process.env.GQL_API_CORS_ORIGIN
+  ? process.env.GQL_API_CORS_ORIGIN.split(",")
       .map((origin) => origin.trim())
       .filter(Boolean)
   : undefined;
@@ -110,6 +110,6 @@ app.use(
   }),
 );
 
-const PORT = 4000;
-const DEPLOYED_URL = process.env.DEPLOYED_URL || `http://localhost:${PORT}`;
+const PORT = process.env.GQL_API_PORT || 4000;
+const DEPLOYED_URL = process.env.GQL_API_BASE_URL || `http://localhost:${PORT}`;
 httpServer.listen(PORT, () => console.log(`🚀 GraphQL ready at ${DEPLOYED_URL}/graphql`));

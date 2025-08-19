@@ -13,7 +13,7 @@ const NEW_JOB = "NEW_JOB";
 export function getResolvers(prisma: PrismaClient): any {
   // --- hook Postgres NOTIFY to PubSub ---
   const listener = new pg.Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.PG_DATABASE_URL,
   });
   listener.connect().then(() => {
     listener.query("LISTEN new_job");

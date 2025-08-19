@@ -33,7 +33,7 @@ type adzResp struct {
 	} `json:"results"`
 }
 
-func Adzuna(ctx context.Context, page int, appID, appKey string) ([]storage.JobRow, error) {
+func Adzuna(ctx context.Context, page int, appID, appKey, baseURL string) ([]storage.JobRow, error) {
 	if appID == "" || appKey == "" {
 		return nil, fmt.Errorf("adzuna API credentials are required")
 	}
@@ -44,7 +44,14 @@ func Adzuna(ctx context.Context, page int, appID, appKey string) ([]storage.JobR
 		"results_per_page": {"50"},
 		"sort_by":          {"date"},
 	}
-	endpt := fmt.Sprintf("https://api.adzuna.com/v1/api/jobs/us/search/%d?%s", page, q.Encode())
+
+	if baseURL == "" {
+		baseURL = "https://api.adzuna.com"
+	}
+	// Remove trailing slash if present
+	baseURL = strings.TrimRight(baseURL, "/")
+	endpointPath := fmt.Sprintf("/v1/api/jobs/us/search/%d?%s", page, q.Encode())
+	endpt := baseURL + endpointPath
 
 	req, err := http.NewRequestWithContext(ctx, "GET", endpt, nil)
 	if err != nil {

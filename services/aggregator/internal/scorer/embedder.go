@@ -40,7 +40,7 @@ func NewEmbedder(cfg *config.Config) (*Embedder, error) {
 		return nil, fmt.Errorf("EMBEDDER_URL not configured")
 	}
 	return &Embedder{
-		URL:    cfg.EmbedderURL,
+		URL:    strings.TrimRight(cfg.EmbedderURL, "/") + "/embed",
 		Config: cfg,
 		Client: &http.Client{
 			Timeout: cfg.EmbedderClientTimeout,

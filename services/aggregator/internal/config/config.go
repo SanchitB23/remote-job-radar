@@ -21,8 +21,10 @@ type Config struct {
 	EmbedderURL string
 
 	// Job Sources
+	AdzunaBaseURL     string
 	AdzunaAppID       string
 	AdzunaAppKey      string
+	RemotiveBaseURL   string
 	FetcherMaxPageNum int
 
 	// Skills
@@ -51,15 +53,10 @@ type Config struct {
 func Load() (*Config, error) {
 	// Load environment file in local development
 	env := os.Getenv("ENV")
-	goEnv := os.Getenv("GO_ENV")
-	ginMode := os.Getenv("GIN_MODE")
 
-	logger.Info("Loading configuration",
-		zap.String("env", env),
-		zap.String("goEnv", goEnv),
-		zap.String("ginMode", ginMode))
+	logger.Info("Loading configuration", zap.String("env", env))
 
-	if env == "local" || goEnv == "local" || ginMode == "debug" {
+	if env == "local" {
 		if err := godotenv.Load(".env.local"); err != nil {
 			logger.Warn("Could not load .env.local", zap.Error(err))
 		}
@@ -67,12 +64,14 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Port:        getEnvWithDefault("PORT", "8080"),
-		DatabaseDSN: getRequiredEnv("DB_DSN"),
-		EmbedderURL: getRequiredEnv("EMBEDDER_URL"),
+		DatabaseDSN: getRequiredEnv("PG_DATABASE_URL"),
+		EmbedderURL: getRequiredEnv("EMBEDDER_BASE_URL"),
 		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
 		Environment: getEnvWithDefault("ENV", "development"),
 
 		// Job Sources (optional)
+		RemotiveBaseURL:   os.Getenv("REMOTIVE_BASE_URL"),
+		AdzunaBaseURL:     os.Getenv("ADZUNA_BASE_URL"),
 		AdzunaAppID:       os.Getenv("ADZUNA_APP_ID"),
 		AdzunaAppKey:      os.Getenv("ADZUNA_APP_KEY"),
 		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),

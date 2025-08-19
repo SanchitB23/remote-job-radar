@@ -1,8 +1,10 @@
 """Embedder FastAPI service for generating text embeddings."""
 
+
 # Standard library imports
 import hashlib
 import logging
+import os
 import sys
 
 # Third-party imports
@@ -14,14 +16,17 @@ from pydantic import BaseModel
 # Alternatives that are still small:
 #   "intfloat/e5-small-v2" (384-d), "Snowflake/snowflake-arctic-embed-xs" (384-d)
 
+
+# Read environment variables
+MODEL_NAME = os.getenv("MODEL_NAME", "BAAI/bge-small-en-v1.5")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
 # Configure logging to stdout for cloud platforms (e.g., Render)
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
     format="%(asctime)s %(levelname)s %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
-MODEL_NAME = "BAAI/bge-small-en-v1.5"
 
 
 app = FastAPI()
