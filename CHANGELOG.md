@@ -1,3 +1,15 @@
+## 1.1.0-beta.1 (2025-08-19)
+
+- fix: add newline at end of file in commitlint configuration ([95b07e6](https://github.com/SanchitB23/remote-job-radar/commit/95b07e6))
+- feat: add GitHub Actions workflow for syncing labels (#38) ([25e0590](https://github.com/SanchitB23/remote-job-radar/commit/25e0590)), closes [#38](https://github.com/SanchitB23/remote-job-radar/issues/38)
+- feat: add new UI components and providers for theming and state mngmnt (#17) ([2abf9de](https://github.com/SanchitB23/remote-job-radar/commit/2abf9de)), closes [#17](https://github.com/SanchitB23/remote-job-radar/issues/17)
+- feat: implement debounced state for filters in FilterSidebar and add … (#19) ([07eaab9](https://github.com/SanchitB23/remote-job-radar/commit/07eaab9)), closes [#19](https://github.com/SanchitB23/remote-job-radar/issues/19)
+- docs: 23 create yaml for issue tracking (#36) ([1aa1c8c](https://github.com/SanchitB23/remote-job-radar/commit/1aa1c8c)), closes [#36](https://github.com/SanchitB23/remote-job-radar/issues/36)
+- docs: update gh workflows and issue templates (#33) ([ca45824](https://github.com/SanchitB23/remote-job-radar/commit/ca45824)), closes [#33](https://github.com/SanchitB23/remote-job-radar/issues/33)
+- Merge branch 'main' into develop ([3b33cf0](https://github.com/SanchitB23/remote-job-radar/commit/3b33cf0))
+- Revert "fix: (temp) ignore commitlint for initial release (#11)" (#15) ([604ed73](https://github.com/SanchitB23/remote-job-radar/commit/604ed73)), closes [#11](https://github.com/SanchitB23/remote-job-radar/issues/11) [#15](https://github.com/SanchitB23/remote-job-radar/issues/15)
+- refactor: update environment configuration and refactor database connecti… (#21) ([cb241fd](https://github.com/SanchitB23/remote-job-radar/commit/cb241fd)), closes [#21](https://github.com/SanchitB23/remote-job-radar/issues/21)
+
 ## 1.0.0 (2025-08-18)
 
 - Enhance job scoring and embedding process ([51de70b](https://github.com/SanchitB23/remote-job-radar/commit/51de70b))
