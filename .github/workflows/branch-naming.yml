@@ -11,6 +11,10 @@ jobs:
       - name: Validate branch name
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "develop" ]]; then
+            echo "✅ Skipping branch name check for protected branch: $BRANCH"
+            exit 0
+          fi
           if [[ ! "$BRANCH" =~ ^(feat|bug|chore|docs|refactor)/[0-9]+-[a-z0-9._-]+$ ]]; then
             echo "❌ Invalid branch name: $BRANCH"
             echo "Expected: (feat|bug|chore|docs|refactor)/<issue-number>-<kebab-title>"
