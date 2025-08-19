@@ -31,7 +31,7 @@ cp .env.example .env.local
 - `CLERK_SECRET_KEY` – Clerk secret key
 - `CLERK_JWT_KID` – JWT Key ID
 - `CLERK_JWT_ISSUER` – JWT issuer URL
-- `NEXT_PUBLIC_GRAPHQL_HTTP_ENDPOINT` – GraphQL HTTP endpoint (default: `http://localhost:4000/graphql`)
+- `NEXT_PUBLIC_GRAPHQL_BASE_URL` – GraphQL HTTP endpoint (default: `http://localhost:4000/graphql`)
 - `NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT` – GraphQL WebSocket endpoint (default: `ws://localhost:4000/graphql`)
 
 ### 2. Development Workflow

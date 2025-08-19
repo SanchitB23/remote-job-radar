@@ -1,7 +1,7 @@
 // Shared GraphQL utilities and types
 import { GraphQLClient } from "graphql-request";
 
-import { GRAPHQL_HTTP_ENDPOINT } from "@/constants";
+import { GRAPHQL_BASE_URL } from "@/constants";
 import {
   BOOKMARK_MUTATION,
   FILTER_METADATA_QUERY,
@@ -13,7 +13,7 @@ import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } fr
 
 // Utility function to create a GraphQL client with consistent configuration
 export function createGraphQLClient(token?: string | null): GraphQLClient {
-  return new GraphQLClient(GRAPHQL_HTTP_ENDPOINT, {
+  return new GraphQLClient(`${GRAPHQL_BASE_URL}/graphql`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 }
