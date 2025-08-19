@@ -1,3 +1,7 @@
+## 1.1.0-beta.2 (2025-08-19)
+
+- fix: update label sync workflow to use 'develop' branch ([0dc0e5e](https://github.com/SanchitB23/remote-job-radar/commit/0dc0e5e))
+
 ## 1.1.0-beta.1 (2025-08-19)
 
 - fix: add newline at end of file in commitlint configuration ([95b07e6](https://github.com/SanchitB23/remote-job-radar/commit/95b07e6))
