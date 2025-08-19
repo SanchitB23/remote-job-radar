@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { HealthResponse } from "@/types/api/health";
 
 export async function GET(): Promise<NextResponse<HealthResponse>> {
-  const apiUrl = process.env.GRAPHQL_SERVER_BASE_URL || "http://localhost:4000";
+  const apiUrl = process.env.NEXT_PUBLIC_GRAPHQL_BASE_URL || "http://localhost:4000";
   try {
     const res = await fetch(apiUrl + "/health");
     const data = (await res.json()) as HealthResponse;

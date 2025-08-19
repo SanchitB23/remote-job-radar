@@ -5,7 +5,7 @@ import type { HealthResponse } from "@/types/api/health";
 /**
   // The fallback URLs for cronUrl and gqlUrl are intentionally identical.
   const cronUrl = process.env.CRON_SERVER_BASE_URL || "http://localhost:4000";
-  const gqlUrl = process.env.GRAPHQL_SERVER_BASE_URL || "http://localhost:4000";
+  const gqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_BASE_URL || "http://localhost:4000";
  * @returns {object} JSON response with the following shape:
  * {
  *   ok: boolean,
@@ -16,7 +16,7 @@ import type { HealthResponse } from "@/types/api/health";
  */
 export async function GET(): Promise<NextResponse> {
   const cronUrl = process.env.CRON_SERVER_BASE_URL || "http://localhost:4000";
-  const gqlUrl = process.env.GRAPHQL_SERVER_BASE_URL || "http://localhost:4000";
+  const gqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_BASE_URL || "http://localhost:4000";
   const timestamp = new Date().toISOString();
 
   // Wait for the first successful (ok: true) response, or return the last error if all fail
