@@ -37,7 +37,6 @@ type Config struct {
 	RunInitialFetch bool
 
 	// Embedder Configuration
-	EmbedderTimeout        time.Duration
 	EmbedderMaxRetries     int
 	EmbedderBaseDelay      time.Duration
 	EmbedderMaxDelay       time.Duration

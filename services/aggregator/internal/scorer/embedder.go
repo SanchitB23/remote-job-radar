@@ -94,11 +94,9 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	const (
-		maxRetries = 10               // Increased retries for background jobs
-		baseDelay  = 1 * time.Second  // Longer base delay
-		maxDelay   = 30 * time.Second // Much higher max delay for background processing
-	)
+	maxRetries := e.Config.EmbedderMaxRetries
+	baseDelay := e.Config.EmbedderBaseDelay
+	maxDelay := e.Config.EmbedderMaxDelay
 
 	var lastErr error
 	var lastStatus int
@@ -161,11 +159,9 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 	return nil, fmt.Errorf("embedder service failed with status %d after %d attempts", lastStatus, maxRetries)
 }
 
-const embedderRequestTimeout = 3 * time.Minute
-
 func (e *Embedder) attemptRequest(ctx context.Context, body []byte) ([]float32, int, error) {
 	// Create request context that respects parent but extends timeout
-	requestCtx, cancel := context.WithTimeout(ctx, embedderRequestTimeout)
+	requestCtx, cancel := context.WithTimeout(ctx, e.Config.EmbedderRequestTimeout)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(requestCtx, "POST", e.URL, bytes.NewReader(body))
