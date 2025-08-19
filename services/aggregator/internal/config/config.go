@@ -82,7 +82,6 @@ func Load() (*Config, error) {
 		RunInitialFetch: getBoolEnvWithDefault("RUN_INITIAL_FETCH", false),
 
 		// Embedder Configuration
-		EmbedderTimeout:        getDurationWithDefault("EMBEDDER_TIMEOUT", 10*time.Minute),
 		EmbedderMaxRetries:     getIntEnvWithDefault("EMBEDDER_MAX_RETRIES", 10),
 		EmbedderBaseDelay:      getDurationWithDefault("EMBEDDER_BASE_DELAY", 1*time.Second),
 		EmbedderMaxDelay:       getDurationWithDefault("EMBEDDER_MAX_DELAY", 30*time.Second),
@@ -99,7 +98,6 @@ func Load() (*Config, error) {
 		zap.Duration("scoreInterval", cfg.ScoreInterval),
 		zap.Bool("runInitialFetch", cfg.RunInitialFetch),
 		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""),
-		zap.Duration("embedderTimeout", cfg.EmbedderTimeout),
 		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
 		zap.Duration("embedderRequestTimeout", cfg.EmbedderRequestTimeout),
 		zap.Int("embedderWorkerCount", cfg.EmbedderWorkerCount),
