@@ -1,0 +1,36 @@
+name: "🐛 Bug report"
+description: Something isn't working
+title: "[BUG] <short summary>"
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce + expected vs actual
+      placeholder: "1) Go to..., 2) Click..., 3) See error..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Affected version/commit
+      placeholder: "v1.2.3 or commit SHA"
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "Node 18, Postgres 15, Render (stage/prod), Browser"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I searched existing issues.
+          required: true
+        - label: I can reproduce on latest main.

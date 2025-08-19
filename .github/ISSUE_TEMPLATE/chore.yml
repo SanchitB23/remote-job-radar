@@ -1,0 +1,24 @@
+name: "🧰 Chore"
+description: Tooling, CI/CD, dependencies, infra
+title: "[CHORE] <subject>"
+labels: ["chore"]
+body:
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      placeholder: "CI pipeline, ESLint/Prettier, semantic-release, Render config"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - label: No behavior change
+          required: true
+        - label: Requires doc update

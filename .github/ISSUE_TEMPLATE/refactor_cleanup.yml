@@ -1,0 +1,31 @@
+name: "🧹 Refactor / Cleanup"
+description: Code health improvements without behavior changes
+title: "[REFACTOR] <area>"
+labels: ["refactor"]
+body:
+  - type: textarea
+    id: area
+    attributes:
+      label: Area / module
+      placeholder: "api/graphql, prisma models, utils/date"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Tech debt, readability, performance, etc.
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan of attack
+      description: Steps, risks, and test plan
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: No user-facing changes
+          required: true
+        - label: Unit tests updated/added
+        - label: E2E smoke passes locally

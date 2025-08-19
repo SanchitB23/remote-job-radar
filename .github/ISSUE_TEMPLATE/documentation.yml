@@ -1,0 +1,25 @@
+name: "📝 Documentation"
+description: Add or improve docs
+title: "[DOCS] <subject>"
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What needs documenting and why?
+    validations:
+      required: true
+  - type: textarea
+    id: changes
+    attributes:
+      label: Proposed changes
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: README
+        - label: API reference
+        - label: Architecture/ADR
+        - label: Contributing/Runbook
