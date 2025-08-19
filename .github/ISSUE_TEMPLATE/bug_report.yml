@@ -34,3 +34,16 @@ body:
         - label: I searched existing issues.
           required: true
         - label: I can reproduce on latest main.
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.

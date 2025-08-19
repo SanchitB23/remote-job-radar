@@ -15,3 +15,16 @@ body:
     attributes:
       label: Context
       placeholder: "What you tried, logs, screenshots"
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.

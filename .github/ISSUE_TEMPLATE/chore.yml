@@ -22,3 +22,16 @@ body:
         - label: No behavior change
           required: true
         - label: Requires doc update
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.

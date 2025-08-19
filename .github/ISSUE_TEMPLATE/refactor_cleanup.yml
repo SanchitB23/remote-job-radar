@@ -29,3 +29,16 @@ body:
           required: true
         - label: Unit tests updated/added
         - label: E2E smoke passes locally
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.
