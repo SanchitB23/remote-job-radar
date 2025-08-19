@@ -8,7 +8,7 @@
 
 - Types: feat, fix, docs, style, refactor, perf, test, chore
 - Scopes: api, web, aggregator, embedder, pipeline, ui, db (or leave blank)
-- Keep the header (title) under 50 characters (recommended), and never exceed 100 characters (required by commitlint). Use imperative mood.
+- Keep the header (title) under 50 characters (recommended), and NEVER exceed 90 characters (required by commitlint). Use imperative mood.
 - Separate body from header with a blank line. Wrap body lines at 90 characters.
 - Use `BREAKING CHANGE:` in the footer for breaking changes.
 - Reference issues in the footer if needed.
