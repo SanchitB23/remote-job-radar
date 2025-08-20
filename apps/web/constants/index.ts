@@ -1,4 +1,4 @@
-export const GRAPHQL_BASE_URL = process.env.NEXT_PUBLIC_GRAPHQL_BASE_URL || "http://localhost:4000";
+export const GRAPHQL_BASE_URL = process.env.GRAPHQL_BASE_URL || "http://localhost:4000";
 export const GRAPHQL_WS_ENDPOINT =
   process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT || "ws://localhost:4000/graphql";
 
