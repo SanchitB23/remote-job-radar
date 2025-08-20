@@ -44,34 +44,37 @@ func NewApp() (*App, error) {
 	}
 	logger.Info("Database connection established")
 
-	// Initialize embedder
-	embedder, err := scorer.NewEmbedder(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize embedder: %w", err)
-	}
+	// Start embedder and skills vector loading in the background
+	var jobService *services.JobService
+	var h *handlers.Handlers
+	var s *scheduler.Scheduler
 
-	// Initialize skills service and load skill vector
-	skillsService := services.NewSkillsService(embedder, cfg.SkillsFile)
-	logger.Info("Loading skills configuration")
-	skillVec, err := skillsService.LoadSkillVector(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("failed to load skills vector: %w", err)
-	}
+	go func() {
+		embedder, err := scorer.NewEmbedder(cfg)
+		if err != nil {
+			logger.Error("Failed to initialize embedder (background)", zap.Error(err))
+			return
+		}
+		skillsService := services.NewSkillsService(embedder, cfg.SkillsFile)
+		logger.Info("[Background] Loading skills configuration and vector for job service")
+		skillVec, err := skillsService.LoadSkillVector(context.Background())
+		if err != nil {
+			logger.Error("Failed to load skills vector (background)", zap.Error(err))
+			return
+		}
+		jobService = services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
+		h = handlers.NewHandlers(store, jobService)
+		s = scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
+		logger.Info("[Background] Embedder and skills vector loaded, job service initialized")
+	}()
 
-	// Initialize job service
-	jobService := services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
-
-	// Initialize handlers
-	handlers := handlers.NewHandlers(store, jobService)
-
-	// Initialize scheduler
-	scheduler := scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
+	logger.Info("Embedder and skills vector loading in background; server setup starting now.")
 
 	return &App{
 		Config:    cfg,
 		Store:     store,
-		Handlers:  handlers,
-		Scheduler: scheduler,
+		Handlers:  h,
+		Scheduler: s,
 	}, nil
 }
 
