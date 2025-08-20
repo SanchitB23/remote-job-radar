@@ -90,9 +90,9 @@ func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) 
 
 	// --- Cold start trigger: GET /health before POST /embed, with retry logic ---
 	healthURL := strings.TrimRight(e.Config.EmbedderURL, "/") + "/health"
-	healthMaxRetries := 5
-	healthBaseDelay := 200 * time.Millisecond
-	healthMaxDelay := 2 * time.Second
+	healthMaxRetries := e.Config.EmbedderMaxRetries
+	healthBaseDelay := e.Config.EmbedderBaseDelay
+	healthMaxDelay := e.Config.EmbedderMaxDelay
 	var healthErr error
 healthLoop:
 	for attempt := 0; attempt < healthMaxRetries; attempt++ {
