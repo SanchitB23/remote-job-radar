@@ -1,3 +1,9 @@
+## 1.1.0-beta.3 (2025-08-20)
+
+- docs: update copilot instructions (#44) ([cbff4f1](https://github.com/SanchitB23/remote-job-radar/commit/cbff4f1)), closes [#44](https://github.com/SanchitB23/remote-job-radar/issues/44)
+- docs: update Git workflow and commit message guidelines (#43) ([153ef79](https://github.com/SanchitB23/remote-job-radar/commit/153ef79)), closes [#43](https://github.com/SanchitB23/remote-job-radar/issues/43)
+- fix: remove temporary ignore rule from commitlint configuration ([1fe1868](https://github.com/SanchitB23/remote-job-radar/commit/1fe1868))
+
 ## 1.1.0-beta.2 (2025-08-19)
 
 - fix: update label sync workflow to use 'develop' branch ([0dc0e5e](https://github.com/SanchitB23/remote-job-radar/commit/0dc0e5e))
