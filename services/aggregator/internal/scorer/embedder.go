@@ -87,6 +87,51 @@ func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
 
 // performEmbedding handles the actual HTTP request with robust retry logic
 func (e *Embedder) performEmbedding(ctx context.Context, text, textHash string) ([]float32, error) {
+
+	// --- Cold start trigger: GET /health before POST /embed, with retry logic ---
+	healthURL := strings.TrimRight(e.Config.EmbedderURL, "/") + "/health"
+	healthMaxRetries := 5
+	healthBaseDelay := 200 * time.Millisecond
+	healthMaxDelay := 2 * time.Second
+	var healthErr error
+healthLoop:
+	for attempt := 0; attempt < healthMaxRetries; attempt++ {
+		healthReq, err := http.NewRequestWithContext(ctx, "GET", healthURL, nil)
+		if err != nil {
+			logger.Warn("Failed to create /health GET request", zap.Error(err))
+			healthErr = err
+			break healthLoop
+		}
+		resp, err := e.Client.Do(healthReq)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			resp.Body.Close()
+			logger.Debug("Embedder /health GET succeeded", zap.String("url", healthURL), zap.Int("status", resp.StatusCode), zap.Int("attempt", attempt+1))
+			healthErr = nil
+			break healthLoop
+		}
+		if resp != nil {
+			resp.Body.Close()
+		}
+		statusCode := 0
+		if resp != nil {
+			statusCode = resp.StatusCode
+		}
+		logger.Warn("Embedder /health GET failed", zap.Error(err), zap.Int("status", statusCode), zap.Int("attempt", attempt+1))
+		healthErr = err
+		// Exponential backoff
+		delay := minDuration(healthBaseDelay*(1<<attempt), healthMaxDelay)
+		select {
+		case <-time.After(delay):
+			continue
+		case <-ctx.Done():
+			logger.Warn("Context cancelled during /health retry delay", zap.Error(ctx.Err()))
+			break healthLoop
+		}
+	}
+	if healthErr != nil {
+		logger.Warn("Embedder /health cold start trigger failed after retries", zap.Error(healthErr))
+	}
+
 	request := EmbedRequest{Text: text}
 	body, err := json.Marshal(request)
 	if err != nil {
