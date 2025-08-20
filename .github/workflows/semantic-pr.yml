@@ -23,6 +23,7 @@ jobs:
             build
             ci
             chore
+            release
           requireScope: false
           # Enforce non-empty, sentence-case-ish subject
           subjectPattern: "^[a-z].+"
