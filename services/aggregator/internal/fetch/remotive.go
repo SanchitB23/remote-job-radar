@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 )
@@ -23,7 +26,13 @@ type remotiveResp struct {
 }
 
 func Remotive(baseURL string) ([]storage.JobRow, error) {
-	resp, err := http.Get(baseURL + "/api/remote-jobs")
+	if baseURL == "" {
+		logger.Warn("Remotive: baseURL not provided, defaulting to https://remotive.com")
+		baseURL = "https://remotive.com"
+	}
+	baseURL = strings.TrimRight(baseURL, "/")
+	url := fmt.Sprintf("%s/api/remote-jobs", baseURL)
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
+
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 )
 
@@ -46,6 +48,7 @@ func Adzuna(ctx context.Context, page int, appID, appKey, baseURL string) ([]sto
 	}
 
 	if baseURL == "" {
+		logger.Warn("Adzuna: baseURL not provided, defaulting to https://api.adzuna.com")
 		baseURL = "https://api.adzuna.com"
 	}
 	// Remove trailing slash if present
