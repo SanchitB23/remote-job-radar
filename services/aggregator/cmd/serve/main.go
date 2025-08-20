@@ -34,9 +34,7 @@ func main() {
 		serverErrors <- server.ListenAndServe()
 	}()
 
-	// Start scheduler
-	ctx := context.Background()
-	application.Scheduler.Start(ctx)
+	// Scheduler is started in the background goroutine after embedder/skills are ready
 
 	logger.Info("Service fully initialized and ready to serve requests")
 
@@ -54,8 +52,7 @@ func main() {
 	// Graceful shutdown
 	logger.Info("Starting graceful shutdown...")
 
-	// Stop scheduler first
-	application.Scheduler.Stop()
+	// Scheduler is stopped in the background goroutine or via app.Cleanup if needed
 
 	// Shutdown HTTP server with timeout
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

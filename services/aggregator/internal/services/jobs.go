@@ -13,6 +13,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// JobServiceInterface is implemented by both JobService and WarmingUpJobService
+type JobServiceInterface interface {
+	FetchAndProcessJobs(ctx context.Context) error
+	FetchAndProcessJobsFromSources(ctx context.Context, sources []string) error
+	ScoreNewJobs(ctx context.Context) error
+}
+
 type JobService struct {
 	store    *storage.Store
 	skillVec []float32

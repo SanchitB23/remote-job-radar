@@ -14,14 +14,12 @@ import (
 )
 
 type Handlers struct {
-	store      *storage.Store
-	jobService *services.JobService
+	store *storage.Store
 }
 
-func NewHandlers(store *storage.Store, jobService *services.JobService) *Handlers {
+func NewHandlers(store *storage.Store) *Handlers {
 	return &Handlers{
-		store:      store,
-		jobService: jobService,
+		store: store,
 	}
 }
 
@@ -77,7 +75,8 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	// Use context.Background() instead of r.Context() to prevent cancellation
 	go func() {
 		ctx := context.Background()
-		if err := h.jobService.FetchAndProcessJobsFromSources(ctx, sources); err != nil {
+		jobService := services.GetJobService()
+		if err := jobService.FetchAndProcessJobsFromSources(ctx, sources); err != nil {
 			logger.Error("Manual fetch failed", zap.Error(err))
 		}
 	}()

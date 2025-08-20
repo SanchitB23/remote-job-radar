@@ -44,11 +44,10 @@ func NewApp() (*App, error) {
 	}
 	logger.Info("Database connection established")
 
-	// Start embedder and skills vector loading in the background
-	var jobService *services.JobService
-	var h *handlers.Handlers
-	var s *scheduler.Scheduler
+	// Initialize atomic JobServiceValue to warming up
+	services.InitJobServiceWarmingUp()
 
+	// Start embedder and skills vector loading in the background
 	go func() {
 		embedder, err := scorer.NewEmbedder(cfg)
 		if err != nil {
@@ -62,10 +61,13 @@ func NewApp() (*App, error) {
 			logger.Error("Failed to load skills vector (background)", zap.Error(err))
 			return
 		}
-		jobService = services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
-		h = handlers.NewHandlers(store, jobService)
-		s = scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
-		logger.Info("[Background] Embedder and skills vector loaded, job service initialized")
+		realJobService := services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
+		services.SetJobService(realJobService)
+		logger.Info("[Background] Embedder and skills vector loaded, job service initialized") // Initialize and start scheduler now that jobService is ready
+		scheduler := scheduler.NewScheduler(realJobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
+		logger.Info("[Background] Scheduler initialized, starting now")
+		ctx := context.Background()
+		scheduler.Start(ctx)
 	}()
 
 	logger.Info("Embedder and skills vector loading in background; server setup starting now.")
@@ -73,8 +75,8 @@ func NewApp() (*App, error) {
 	return &App{
 		Config:    cfg,
 		Store:     store,
-		Handlers:  h,
-		Scheduler: s,
+		Handlers:  handlers.NewHandlers(store),
+		Scheduler: nil, // Scheduler can be handled similarly if needed
 	}, nil
 }
 
