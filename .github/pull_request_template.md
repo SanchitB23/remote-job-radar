@@ -2,13 +2,18 @@
 
 ## Title Convention
 
-Use one of the following prefixes:
+Use one of the following [Conventional Commit](https://www.conventionalcommits.org/) prefixes:
 
 - `feat: <short summary>` (new feature)
 - `fix: <short summary>` (bug fix)
-- `docs: <short summary>` (docs only)
-- `refactor: <short summary>` (code cleanup, no behavior change)
-- `chore: <short summary>` (CI, tooling, deps)
+- `perf: <short summary>` (performance improvement)
+- `docs: <short summary>` (documentation only)
+- `refactor: <short summary>` (code refactor, no behavior change)
+- `test: <short summary>` (tests only)
+- `build: <short summary>` (build system or external dependencies)
+- `ci: <short summary>` (CI/CD related changes)
+- `chore: <short summary>` (maintenance, tooling, deps)
+- `release: <short summary>` (release version)
 
 Example:  
 `feat: add job aggregator API endpoint`
