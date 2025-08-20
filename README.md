@@ -154,7 +154,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_publishable_key"
 CLERK_SECRET_KEY="your_clerk_secret_key"
 CLERK_JWT_KID="your_clerk_jwt_kid"
 CLERK_JWT_ISSUER="your_clerk_issuer_url"
-NEXT_PUBLIC_GRAPHQL_BASE_URL="http://localhost:4000/graphql"
+GRAPHQL_BASE_URL="http://localhost:4000/graphql"
 NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT="ws://localhost:4000/graphql"
 ```
 
