@@ -170,48 +170,43 @@ Remote Job Radar is a **Turbo monorepo** for AI-powered job discovery, using a m
 
 ## Git Workflow & Commit Standards
 
-**Branch Strategy:**
+### Branch Strategy
 
-- **`main`**: Production-ready code, protected branch
-- **`develop`**: Integration branch for features, CI/CD pipeline
+- **main**: Production-ready code, protected branch
+- **develop**: Integration branch for features, CI/CD pipeline
 - **Feature branches**: `feat/feature-name`, `fix/bug-name`, `chore/maintenance-task`
 
-**Commit Message Convention (Conventional Commits):**
+### Commit Message Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) and enforce them with [commitlint](https://github.com/conventional-changelog/commitlint/#what-is-commitlint):
+- **Use [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages.**
+- **Format:** `<type>[optional scope]: <title>`
+  - Description (optional): Add a longer explanation below the title, separated by a blank line.
+- **Types:** feat, fix, docs, style, refactor, perf, test, chore
+- **Optional Scope List:**
+  - `api`: If changes done to GraphQL API (see `apps/api/`)
+  - `web`: If changes done to Frontend/web app (see `apps/web/`)
+  - `aggregator`: If changes done to Go aggregator service (see `services/aggregator/`)
+  - `embedder`: If changes done to Python embedder service (see `services/embedder/`)
+  - (or leave blank)
+- **Header (title):**
+  - Format: `<type>[optional scope]: <description>`
+  - **Max length:** 50 characters (recommended), **NEVER exceed 90 characters** (required by commitlint).
+  - Use imperative mood (e.g., "fix: update API endpoint").
+- **Body:**
+  - Used to provide additional context, motivation, or explanation
+  - **Wrap body lines at 90 characters.**
+  - Separate body from header with a blank line.
+- **Footer:**
+  - Used for breaking changes and issue references
+  - Start with `BREAKING CHANGE:` for breaking changes
+  - Each footer should be a new line
+- **Breaking Changes:**
+  - For breaking changes, use `!` after the type/scope (e.g., `feat(api)!: ...`).
+- **Reference issues in the footer if needed.**
+
+#### Examples
 
 ```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-**Types:**
-
-- **feat**: A new feature for the user
-- **fix**: A bug fix
-- **docs**: Documentation only changes
-- **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-- **refactor**: A code change that neither fixes a bug nor adds a feature
-- **perf**: A code change that improves performance
-- **test**: Adding missing tests or correcting existing tests
-- **chore**: Changes to the build process or auxiliary tools and libraries
-
-**Scopes (when applicable):**
-
-- **api**: GraphQL API changes
-- **web**: Frontend/web app changes
-- **aggregator**: Go aggregator service
-- **embedder**: Python embedder service
-- **pipeline**: Kanban/pipeline functionality
-- **ui**: UI/UX improvements
-- **db**: Database schema or migration changes
-
-**Examples:**
-
-```bash
 feat(pipeline): add drag-and-drop functionality to kanban board
 fix(api): resolve job fetching pagination issue
 docs: update deployment instructions
@@ -219,39 +214,20 @@ refactor(web): improve error handling in job components
 chore(deps): update Next.js to v15.4.5
 ```
 
-**Breaking Changes:**
-For breaking changes, use `!` after the type/scope:
+#### Tools
 
-```bash
-feat(api)!: change GraphQL schema for job filtering
-```
-
-**Commit Message Format and Limits:**
-
-- **Header (title):**
-  - Format: `<type>[optional scope]: <description>`
-  - **Max length:** 50 characters (recommended)
-  - Should be concise and written in the imperative mood (e.g., "fix: update API endpoint")
-- **Body:**
-  - Used to provide additional context, motivation, or explanation
-  - **Wrap lines within 90 characters** (recommended)
-  - Separate from header by a blank line
-- **Footer:**
-  - Used for breaking changes and issue references
-  - Start with `BREAKING CHANGE:` for breaking changes
-  - Each footer should be a new line
-
-> See [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) for all available rules and configuration options.
-
-**Tools:**
-
-- **commitlint**: Enforces conventional commit format ([see docs](https://github.com/conventional-changelog/commitlint/#what-is-commitlint))
-- **commitizen**: (Optional) Use for interactive commit prompts
+- **commitlint**: Enforces commit format
+- **commitizen**: (Optional) Interactive commit prompts
 - **Turbo**: Monorepo task running with caching
 - **ESLint**: Code linting with consistent formatting rules
 - **Prettier**: Code formatting (integrated with ESLint)
 
-## Project Conventions & Gotchas
+#### Additional Notes
+
+- Follow project-specific scopes and patterns for clarity.
+- Use clear, concise language and avoid ambiguous descriptions.
+
+> See [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) for all available rules and configuration options.
 
 ## Project Conventions & Gotchas
 
