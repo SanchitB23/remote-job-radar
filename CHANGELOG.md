@@ -1,3 +1,14 @@
+## 2.0.0-beta.1 (2025-08-20)
+
+- feat(web)!: migrate NEXT_PUBLIC_GRAPHQL_BASE_URL to GRAPHQL_BASE_URL (#45) ([f1b940f](https://github.com/SanchitB23/remote-job-radar/commit/f1b940f)), closes [#45](https://github.com/SanchitB23/remote-job-radar/issues/45)
+
+### BREAKING CHANGE
+
+- Environment variable NEXT_PUBLIC_GRAPHQL_BASE_URL is now GRAPHQL_BASE_URL.
+  Update your .env files
+
+- docs: update environment variable from NEXT_PUBLIC_GRAPHQL_BASE_URL to GRAPHQL_BASE_URL
+
 ## 1.1.0-beta.3 (2025-08-20)
 
 - docs: update copilot instructions (#44) ([cbff4f1](https://github.com/SanchitB23/remote-job-radar/commit/cbff4f1)), closes [#44](https://github.com/SanchitB23/remote-job-radar/issues/44)
