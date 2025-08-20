@@ -11,7 +11,7 @@ func (w *WarmingUpJobService) FetchAndProcessJobs(_ context.Context) error {
 	return ErrWarmingUp
 }
 
-func (w *WarmingUpJobService) FetchAndProcessJobsFromSources(_ context.Context, sources []string) error {
+func (w *WarmingUpJobService) FetchAndProcessJobsFromSources(_ context.Context, _ []string) error {
 	return ErrWarmingUp
 }
 
