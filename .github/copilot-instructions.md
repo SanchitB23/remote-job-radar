@@ -192,12 +192,71 @@ Remote Job Radar is a **Turbo monorepo** for AI-powered job discovery, using a m
   - Format: `<type>[optional scope]: <description>`
   - **Max length:** 50 characters (recommended), **NEVER exceed 90 characters** (required by commitlint).
   - Use imperative mood (e.g., "fix: update API endpoint").
+
 - **Body:**
   - Used to provide additional context, motivation, or explanation
   - **Wrap body lines at 90 characters.**
   - Separate body from header with a blank line.
 - **Footer:**
   - Used for breaking changes and issue references
+  - Start with `BREAKING CHANGE:` for breaking changes
+  - Each footer should be a new line
+  - **Each footer line must not exceed 100 characters** ([footer-max-line-length])
+- **Breaking Changes:**
+  - For breaking changes, use `!` after the type/scope (e.g., `feat(api)!: ...`).
+- **Reference issues in the footer if needed.**
+
+#### Examples
+
+```
+feat(pipeline): add drag-and-drop functionality to kanban board
+fix(api): resolve job fetching pagination issue
+docs: update deployment instructions
+refactor(web): improve error handling in job components
+chore(deps): update Next.js to v15.4.5
+```
+
+#### Tools
+
+- **commitlint**: Enforces commit format
+- **commitizen**: (Optional) Interactive commit prompts
+- **Turbo**: Monorepo task running with caching
+- **ESLint**: Code linting with consistent formatting rules
+- **Prettier**: Code formatting (integrated with ESLint)
+
+#### Additional Notes
+
+- Follow project-specific scopes and patterns for clarity.
+- Use clear, concise language and avoid ambiguous descriptions.
+
+#### Commitlint Conventional Rules (Summary)
+
+- **Types allowed:** feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+  - Each type has a specific meaning (see commitlint docs for details)
+- **Header:**
+  - Max length: 100 characters
+  - Must be in format `<type>[optional scope]: <description>`
+- **Body:**
+  - Leading blank line required
+  - Max line length: 100 characters
+  - Used to provide additional context, motivation, or explanation
+
+- **Footer:**
+  - Leading blank line required
+  - Max line length: 100 characters ([footer-max-line-length])
+  - Used for breaking changes and issue references
+
+  - Each footer line must not exceed 100 characters
+- **Subject:**
+  - Should be a short, imperative tense description
+- **Breaking changes:**
+  - Use `!` after type/scope (e.g., `feat(api)!:`)
+  - Must include a body describing the breaking change
+- **Reverts:**
+  - Use `revert:` type for revert commits
+
+For full details, see [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) and [config-conventional source](https://github.com/conventional-changelog/commitlint/blob/master/@commitlint/config-conventional/src/index.ts).
+
   - Start with `BREAKING CHANGE:` for breaking changes
   - Each footer should be a new line
 - **Breaking Changes:**
@@ -228,6 +287,7 @@ chore(deps): update Next.js to v15.4.5
 - Use clear, concise language and avoid ambiguous descriptions.
 
 > See [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) for all available rules and configuration options.
+
 
 ## Project Conventions & Gotchas
 
