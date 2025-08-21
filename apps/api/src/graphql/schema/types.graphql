@@ -1,0 +1,56 @@
+"""
+A remote job posting with AI-generated fit score
+"""
+type Job {
+  id: ID!
+  title: String!
+  company: String!
+  location: String
+  workType: String
+  salaryMin: Int
+  salaryMax: Int
+  fitScore: Float!
+  url: String!
+  publishedAt: String!
+  bookmarked: Boolean!
+  source: JobSource!
+  isTracked: Boolean!
+}
+
+"""
+Paginated connection for jobs, following Relay-style pagination
+"""
+type JobsConnection {
+  edges: [Job!]!
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+"""
+An item in the user's job application pipeline (e.g. Kanban column)
+"""
+type PipelineItem {
+  id: ID!
+  job: Job!
+  column: String!
+  position: Int!
+}
+
+"""
+Range metadata for numeric filters
+"""
+type NumericRange {
+  min: Float!
+  max: Float!
+}
+
+"""
+Metadata about available filter options based on current job data
+"""
+type FilterMetadata {
+  fitScore: NumericRange!
+  salary: NumericRange!
+  sources: [JobSource!]!
+  locations: [String!]!
+  workTypes: [String!]!
+}
