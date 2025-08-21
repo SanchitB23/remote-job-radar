@@ -5,7 +5,7 @@ import type {
   BookmarkArgs,
   PipelineReorderArgs,
   PipelineUpsertArgs,
-} from "../types/resolvers.js";
+} from "../../types/resolvers.js";
 
 export function getMutationResolvers(_prisma: unknown): any {
   return {

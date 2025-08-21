@@ -7,7 +7,7 @@ import type {
   LocationGroupResult,
   SourceResult,
   WorkTypeGroupResult,
-} from "../types/resolvers.js";
+} from "../../types/resolvers.js";
 
 /**
  * Returns an object containing GraphQL query resolvers for jobs and pipeline items.

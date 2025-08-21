@@ -1,6 +1,6 @@
 import { withFilter } from "graphql-subscriptions";
 
-import type { NewJobSubscriptionArgs, PubSubInterface } from "../types/resolvers.js";
+import type { NewJobSubscriptionArgs, PubSubInterface } from "../../types/resolvers.js";
 
 export function getSubscriptionResolvers(pubsub: PubSubInterface, NEW_JOB: string): any {
   return {

@@ -1,0 +1,19 @@
+type Query {
+  jobs(
+    minFit: Float
+    search: String
+    minSalary: Int
+    location: String
+    workType: String
+    sources: [JobSource!]
+    sortBy: SortBy = FIT
+    after: String
+    first: Int = 50
+    bookmarked: Boolean
+    isTracked: Boolean
+  ): JobsConnection!
+
+  pipeline: [PipelineItem!]!
+
+  filterMetadata: FilterMetadata!
+}

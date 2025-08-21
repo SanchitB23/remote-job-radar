@@ -1,0 +1,5 @@
+type Mutation {
+  bookmark(id: ID!): Boolean!
+  pipelineUpsert(jobId: ID!, column: String!, position: Int!): Boolean!
+  pipelineReorder(ids: [ID!]!, positions: [Int!]!): Boolean!
+}
