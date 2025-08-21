@@ -8,8 +8,8 @@ import express from "express";
 import { useServer } from "graphql-ws/use/ws";
 import { WebSocketServer } from "ws";
 
-import { getUserId, getUserIdFromToken } from "./auth";
-import { schema } from "./graphql/schema";
+import { getUserId, getUserIdFromToken } from "./auth.js";
+import { schema } from "./graphql/schema.js";
 
 const prisma = new PrismaClient();
 

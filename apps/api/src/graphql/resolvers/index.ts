@@ -2,10 +2,10 @@ import type { PrismaClient } from "@prisma/client";
 import { PubSub } from "graphql-subscriptions";
 import pg from "pg";
 
-import { getJobFieldResolvers } from "./job";
-import { getMutationResolvers } from "./mutations";
-import { getQueryResolvers } from "./queries";
-import { getSubscriptionResolvers } from "./subscriptions";
+import { getJobFieldResolvers } from "./job.js";
+import { getMutationResolvers } from "./mutations.js";
+import { getQueryResolvers } from "./queries.js";
+import { getSubscriptionResolvers } from "./subscriptions.js";
 
 const pubsub = new PubSub();
 const NEW_JOB = "NEW_JOB";
