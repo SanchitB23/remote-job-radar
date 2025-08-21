@@ -8,8 +8,7 @@ import express from "express";
 import { useServer } from "graphql-ws/use/ws";
 import { WebSocketServer } from "ws";
 
-import { GQL_API_BASE_URL, GQL_API_CORS_ORIGIN, GQL_API_PORT } from "@/constants/index";
-
+import { GQL_API_BASE_URL, GQL_API_CORS_ORIGIN, GQL_API_PORT } from "./constants/index.js";
 import { schema } from "./graphql/schema.js";
 import { getUserId, getUserIdFromToken } from "./lib/auth.js";
 

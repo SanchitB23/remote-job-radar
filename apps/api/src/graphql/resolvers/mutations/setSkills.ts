@@ -1,8 +1,9 @@
 import { GraphQLError } from "graphql";
 import { embedText } from "lib/embedder";
 
-import { MAX_SKILLS_LEN } from "@/constants/index";
 import type { AuthenticatedGraphQLContext } from "@/types/resolvers";
+
+import { MAX_SKILLS_LEN } from "../../../constants/index.js";
 
 export const setSkills = async (
   _: unknown,

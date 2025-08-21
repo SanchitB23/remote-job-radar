@@ -3,7 +3,7 @@ import type { Request } from "express";
 import jwt from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
 
-import { CLERK_JWK_URL, CLERK_JWT_ISSUER } from "@/constants/index";
+import { CLERK_JWK_URL, CLERK_JWT_ISSUER } from "../constants/index.js";
 
 const jwkClient = jwksRsa({
   jwksUri: CLERK_JWK_URL,

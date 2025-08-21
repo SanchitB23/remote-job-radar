@@ -1,12 +1,13 @@
 import { GraphQLError } from "graphql";
 
-import { IVFFLAT_PROBES } from "@/constants/index";
 import type {
   AuthenticatedGraphQLContext,
   JobParent,
   JobResult,
   JobsQueryArgs,
 } from "@/types/resolvers";
+
+import { IVFFLAT_PROBES } from "../../../constants/index.js";
 
 const sortFieldMap: Record<string, string> = {
   FIT: "fit_score",
