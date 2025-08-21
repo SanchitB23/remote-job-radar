@@ -1,9 +1,8 @@
 import { GraphQLError } from "graphql";
 import { embedText } from "lib/embedder";
 
+import { MAX_SKILLS_LEN } from "@/constants/index";
 import type { AuthenticatedGraphQLContext } from "@/types/resolvers";
-
-const MAX_SKILLS = 64;
 
 export const setSkills = async (
   _: unknown,
@@ -16,7 +15,7 @@ export const setSkills = async (
     const cleaned = (skills || [])
       .map((s) => s.trim())
       .filter(Boolean)
-      .slice(0, MAX_SKILLS);
+      .slice(0, MAX_SKILLS_LEN);
 
     const text = cleaned.join(" ");
     let vec;

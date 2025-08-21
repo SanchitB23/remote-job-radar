@@ -3,8 +3,10 @@ import type { Request } from "express";
 import jwt from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
 
+import { CLERK_JWK_URL, CLERK_JWT_ISSUER } from "@/constants/index";
+
 const jwkClient = jwksRsa({
-  jwksUri: process.env.CLERK_JWK_URL!,
+  jwksUri: CLERK_JWK_URL,
   cache: true,
   cacheMaxEntries: 5,
   timeout: 30000,
@@ -25,7 +27,7 @@ export async function getUserId(req: Request): Promise<string | null> {
 
     const key = await jwkClient.getSigningKey(kid);
     const payload = jwt.verify(token, key.getPublicKey(), {
-      issuer: process.env.CLERK_JWT_ISSUER,
+      issuer: CLERK_JWT_ISSUER,
       algorithms: ["RS256"],
     }) as jwt.JwtPayload | string;
 
@@ -60,7 +62,7 @@ export async function getUserIdFromToken(token: string): Promise<string | null> 
 
     const key = await jwkClient.getSigningKey(kid);
     const payload: jwt.JwtPayload | string = jwt.verify(cleanToken, key.getPublicKey(), {
-      issuer: process.env.CLERK_JWT_ISSUER,
+      issuer: CLERK_JWT_ISSUER,
       algorithms: ["RS256"],
     });
 
