@@ -1,6 +1,4 @@
-import { filterMetadata } from "./queries/filterMetadata.js";
-import { jobs } from "./queries/jobs.js";
-import { pipeline } from "./queries/pipeline.js";
+import { filterMetadata, jobs, meProfile, pipeline } from "./queries/index.js";
 
 /**
  * Returns an object containing GraphQL query resolvers for jobs and pipeline items.
@@ -14,5 +12,6 @@ export function getQueryResolvers(_prisma: unknown): any {
     jobs,
     pipeline,
     filterMetadata,
+    meProfile,
   };
 }
