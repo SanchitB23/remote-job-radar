@@ -1,5 +1,49 @@
+"""
+Root mutation type for modifying bookmarks and pipeline items.
+"""
 type Mutation {
-  bookmark(id: ID!): Boolean!
-  pipelineUpsert(jobId: ID!, column: String!, position: Int!): Boolean!
-  pipelineReorder(ids: [ID!]!, positions: [Int!]!): Boolean!
+  """
+  Bookmark or unbookmark a job for the current user.
+  Returns true if the operation succeeded.
+  """
+  bookmark(
+    """
+    ID of the job to bookmark or unbookmark
+    """
+    id: ID!
+  ): Boolean!
+
+  """
+  Add or update a job in the user's pipeline (kanban board).
+  Returns true if the operation succeeded.
+  """
+  pipelineUpsert(
+    """
+    ID of the job to add or update in the pipeline
+    """
+    jobId: ID!
+    """
+    Target kanban column (e.g. wishlist, applied, interview, offer)
+    """
+    column: String!
+    """
+    Position/order within the column
+    """
+    position: Int!
+  ): Boolean!
+
+  """
+  Reorder jobs within a pipeline column.
+  Returns true if the operation succeeded.
+  """
+  pipelineReorder(
+    """
+    List of job IDs in the new order
+    """
+    ids: [ID!]!
+    """
+    List of positions corresponding to the job IDs
+    """
+    positions: [Int!]!
+  ): Boolean!
 }
