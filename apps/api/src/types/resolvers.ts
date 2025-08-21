@@ -104,6 +104,5 @@ export interface JobResult {
   salaryMax: number | null;
   url: string | null;
   publishedAt: Date | null;
-  vector: unknown | null;
   fitScore: number;
 }
