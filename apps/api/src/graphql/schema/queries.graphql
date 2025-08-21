@@ -64,4 +64,10 @@ type Query {
   Useful for building dynamic filter UIs.
   """
   filterMetadata: FilterMetadata!
+
+  """
+  Retrieves the profile information of the currently authenticated user.
+  Returns a `UserProfile` object containing user-specific details.
+  """
+  meProfile: UserProfile
 }

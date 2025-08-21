@@ -135,3 +135,26 @@ type FilterMetadata {
   """
   workTypes: [String!]!
 }
+
+"""
+Represents a user's profile information.
+
+Fields:
+- userId: Unique identifier for the user.
+- skills: List of skills associated with the user.
+- updatedAt: Timestamp indicating when the profile was last updated.
+"""
+type UserProfile {
+  """
+  The unique identifier of the user associated with this entity.
+  """
+  userId: ID!
+  """
+  A list of skills relevant to the user or entity.
+  """
+  skills: [String!]!
+  """
+  The ISO 8601 formatted date and time when this entity was last updated.
+  """
+  updatedAt: String!
+}

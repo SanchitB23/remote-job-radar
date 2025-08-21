@@ -46,4 +46,20 @@ type Mutation {
     """
     positions: [Int!]!
   ): Boolean!
+
+  """
+  Sets the user's skills.
+
+  Arguments:
+  - skills: A non-empty list of skill names to set for the user.
+
+  Returns:
+  - Boolean: True if the skills were successfully set, otherwise false.
+  """
+  setSkills(
+    """
+    A non-empty list of skill names to set for the user.
+    """
+    skills: [String!]!
+  ): Boolean!
 }
