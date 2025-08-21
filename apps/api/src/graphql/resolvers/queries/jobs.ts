@@ -136,7 +136,7 @@ export const jobs = async (
         ranked AS (
           SELECT
             j.id, j.source, j.title, j.company, j.description, j.location,
-            j.work_type, j.salary_min, j.salary_max, j.url, j.published_at, j.vector,
+            j.work_type, j.salary_min, j.salary_max, j.url, j.published_at,
             (100 * (1 - (j.vector <=> (SELECT "skill_vector" FROM up)))) AS fit_score
           FROM "jobs" j
           ${whereSQL}
@@ -243,7 +243,6 @@ export const jobs = async (
         salaryMax: job.salary_max,
         url: job.url,
         publishedAt: job.published_at,
-        vector: job.vector,
         fitScore: job.fit_score ?? 0,
       })),
       endCursor,
