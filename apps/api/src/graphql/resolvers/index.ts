@@ -1,3 +1,4 @@
+import type { IResolvers } from "@graphql-tools/utils";
 import type { PrismaClient } from "@prisma/client";
 import { DateTimeResolver } from "graphql-scalars";
 import { PubSub } from "graphql-subscriptions";
@@ -11,7 +12,7 @@ import { getSubscriptionResolvers } from "./subscriptions.js";
 const pubsub = new PubSub();
 const NEW_JOB = "NEW_JOB";
 
-export function getResolvers(prisma: PrismaClient): any {
+export function getResolvers(prisma: PrismaClient): IResolvers<string, unknown> {
   // --- hook Postgres NOTIFY to PubSub ---
   const listener = new pg.Client({
     connectionString: process.env.PG_DATABASE_URL,

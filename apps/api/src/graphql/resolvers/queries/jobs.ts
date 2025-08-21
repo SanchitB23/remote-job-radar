@@ -1,6 +1,11 @@
 import { GraphQLError } from "graphql";
 
-import type { AuthenticatedGraphQLContext, JobParent, JobsQueryArgs } from "@/types/resolvers";
+import type {
+  AuthenticatedGraphQLContext,
+  JobParent,
+  JobResult,
+  JobsQueryArgs,
+} from "@/types/resolvers";
 
 const IVFFLAT_PROBES = 10;
 
@@ -10,7 +15,15 @@ const sortFieldMap: Record<string, string> = {
   SALARY: "salary_min",
 };
 
-export const jobs = async (_: unknown, args: JobsQueryArgs, ctx: AuthenticatedGraphQLContext) => {
+export const jobs = async (
+  _: unknown,
+  args: JobsQueryArgs,
+  ctx: AuthenticatedGraphQLContext,
+): Promise<{
+  edges: Array<JobResult>;
+  endCursor: string | null;
+  hasNextPage: boolean;
+}> => {
   if (!ctx.userId) {
     throw new GraphQLError("UNAUTHENTICATED", {
       extensions: { code: "UNAUTHENTICATED" },

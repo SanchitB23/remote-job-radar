@@ -6,7 +6,7 @@ export const pipelineReorder = async (
   _: unknown,
   { ids, positions }: PipelineReorderArgs,
   ctx: AuthenticatedGraphQLContext,
-) => {
+): Promise<boolean> => {
   if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
   await ctx.prisma.$transaction(
     ids.map((id: string, i: number) => {

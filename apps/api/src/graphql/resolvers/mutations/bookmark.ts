@@ -6,7 +6,7 @@ export const bookmark = async (
   _: unknown,
   { id }: BookmarkArgs,
   ctx: AuthenticatedGraphQLContext,
-) => {
+): Promise<boolean> => {
   if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
   try {
     const where = { user_id_job_id: { user_id: ctx.userId, job_id: id } };

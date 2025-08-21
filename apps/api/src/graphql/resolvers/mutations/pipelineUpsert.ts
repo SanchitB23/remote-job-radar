@@ -6,7 +6,7 @@ export const pipelineUpsert = async (
   _: unknown,
   { jobId, column, position }: PipelineUpsertArgs,
   ctx: AuthenticatedGraphQLContext,
-) => {
+): Promise<boolean> => {
   if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
   await ctx.prisma.pipelineItem.upsert({
     where: { user_id_job_id: { user_id: ctx.userId, job_id: jobId } },

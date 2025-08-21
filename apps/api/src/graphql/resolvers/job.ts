@@ -1,6 +1,6 @@
 import type { AuthenticatedGraphQLContext, JobParent } from "@/types/resolvers";
 
-export function getJobFieldResolvers(): any {
+export function getJobFieldResolvers(): Record<string, unknown> {
   return {
     bookmarked: async (parent: JobParent, _: unknown, ctx: AuthenticatedGraphQLContext) => {
       const count = await ctx.prisma.bookmark.count({
