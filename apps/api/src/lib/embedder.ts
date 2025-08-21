@@ -1,4 +1,4 @@
-import { EMBEDDER_BASE_URL } from "@/constants/index";
+import { EMBEDDER_BASE_URL } from "../constants/index.js";
 
 export async function embedText(text: string): Promise<number[]> {
   const r = await fetch(EMBEDDER_BASE_URL + "/embed", {
