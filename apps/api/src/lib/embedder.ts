@@ -1,6 +1,7 @@
+import { EMBEDDER_BASE_URL } from "@/constants/index";
+
 export async function embedText(text: string): Promise<number[]> {
-  const url = process.env.EMBEDDER_BASE_URL || "http://localhost:8000";
-  const r = await fetch(url + "/embed", {
+  const r = await fetch(EMBEDDER_BASE_URL + "/embed", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text }),
