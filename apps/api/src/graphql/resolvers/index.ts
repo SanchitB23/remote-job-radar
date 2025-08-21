@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+import { DateTimeResolver } from "graphql-scalars";
 import { PubSub } from "graphql-subscriptions";
 import pg from "pg";
 
@@ -43,6 +44,7 @@ export function getResolvers(prisma: PrismaClient): any {
   });
 
   return {
+    DateTime: DateTimeResolver,
     Query: getQueryResolvers(prisma),
     Mutation: getMutationResolvers(prisma),
     Subscription: getSubscriptionResolvers(pubsub, NEW_JOB),
