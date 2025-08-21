@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
 
-import type { AuthenticatedGraphQLContext } from "../../../types/resolvers.js";
+import type { AuthenticatedGraphQLContext } from "@/types/resolvers";
 
 export const pipeline = async (_: unknown, __: unknown, ctx: AuthenticatedGraphQLContext) => {
   if (!ctx.userId) {

@@ -5,7 +5,7 @@ import type {
   LocationGroupResult,
   SourceResult,
   WorkTypeGroupResult,
-} from "../../../types/resolvers.js";
+} from "@/types/resolvers";
 
 export const filterMetadata = async (_: unknown, __: unknown, ctx: AuthenticatedGraphQLContext) => {
   if (!ctx.userId) {

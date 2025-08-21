@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
 
-import type { AuthenticatedGraphQLContext, BookmarkArgs } from "../../../types/resolvers.js";
+import type { AuthenticatedGraphQLContext, BookmarkArgs } from "@/types/resolvers";
 
 export const bookmark = async (
   _: unknown,

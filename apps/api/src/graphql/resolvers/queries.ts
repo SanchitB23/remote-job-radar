@@ -1,6 +1,6 @@
-import { filterMetadata } from "./queries/filterMetadata.js";
-import { jobs } from "./queries/jobs.js";
-import { pipeline } from "./queries/pipeline.js";
+import { filterMetadata } from "./queries/filterMetadata";
+import { jobs } from "./queries/jobs";
+import { pipeline } from "./queries/pipeline";
 
 /**
  * Returns an object containing GraphQL query resolvers for jobs and pipeline items.

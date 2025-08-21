@@ -1,10 +1,6 @@
 import { GraphQLError } from "graphql";
 
-import type {
-  AuthenticatedGraphQLContext,
-  JobParent,
-  JobsQueryArgs,
-} from "../../../types/resolvers.js";
+import type { AuthenticatedGraphQLContext, JobParent, JobsQueryArgs } from "@/types/resolvers";
 
 export const jobs = async (_: unknown, args: JobsQueryArgs, ctx: AuthenticatedGraphQLContext) => {
   if (!ctx.userId) {

@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
 
-import type { AuthenticatedGraphQLContext, PipelineUpsertArgs } from "../../../types/resolvers.js";
+import type { AuthenticatedGraphQLContext, PipelineUpsertArgs } from "@/types/resolvers";
 
 export const pipelineUpsert = async (
   _: unknown,
