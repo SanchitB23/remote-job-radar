@@ -9,7 +9,7 @@ export const setSkills = async (
   _: unknown,
   { skills }: { skills: string[] },
   ctx: AuthenticatedGraphQLContext,
-) => {
+): Promise<boolean> => {
   if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
   const cleaned = (skills || [])
     .map((s) => s.trim())

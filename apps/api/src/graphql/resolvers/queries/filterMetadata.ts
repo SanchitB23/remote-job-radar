@@ -2,12 +2,17 @@ import { GraphQLError } from "graphql";
 
 import type {
   AuthenticatedGraphQLContext,
+  FilterMetadataResult,
   LocationGroupResult,
   SourceResult,
   WorkTypeGroupResult,
 } from "@/types/resolvers";
 
-export const filterMetadata = async (_: unknown, __: unknown, ctx: AuthenticatedGraphQLContext) => {
+export const filterMetadata = async (
+  _: unknown,
+  __: unknown,
+  ctx: AuthenticatedGraphQLContext,
+): Promise<FilterMetadataResult> => {
   if (!ctx.userId) {
     throw new GraphQLError("UNAUTHENTICATED", {
       extensions: { code: "UNAUTHENTICATED" },
