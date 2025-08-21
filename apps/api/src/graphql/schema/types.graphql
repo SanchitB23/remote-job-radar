@@ -41,7 +41,7 @@ type Job {
   """
   ISO 8601 date string when the job was published
   """
-  publishedAt: String!
+  publishedAt: DateTime!
   """
   Whether the job is bookmarked by the user
   """
@@ -156,5 +156,10 @@ type UserProfile {
   """
   The ISO 8601 formatted date and time when this entity was last updated.
   """
-  updatedAt: String!
+  updatedAt: DateTime!
 }
+
+"""
+A custom scalar representing a date and time in ISO 8601 format.
+"""
+scalar DateTime
