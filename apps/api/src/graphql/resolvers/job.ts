@@ -1,4 +1,4 @@
-import type { AuthenticatedGraphQLContext, JobParent } from "../types/resolvers.js";
+import type { AuthenticatedGraphQLContext, JobParent } from "@/types/resolvers";
 
 export function getJobFieldResolvers(): any {
   return {

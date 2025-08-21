@@ -1,9 +1,7 @@
-import { readFileSync } from "node:fs";
 import http from "node:http";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { makeExecutableSchema } from "@graphql-tools/schema";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express from "express";
@@ -11,14 +9,9 @@ import { useServer } from "graphql-ws/use/ws";
 import { WebSocketServer } from "ws";
 
 import { getUserId, getUserIdFromToken } from "./auth.js";
-import { getResolvers } from "./resolvers/index.js";
+import { schema } from "./graphql/schema.js";
 
 const prisma = new PrismaClient();
-
-// 1. SDL & resolvers
-const typeDefs = readFileSync("./src/schema.graphql", "utf8");
-const resolvers = getResolvers(prisma);
-const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 // 2. Create HTTP + WS servers
 const app = express();
@@ -92,7 +85,7 @@ app.use(
 app.use(express.json());
 
 // 4. Apollo
-const apolloServer = new ApolloServer({ typeDefs, resolvers });
+const apolloServer = new ApolloServer({ schema });
 await apolloServer.start();
 app.use(
   "/graphql",
