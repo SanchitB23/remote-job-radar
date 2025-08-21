@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "build": "npm run db:generate && tsc",
+    "build": "npm run db:generate && tsc && node copy-graphql-schema.js",
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "npm run db:generate && tsc -p tsconfig.json --noEmit",
     "format": "prettier . --write",
