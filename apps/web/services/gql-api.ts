@@ -8,6 +8,7 @@ import {
   JOBS_QUERY,
   PIPELINE_QUERY,
   PIPELINE_UPSERT_MUTATION,
+  SET_USER_SKILLS_MUTATION,
   USER_SKILLS_QUERY,
 } from "@/constants/gqlQueries";
 import type {
@@ -113,4 +114,8 @@ export async function fetchUserSkills(token?: string | null): Promise<Pick<UserP
     meProfile: UserProfile;
   }>(USER_SKILLS_QUERY, {}, token);
   return { skills: response.meProfile.skills };
+}
+
+export async function saveUserSkills(token: string | null, skills: string[]): Promise<void> {
+  await executeGraphQLQuery(SET_USER_SKILLS_MUTATION, { skills }, token);
 }
