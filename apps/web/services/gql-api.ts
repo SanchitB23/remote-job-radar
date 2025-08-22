@@ -8,8 +8,15 @@ import {
   JOBS_QUERY,
   PIPELINE_QUERY,
   PIPELINE_UPSERT_MUTATION,
+  USER_SKILLS_QUERY,
 } from "@/constants/gqlQueries";
-import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } from "@/types/gql";
+import type {
+  FetchJobsParams,
+  FilterMetadata,
+  JobsConnection,
+  PipelineItem,
+  UserProfile,
+} from "@/types/gql";
 
 // Utility function to create a GraphQL client with consistent configuration
 export function createGraphQLClient(token?: string | null): GraphQLClient {
@@ -99,4 +106,11 @@ export async function fetchFilterMetadataShared(token?: string | null): Promise<
     filterMetadata: FilterMetadata;
   }>(FILTER_METADATA_QUERY, {}, token);
   return response.filterMetadata;
+}
+
+export async function fetchUserSkills(token?: string | null): Promise<Pick<UserProfile, "skills">> {
+  const response = await executeGraphQLQuery<{
+    meProfile: UserProfile;
+  }>(USER_SKILLS_QUERY, {}, token);
+  return { skills: response.meProfile.skills };
 }

@@ -54,3 +54,9 @@ export interface FilterMetadata {
   locations: string[];
   workTypes: string[];
 }
+
+export interface UserProfile {
+  userId: string;
+  skills: string[];
+  updatedAt: string;
+}
