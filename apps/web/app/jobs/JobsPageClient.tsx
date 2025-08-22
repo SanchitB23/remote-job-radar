@@ -5,14 +5,11 @@ import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useInfiniteJobs, useUserSkills } from "@/lib/hooks";
 import type { Job, JobsConnection } from "@/types/gql";
 
-import { AddToPipelineButton } from "./AddToPipelineBtn";
-import { BookmarkButton } from "./BookmarkBtn";
+import { JobCard } from "./JobCard";
 import { JobCardSkeleton } from "./JobCardSkeleton";
 import { parseUrlJobParams } from "./utils";
 
@@ -129,58 +126,7 @@ export function JobsPageClient(): JSX.Element {
       <ul className="space-y-2">
         {jobs.map((j: Job) => (
           <li key={j.id}>
-            <Card
-              className="transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-alias group"
-              onClick={(e) => {
-                const target = e.target as HTMLElement;
-                if (target.closest("[data-bookmark-btn]")) return;
-                window.open(j.url, "_blank", "noopener");
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={j.title}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  const target = e.target as HTMLElement;
-                  if (target.closest("[data-bookmark-btn]")) return;
-                  window.open(j.url, "_blank", "noopener");
-                }
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex-1 w-full">
-                    <h3 className="font-semibold text-lg">{j.title}</h3>
-                    <p className="text-muted-foreground">{j.company}</p>
-                    <Badge variant={j.fitScore === 0 ? "secondary" : "default"} className="mt-2">
-                      Fit Score: {j.fitScore === 0 ? "N/A" : `${Math.round(j.fitScore)}%`}
-                    </Badge>
-                  </div>
-                  <span
-                    className="z-20 pointer-events-auto flex flex-row gap-3 justify-center items-center w-full sm:w-auto mt-4 sm:mt-0"
-                    data-bookmark-btn
-                  >
-                    <span title={j.bookmarked ? "Remove bookmark" : "Bookmark this job"}>
-                      <BookmarkButton
-                        id={j.id}
-                        bookmarked={j.bookmarked ?? false}
-                        size="lg"
-                        variant="cta"
-                      />
-                    </span>
-                    <span title="Add to Pipeline (Wishlist)">
-                      <AddToPipelineButton
-                        jobId={j.id}
-                        inPipeline={j.isTracked}
-                        size="lg"
-                        variant="cta"
-                      />
-                    </span>
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <JobCard job={j} />
           </li>
         ))}
       </ul>
