@@ -247,6 +247,7 @@ chore(deps): update Next.js to v15.4.5
   - Used for breaking changes and issue references
 
   - Each footer line must not exceed 100 characters
+
 - **Subject:**
   - Should be a short, imperative tense description
 - **Breaking changes:**
@@ -257,8 +258,8 @@ chore(deps): update Next.js to v15.4.5
 
 For full details, see [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) and [config-conventional source](https://github.com/conventional-changelog/commitlint/blob/master/@commitlint/config-conventional/src/index.ts).
 
-  - Start with `BREAKING CHANGE:` for breaking changes
-  - Each footer should be a new line
+- Start with `BREAKING CHANGE:` for breaking changes
+- Each footer should be a new line
 - **Breaking Changes:**
   - For breaking changes, use `!` after the type/scope (e.g., `feat(api)!: ...`).
 - **Reference issues in the footer if needed.**
@@ -288,7 +289,6 @@ chore(deps): update Next.js to v15.4.5
 
 > See [commitlint rules reference](https://github.com/conventional-changelog/commitlint/blob/master/docs/reference/rules.md) for all available rules and configuration options.
 
-
 ## Project Conventions & Gotchas
 
 - **Imports**: Use `@/` alias for `apps/web/` paths, organize imports with simple-import-sort
@@ -298,6 +298,31 @@ chore(deps): update Next.js to v15.4.5
 - **Turbo**: Use `turbo dev` for monorepo caching; avoid per-app `npm run dev`
 - **Go service**: Connects directly to DB, not via Prisma
 - **Embeddings**: Jobs must be embedded before fit scoring works
+
+### Console Logging Pattern
+
+**Preferred logging format:**
+
+```
+[Filename] [functionName] varName: <var>
+```
+
+- Use this pattern for all `console.log`/`console.debug`/`console.error` statements.
+- If possible, include a stack trace for deeper debugging (e.g., with `console.trace`).
+- Example:
+  ```js
+  console.log("[MyComponent.tsx] [fetchJobs] jobs:", jobs);
+  // With trace:
+  console.trace("[MyComponent.tsx] [fetchJobs] jobs:", jobs);
+  ```
+- For reusable logging, consider a utility function:
+  ```js
+  function logVar(file, func, varName, value, trace = false) {
+    const msg = `[${file}] [${func}] ${varName}: ${JSON.stringify(value, null, 2)}`;
+    trace ? console.trace(msg) : console.log(msg);
+  }
+  ```
+- Always use clear, explicit variable names and context in logs.
 
 **Code Quality:**
 
