@@ -8,9 +8,9 @@ import { useCallback, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useInfiniteJobs, useUserSkills } from "@/lib/hooks";
 import type { Job, JobsConnection } from "@/types/gql";
 
-import { useInfiniteJobs } from "../../lib/hooks";
 import { AddToPipelineButton } from "./AddToPipelineBtn";
 import { BookmarkButton } from "./BookmarkBtn";
 import { JobCardSkeleton } from "./JobCardSkeleton";
@@ -39,6 +39,12 @@ export function JobsPageClient(): JSX.Element {
 
   const { data, isLoading, isFetching, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteJobs(infiniteParams);
+
+  const {
+    data: userSkills,
+    isLoading: isLoadingUserSkills,
+    isError: isErrorUserSkills,
+  } = useUserSkills();
 
   // Flatten all jobs from all pages
   const jobs: Job[] =
@@ -76,6 +82,24 @@ export function JobsPageClient(): JSX.Element {
     };
   }, [handleLoadMore]);
 
+  const renderPersonalizedChip = (): JSX.Element | null =>
+    !isLoadingUserSkills &&
+    !isErrorUserSkills &&
+    userSkills?.skills &&
+    userSkills.skills.length > 0 ? (
+      <span className="ml-3 inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800 border border-emerald-200 shadow-sm dark:bg-emerald-900 dark:text-emerald-100 dark:border-emerald-700">
+        <svg
+          className="w-3.5 h-3.5 mr-1.5 text-emerald-500 dark:text-emerald-300"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          aria-hidden="true"
+        >
+          <path d="M10 2a1 1 0 0 1 .894.553l2.382 4.83 5.334.775a1 1 0 0 1 .554 1.707l-3.858 3.762.911 5.312a1 1 0 0 1-1.451 1.054L10 16.347l-4.768 2.506a1 1 0 0 1-1.451-1.054l.911-5.312L.834 9.865a1 1 0 0 1 .554-1.707l5.334-.775L9.106 2.553A1 1 0 0 1 10 2Z" />
+        </svg>
+        Personalized
+      </span>
+    ) : null;
+
   if (error) {
     return <JobsError error={error} />;
   }
@@ -93,14 +117,15 @@ export function JobsPageClient(): JSX.Element {
 
   return (
     <div>
-      {/* Jobs info header */}
-      {jobs.length > 0 && (
-        <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-          Showing {jobs.length} job{jobs.length !== 1 ? "s" : ""}
-          {hasNextPage && " (loading more as you scroll)"}
-        </div>
-      )}
-
+      <div className="flex items-center gap-3 mb-2 text-sm text-gray-600 dark:text-gray-400">
+        {renderPersonalizedChip()}
+        {jobs.length > 0 && (
+          <span>
+            Showing {jobs.length} job{jobs.length !== 1 ? "s" : ""}
+            {hasNextPage && " (loading more as you scroll)"}
+          </span>
+        )}
+      </div>
       <ul className="space-y-2">
         {jobs.map((j: Job) => (
           <li key={j.id}>

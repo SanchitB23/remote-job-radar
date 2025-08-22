@@ -18,10 +18,7 @@ export default function JobsLayout({ children }: { children: ReactNode }): JSX.E
         </div>
       </SignedOut>
       <SignedIn>
-        <div>
-          <h1 className="text-2xl font-bold mb-6">Your Job Recommendations</h1>
-          {children}
-        </div>
+        <div>{children}</div>
       </SignedIn>
     </>
   );
