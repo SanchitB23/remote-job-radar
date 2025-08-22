@@ -159,3 +159,36 @@ export function useUserSkills(): UseQueryResult<Pick<UserProfile, "skills">, Err
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 }
+
+export function useSetUserSkills(): UseMutationResult<
+  Pick<UserProfile, "skills">,
+  Error,
+  Pick<UserProfile, "skills">,
+  unknown
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (skills: Pick<UserProfile, "skills">) => {
+      const response = await fetch("/api/user/skills", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(skills),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch user skills query
+      queryClient.invalidateQueries({ queryKey: ["user-skills"] });
+    },
+    onError: (error) => {
+      console.error("Set user skills mutation error:", error);
+    },
+  });
+}
