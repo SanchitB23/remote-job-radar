@@ -1,103 +1,164 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-// import { useAuthedFetcher } from "@/lib/gqlClient.client";
+import type { RefetchOptions } from "@tanstack/react-query";
+import _ from "lodash";
+import { AlertCircleIcon, Loader2, RotateCcw } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-export function PersonalizationPanel() {
-  const { isSignedIn } = useAuth();
-  // const gql = useAuthedFetcher();
-  const [skillsText, setSkillsText] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSetUserSkills, useUserSkills } from "@/lib/hooks";
 
-  useEffect(() => {
-    let mounted = true;
-    // (async () => {
-    //   try {
-    //     const res = await gql<{ meProfile: { skills: string[] } | null }>(
-    //       `{ meProfile { skills } }`,
-    //     );
-    //     if (!mounted) return;
-    //     setSkillsText(res.meProfile?.skills?.join(", ") ?? "");
-    //   } finally {
-    //     if (mounted) setLoading(false);
-    //   }
-    // })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+function LoadingSkillsCard() {
+  return (
+    <Card className="p-6 bg-muted/50 shadow-none border-0 flex items-center justify-center min-h-[160px]">
+      <CardContent className="flex flex-col items-center justify-center p-0">
+        <div className="flex flex-col items-center gap-2">
+          <span className="animate-spin text-primary">
+            <Loader2 className="h-6 w-6" />
+          </span>
+          <span className="text-sm text-muted-foreground font-medium tracking-wide">
+            Loading your skills…
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-  async function saveSkills() {
-    setSaving(true);
-    try {
-      const skills = skillsText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .slice(0, 64);
-      // await gql(`mutation($skills:[String!]!){ setSkills(skills:$skills) }`, { skills });
-      toast.success("Saved! Your feed will be personalized.");
-    } catch (e) {
-      toast.error("Failed to save skills");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function onResumeSelected(file: File) {
-    try {
-      setUploading(true);
-      // FUTURE:
-      // 1) Upload file to storage (UploadThing/R2/S3/Vercel Blob) → returns URL
-      // 2) gql(`mutation($url:String!){ parseResume(uploadUrl:$url){ extractedSkills } }`)
-      // 3) Merge extracted skills into skillsText (dedupe)
-      // For now, just a placeholder:
-      toast("Résumé upload coming soon");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  if (!isSignedIn) return <div className="p-4">Please sign in.</div>;
-  if (loading) return <div className="p-4">Loading…</div>;
+function ErrorSkillsCard({
+  handleRefresh,
+}: {
+  handleRefresh: (options?: RefetchOptions | undefined) => Promise<any>;
+}) {
+  // Use a reload for now; in a real app, pass a refetch function as prop
 
   return (
-    <div className="p-4 space-y-3">
-      <h2 className="text-base font-semibold">Personalization</h2>
-      <p className="text-xs text-gray-500">
-        Add your skills (comma‑separated). Later, you can upload a résumé to auto‑extract skills.
-      </p>
+    <Card className="p-6 bg-destructive/10 shadow-none border-0 flex items-center justify-center min-h-[160px]">
+      <CardContent className="flex flex-col items-center justify-center p-0">
+        <div className="flex flex-col items-center gap-2">
+          <AlertCircleIcon className="h-7 w-7 text-destructive" />
+          <span className="text-sm text-destructive font-semibold tracking-wide">
+            Error loading user skills
+          </span>
+          <span className="text-xs text-muted-foreground">Please refresh or try again later.</span>
+          <Button
+            onClick={() => handleRefresh()}
+            size="sm"
+            variant="outline"
+            className="mt-2 flex items-center gap-1 border-destructive text-destructive hover:bg-destructive/20"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-      <textarea
-        className="w-full border rounded p-2 min-h-[120px] outline-none"
-        placeholder="react, typescript, graphql, nextjs, tailwind"
-        value={skillsText}
-        onChange={(e) => setSkillsText(e.target.value)}
-      />
+export function PersonalizationPanel() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const [skillsText, setSkillsText] = useState("");
+  const {
+    data: userSkills,
+    isPending: isLoadingUserSkills,
+    isError: isErrorUserSkills,
+    refetch,
+  } = useUserSkills();
 
-      <div className="flex gap-2">
-        <button
-          className="border px-3 py-1 rounded disabled:opacity-50"
-          onClick={saveSkills}
-          disabled={saving}
-        >
-          {saving ? "Saving…" : "Save"}
-        </button>
+  const {
+    mutate: setUserSkills,
+    isPending: isSavingSkills,
+    isError: isErrorSavingSkills,
+    isSuccess: isSuccessSavingSkills,
+  } = useSetUserSkills();
 
-        <label className="border px-3 py-1 rounded cursor-pointer">
-          {uploading ? "Uploading…" : "Upload résumé (PDF)"}
-          <input
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && onResumeSelected(e.target.files[0])}
-          />
-        </label>
-      </div>
-    </div>
+  const memoizedSkills = useMemo(
+    () => _.chain(skillsText).split(",").map(_.trim).filter(Boolean).take(64).value(),
+    [skillsText],
+  );
+
+  useEffect(() => {
+    if (userSkills && userSkills.skills) {
+      setSkillsText(userSkills.skills.join(", "));
+    }
+  }, [userSkills]);
+
+  if (!isLoaded || isLoadingUserSkills) return <LoadingSkillsCard />;
+  if (isErrorUserSkills) return <ErrorSkillsCard handleRefresh={refetch} />;
+
+  return (
+    <Card className="p-4 shadow-none border-0">
+      <CardContent className="space-y-3 p-0">
+        <h2 className="text-base font-semibold">Personalization</h2>
+        <p className="text-xs text-muted-foreground">
+          Add your skills (comma‑separated). We&apos;ll use these to calculate fit scores and
+          personalize your job recommendations. Later, you can upload a résumé to auto‑extract
+          skills.
+        </p>
+
+        <Textarea
+          className="min-h-[120px]"
+          placeholder="react, typescript, graphql, nextjs, tailwind"
+          value={skillsText}
+          onChange={(e) => setSkillsText(e.target.value)}
+        />
+
+        <div className="flex items-center gap-2">
+          <TooltipProvider>
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setUserSkills({ skills: memoizedSkills })}
+                  disabled={isSavingSkills || _.isEmpty(skillsText)}
+                  variant="default"
+                  className={`flex-shrink-0 w-24 h-9 flex items-center justify-center gap-2${isSavingSkills ? " cursor-wait" : ""}`}
+                >
+                  {isSavingSkills && <Loader2 className="h-4 w-4 animate-spin" />}
+                  <span>
+                    {isErrorSavingSkills ? "Try Again" : isSavingSkills ? "Saving…" : "Save"}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              {(() => {
+                let tooltipMsg = "";
+                if (isSavingSkills) tooltipMsg = "Saving, please wait…";
+                else if (_.isEmpty(skillsText)) tooltipMsg = "Enter skills";
+                else if (_.isEqual(memoizedSkills, userSkills.skills))
+                  tooltipMsg = "Make changes to your skills";
+                if (!tooltipMsg) return null;
+                return (
+                  <TooltipContent side="top" align="center" className="z-[100001]">
+                    {tooltipMsg}
+                  </TooltipContent>
+                );
+              })()}
+            </Tooltip>
+          </TooltipProvider>
+          {isSuccessSavingSkills && (
+            <Alert variant="success" className="flex-1 border-0 shadow-none">
+              <AlertCircleIcon />
+              <AlertTitle>Skills saved successfully!</AlertTitle>
+            </Alert>
+          )}
+          {isErrorSavingSkills && (
+            <Alert variant="destructive" className="flex-1 border-0 shadow-none">
+              <AlertCircleIcon />
+              <AlertTitle>Unable to save skills.</AlertTitle>
+            </Alert>
+          )}
+        </div>
+        <Separator className="my-4" />
+        <div className="text-xs text-muted-foreground text-center">
+          🚀 Resume upload & skill extraction coming soon!
+        </div>
+      </CardContent>
+    </Card>
   );
 }
