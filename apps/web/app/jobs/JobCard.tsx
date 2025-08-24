@@ -14,7 +14,7 @@ interface JobCardProps {
 export function JobCard({ job }: JobCardProps): JSX.Element {
   return (
     <Card
-      className="transition-colors hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-alias group"
+      className="transition-colors hover:bg-muted/50 cursor-alias group"
       onClick={(e) => {
         const target = e.target as HTMLElement;
         if (target.closest("[data-bookmark-btn]")) return;

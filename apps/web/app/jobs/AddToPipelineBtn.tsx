@@ -40,7 +40,7 @@ export function AddToPipelineButton({
       });
       toast.success("Added to Pipeline → Wishlist");
     } catch {
-      toast.error("Couldn’t add to Pipeline");
+      toast.error("Couldn't add to Pipeline");
       setOptimisticInPipeline(false); // revert
     } finally {
       setClicked(false);
@@ -54,28 +54,22 @@ export function AddToPipelineButton({
       disabled={mutation.isPending || clicked || optimisticInPipeline}
       aria-label={optimisticInPipeline ? "In Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
       title={optimisticInPipeline ? "Already in Pipeline (Wishlist)" : "Add to Pipeline (Wishlist)"}
-      className={`ml-2 cursor-pointer rounded-full shadow-sm transition-colors duration-150
+      className={`ml-2 cursor-pointer rounded-full shadow-sm transition-all duration-150
         ${size === "lg" ? "p-3" : "p-2"}
-        ${variant === "cta" ? "bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 focus:ring-2 focus:ring-blue-400" : ""}
-        ${optimisticInPipeline && variant === "cta" ? "bg-blue-200 text-blue-800" : ""}
-        ${optimisticInPipeline ? "text-blue-500 dark:text-blue-300" : "text-gray-400 hover:text-blue-600 dark:hover:text-blue-300"}
+        ${variant === "cta" ? "bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 focus:ring-2 focus:ring-primary/40" : ""}
+        ${optimisticInPipeline && variant === "cta" ? "bg-primary/20 text-primary" : ""}
+        ${optimisticInPipeline ? "text-primary" : "text-muted-foreground hover:text-primary"}
         ${mutation.isPending || clicked ? "opacity-60" : ""} focus:outline-none`}
       onClick={handleClick}
     >
       {optimisticInPipeline ? (
-        <CheckIcon
-          className={
-            size === "lg"
-              ? "h-6 w-6 text-blue-500 dark:text-blue-300"
-              : "h-5 w-5 text-blue-500 dark:text-blue-300"
-          }
-        />
+        <CheckIcon className={size === "lg" ? "h-6 w-6 text-primary" : "h-5 w-5 text-primary"} />
       ) : (
         <PlusIcon
           className={
             size === "lg"
-              ? "h-6 w-6 text-gray-400 hover:text-blue-500"
-              : "h-5 w-5 text-gray-400 hover:text-blue-500"
+              ? "h-6 w-6 text-muted-foreground hover:text-primary"
+              : "h-5 w-5 text-muted-foreground hover:text-primary"
           }
         />
       )}
