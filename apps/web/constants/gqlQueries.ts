@@ -1,6 +1,30 @@
-export const JOBS_QUERY = `#graphql
-  query($minFit: Float, $first: Int, $search: String, $minSalary: Int, $location: String, $workType: String, $sources: [JobSource!], $sortBy: SortBy, $after: String, $bookmarked: Boolean, $isTracked: Boolean) {
-    jobs(minFit: $minFit, first: $first, search: $search, minSalary: $minSalary, location: $location, workType: $workType, sources: $sources, sortBy: $sortBy, after: $after, bookmarked: $bookmarked, isTracked: $isTracked) {
+export const JOBS_QUERY = /* GraphQL */ `
+  query (
+    $minFit: Float
+    $first: Int
+    $search: String
+    $minSalary: Int
+    $location: String
+    $workType: String
+    $sources: [JobSource!]
+    $sortBy: SortBy
+    $after: String
+    $bookmarked: Boolean
+    $isTracked: Boolean
+  ) {
+    jobs(
+      minFit: $minFit
+      first: $first
+      search: $search
+      minSalary: $minSalary
+      location: $location
+      workType: $workType
+      sources: $sources
+      sortBy: $sortBy
+      after: $after
+      bookmarked: $bookmarked
+      isTracked: $isTracked
+    ) {
       edges {
         id
         title
@@ -23,13 +47,13 @@ export const JOBS_QUERY = `#graphql
   }
 `;
 
-export const BOOKMARK_MUTATION = `#graphql
-  mutation($id: ID!) {
+export const BOOKMARK_MUTATION = /* GraphQL */ `
+  mutation ($id: ID!) {
     bookmark(id: $id)
   }
 `;
 
-export const PIPELINE_QUERY = `#graphql
+export const PIPELINE_QUERY = /* GraphQL */ `
   query {
     pipeline {
       id
@@ -45,14 +69,14 @@ export const PIPELINE_QUERY = `#graphql
   }
 `;
 
-export const PIPELINE_UPSERT_MUTATION = `#graphql
-  mutation($jobId: ID!, $column: String!, $position: Int!) {
+export const PIPELINE_UPSERT_MUTATION = /* GraphQL */ `
+  mutation ($jobId: ID!, $column: String!, $position: Int!) {
     pipelineUpsert(jobId: $jobId, column: $column, position: $position)
   }
 `;
 
 // Subscription query for new jobs
-export const NEW_JOB_SUBSCRIPTION = `#graphql
+export const NEW_JOB_SUBSCRIPTION = /* GraphQL */ `
   subscription NewJob($minFit: Float) {
     newJob(minFit: $minFit) {
       id
@@ -64,7 +88,7 @@ export const NEW_JOB_SUBSCRIPTION = `#graphql
   }
 `;
 
-export const FILTER_METADATA_QUERY = `#graphql
+export const FILTER_METADATA_QUERY = /* GraphQL */ `
   query GetFilterMetadata {
     filterMetadata {
       fitScore {
@@ -78,6 +102,24 @@ export const FILTER_METADATA_QUERY = `#graphql
       sources
       locations
       workTypes
+    }
+  }
+`;
+
+export const USER_SKILLS_QUERY = /* GraphQL */ `
+  query GetUserSkills {
+    meProfile {
+      skills
+      updatedAt
+      userId
+    }
+  }
+`;
+
+export const SET_USER_SKILLS_MUTATION = /* GraphQL */ `
+  mutation SetUserSkills($skills: [String!]!) {
+    setUserSkills(skills: $skills) {
+      success
     }
   }
 `;
