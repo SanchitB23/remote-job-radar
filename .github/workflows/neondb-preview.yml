@@ -80,7 +80,7 @@ jobs:
           DB: ${{ steps.create.outputs.db_url_with_pooler }}
 
   wire_previews:
-    name: Wire Render + Vercel (and redeploy)
+    name: Wire Render + Vercel (single PATCH + single redeploy)
     needs: create_neon_branch
     if: |
       github.event.action == 'synchronize' ||
@@ -89,102 +89,93 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       api_preview_url: ${{ steps.render_api.outputs.api_url || vars.STAGE_API_URL }}
-      embedder_preview_url: ${{ steps.render_embedder.outputs.svc_url || vars.STAGE_EMBEDDER_URL }}
     steps:
       - uses: actions/checkout@v4
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # --- RENDER: API preview wiring (set DB envs + redeploy) ---
-      - name: Patch Render API preview with Neon DB (if preview exists)
-        id: render_api
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_API }}
-          DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
-        run: |
-          set -e
-          PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            "https://api.render.com/v1/services/${SERVICE_ID}/previews")
-          PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
-
-          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
-            echo "No API preview; will fall back to STAGE for web."
-            echo "api_url=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Set BOTH Prisma URLs (your schema uses PG_DATABASE_URL)
-          curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
-            -d @- <<EOF
-          {"envVars":[
-            { "key":"DATABASE_URL",    "value":"${DB_URL}" },
-            { "key":"PG_DATABASE_URL", "value":"${DB_URL}" }
-          ]}
-          EOF
-
-          # Trigger redeploy of the preview instance so env takes effect
-          curl -s -X POST "https://api.render.com/v1/services/${PREVIEW_ID}/deploys" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
-            -d '{"clearCache":"do_not_clear"}'
-          echo "Triggered redeploy for Render API preview ${PREVIEW_ID}"
-
-          # Capture preview URL
-          DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            "https://api.render.com/v1/services/${PREVIEW_ID}")
-          API_URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
-          echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
-          echo "API preview URL: ${API_URL}"
-
-      # --- RENDER: Embedder preview (optional) ---
-      - name: Capture Render Embedder preview URL (if exists)
+      - name: Find Render Embedder preview URL (if exists)
         id: render_embedder
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_EMBEDDER }}
         run: |
           if [ -z "${SERVICE_ID}" ]; then
-            echo "No embedder service id; skipping."
-            echo "svc_url=" >> $GITHUB_OUTPUT
+            echo "No embedder base service id; will use STAGE_EMBEDDER_URL."
+            echo "url=" >> $GITHUB_OUTPUT
             exit 0
           fi
+
           PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
             "https://api.render.com/v1/services/${SERVICE_ID}/previews")
           PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
           if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
-            echo "No embedder preview; will fall back to STAGE_EMBEDDER_URL."
-            echo "svc_url=" >> $GITHUB_OUTPUT
+            echo "No embedder preview for this branch; will use STAGE_EMBEDDER_URL."
+            echo "url=" >> $GITHUB_OUTPUT
             exit 0
           fi
+
           DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
             "https://api.render.com/v1/services/${PREVIEW_ID}")
           URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
-          echo "svc_url=${URL}" >> $GITHUB_OUTPUT
+          echo "url=${URL}" >> $GITHUB_OUTPUT
           echo "Embedder preview URL: ${URL}"
 
-      - name: Patch API preview with EMBEDDER_URL (optional)
-        if: ${{ steps.render_api.outputs.api_url != '' }}
+      # --- RENDER: API preview wiring (PATCH both URLs in one call, then redeploy once) ---
+      - name: Set API preview envs (DB + EMBEDDER_URL in one PATCH) and redeploy once
+        id: render_api
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_API }}
-          EMB_URL: ${{ steps.render_embedder.outputs.svc_url || vars.STAGE_EMBEDDER_URL }}
+          DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
+          STAGE_EMBEDDER_URL: ${{ vars.STAGE_EMBEDDER_URL }}
+          EMBEDDER_PREVIEW_URL: ${{ steps.render_embedder.outputs.url }}
         run: |
+          set -e
+
+          # Resolve final EMBEDDER_URL: prefer preview, else stage
+          if [ -n "${EMBEDDER_PREVIEW_URL}" ] && [ "${EMBEDDER_PREVIEW_URL}" != "null" ]; then
+            EMB_URL="${EMBEDDER_PREVIEW_URL}"
+          else
+            EMB_URL="${STAGE_EMBEDDER_URL}"
+          fi
+          echo "Using EMBEDDER_URL=${EMB_URL}"
+
+          # Find API preview service id for this branch
           PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
             "https://api.render.com/v1/services/${SERVICE_ID}/previews")
           PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
-          if [ -n "$PREVIEW_ID" ]; then
-            curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
-              -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
-              -d @- <<EOF
-            {"envVars":[ { "key":"EMBEDDER_URL", "value":"${EMB_URL}" } ]}
-            EOF
-            curl -s -X POST "https://api.render.com/v1/services/${PREVIEW_ID}/deploys" \
-              -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
-              -d '{"clearCache":"do_not_clear"}'
-            echo "Patched API preview with EMBEDDER_URL and redeployed"
+          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
+            echo "No API preview; will fall back to STAGE for web."
+            echo "api_url=" >> $GITHUB_OUTPUT
+            exit 0
           fi
-      # --- VERCEL: upsert GRAPHQL_BASE_URL (branch-scoped) + redeploy web preview ---
+
+          # 🔹 SINGLE PATCH: set DBs + EMBEDDER_URL
+          curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {"envVars":[
+            { "key":"DATABASE_URL",    "value":"${DB_URL}" },
+            { "key":"PG_DATABASE_URL", "value":"${DB_URL}" },
+            { "key":"EMBEDDER_URL",    "value":"${EMB_URL}" }
+          ]}
+          EOF
+
+          # 🔹 SINGLE REDEPLOY
+          curl -s -X POST "https://api.render.com/v1/services/${PREVIEW_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d '{"clearCache":"do_not_clear"}'
+          echo "Redeploy triggered: Render API preview ${PREVIEW_ID}"
+
+          # Capture API preview URL for Vercel
+          DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${PREVIEW_ID}")
+          API_URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
+          echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
+          echo "API preview URL: ${API_URL}"
+
+      # --- VERCEL: Upsert GRAPHQL_BASE_URL (branch-scoped) and redeploy web preview ---
       - name: Decide GRAPHQL_BASE_URL for web (prefer Render preview, else STAGE)
         id: decide
         run: |
@@ -206,7 +197,6 @@ jobs:
            "target":["preview"],"gitBranch":"${{ env.BRANCH_REF }}","configurationId":null}
           EOF
 
-      # --- VERCEL: find & redeploy the latest preview deployment for this branch ---
       - name: Get latest Vercel preview deployment for this branch
         id: vercel_latest
         env:
