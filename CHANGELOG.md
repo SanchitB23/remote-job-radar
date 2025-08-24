@@ -1,3 +1,7 @@
+## 2.0.0-beta.3 (2025-08-24)
+
+- fix: update UserProfile fields to allow null values for userId, skill… (#58) ([eb9dd41](https://github.com/SanchitB23/remote-job-radar/commit/eb9dd41)), closes [#58](https://github.com/SanchitB23/remote-job-radar/issues/58)
+
 ## 2.0.0-beta.2 (2025-08-24)
 
 - feat: implementation of per user skills based fitscore (#50) ([2f97577](https://github.com/SanchitB23/remote-job-radar/commit/2f97577)), closes [#50](https://github.com/SanchitB23/remote-job-radar/issues/50)
