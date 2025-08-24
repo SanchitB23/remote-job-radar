@@ -1,0 +1,92 @@
+# Exported from Render on 2025-08-24T11:33:25Z
+services:
+  - type: web
+    name: remote-job-radar-gql-api
+    runtime: node
+    repo: https://github.com/SanchitB23/remote-job-radar
+    plan: free
+    envVars:
+      - key: GQL_API_CORS_ORIGIN
+        sync: false
+      - key: CLERK_JWT_ISSUER
+        sync: false
+      - key: CLERK_JWK_URL
+        sync: false
+      - fromGroup: RJR-Stage
+    region: singapore
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && node dist/index.js
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    rootDir: apps/api
+    previews:
+      generation: automatic
+
+  - type: web
+    name: remote-job-radar-py-embedder
+    runtime: docker
+    repo: https://github.com/SanchitB23/remote-job-radar
+    plan: free
+    envVars:
+      - fromGroup: RJR-Stage
+    region: singapore
+    healthCheckPath: /health
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    autoDeployTrigger: checksPass
+    rootDir: services/embedder
+    previews:
+      generation: automatic
+
+  - type: web
+    name: remote-job-radar-go-cron
+    runtime: go
+    repo: https://github.com/SanchitB23/remote-job-radar
+    plan: free
+    envVars:
+      - key: REMOTIVE_BASE_URL
+        sync: false
+      - key: EMBEDDER_CLIENT_TIMEOUT
+        sync: false
+      - key: EMBEDDER_REQUEST_TIMEOUT
+        sync: false
+      - key: ADZUNA_BASE_URL
+        sync: false
+      - key: SKILLS_FILE
+        sync: false
+      - key: SCORE_INTERVAL
+        sync: false
+      - key: FETCHER_MAX_PAGE_NUM
+        sync: false
+      - key: FETCH_TIMEOUT
+        sync: false
+      - key: FETCH_INTERVAL
+        sync: false
+      - key: EMBEDDER_WORKER_COUNT
+        sync: false
+      - key: EMBEDDER_MAX_TEXT_LENGTH
+        sync: false
+      - key: EMBEDDER_MAX_RETRIES
+        sync: false
+      - key: EMBEDDER_MAX_DELAY
+        sync: false
+      - key: EMBEDDER_BASE_DELAY
+        sync: false
+      - key: AGGREGATOR_SCHEDULE
+        sync: false
+      - key: PORT
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: ADZUNA_APP_ID
+        sync: false
+      - fromGroup: RJR-Stage
+    region: singapore
+    buildCommand: go build -o server ./cmd/serve
+    startCommand: ./server
+    autoDeployTrigger: checksPass
+    rootDir: services/aggregator
+    previews:
+      generation: automatic
+
+version: "1"

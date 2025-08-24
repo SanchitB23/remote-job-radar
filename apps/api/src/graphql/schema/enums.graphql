@@ -1,0 +1,24 @@
+"""
+Possible sources of job listings
+"""
+enum JobSource {
+  "LinkedIn job source"
+  LINKEDIN
+  "Indeed job source"
+  INDEED
+  "Remotive job source"
+  REMOTIVE
+  "Adzuna job source"
+  ADZUNA
+  "Other/unknown job source"
+  OTHER
+}
+
+enum SortBy {
+  "Sort by AI fit score (default)"
+  FIT
+  "Sort by most recently published jobs"
+  DATE
+  "Sort by highest minimum salary"
+  SALARY
+}

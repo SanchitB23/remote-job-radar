@@ -1,0 +1,38 @@
+name: "📝 Documentation"
+description: Add or improve docs
+title: "[DOCS] <subject>"
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What needs documenting and why?
+    validations:
+      required: true
+  - type: textarea
+    id: changes
+    attributes:
+      label: Proposed changes
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: README
+        - label: API reference
+        - label: Architecture/ADR
+        - label: Contributing/Runbook
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        💡 **Pro tip:** After creating this issue, comment  
+        ```
+        /branch
+        ```
+        or  
+        ```
+        /branch feat|bug|chore|docs|refactor
+        ```
+        to auto-create a properly named branch like `feat/123-add-user-login`.

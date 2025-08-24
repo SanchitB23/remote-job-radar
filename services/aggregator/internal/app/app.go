@@ -62,7 +62,7 @@ func NewApp() (*App, error) {
 	jobService := services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
 
 	// Initialize handlers
-	handlers := handlers.NewHandlers(store, jobService)
+	handlers := handlers.NewHandlers(store, jobService, cfg)
 
 	// Initialize scheduler
 	scheduler := scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)

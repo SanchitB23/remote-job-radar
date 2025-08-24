@@ -83,3 +83,26 @@ export interface WorkTypeGroupResult {
 export interface PubSubInterface {
   asyncIterator(triggerName: string): AsyncIterator<unknown>;
 }
+
+export interface FilterMetadataResult {
+  fitScore: { min: number; max: number };
+  salary: { min: number; max: number };
+  sources: string[];
+  locations: (string | null)[];
+  workTypes: (string | null)[];
+}
+
+export interface JobResult {
+  id: string;
+  source: string;
+  title: string;
+  company: string;
+  description: string;
+  location: string | null;
+  workType: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  url: string | null;
+  publishedAt: Date | null;
+  fitScore: number;
+}

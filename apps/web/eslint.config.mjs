@@ -8,6 +8,8 @@ import typescriptParser from "@typescript-eslint/parser";
 import { FlatCompat } from "@eslint/eslintrc";
 import path from "path";
 import { fileURLToPath } from "url";
+import pluginQuery from "@tanstack/eslint-plugin-query";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +20,7 @@ const compat = new FlatCompat({
 
 const config = [
   {
-    ignores: [".next/**", "node_modules/**", "dist/**", "build/**", "**/.next/**"],
+    ignores: [".next/**", "node_modules/**", "dist/**", "build/**", "**/.next/**", "components/**"],
   },
   // Extend Next.js ESLint config
   ...compat.extends("next/core-web-vitals"),
@@ -34,6 +36,7 @@ const config = [
       "simple-import-sort": simpleImportSort,
       "eslint-comments": eslintComments,
       boundaries: boundaries,
+      "react-hooks": reactHooks,
     },
     settings: {
       "boundaries/elements": [
@@ -43,6 +46,9 @@ const config = [
       ],
     },
     rules: {
+      // React hooks linting
+      "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+      "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
       // Disable rule that expects a /pages directory (for Next.js app dir)
       "@next/next/no-html-link-for-pages": "off",
       // Typescript strictness - make warnings instead of errors
@@ -79,12 +85,14 @@ const config = [
       "**/pages/**/*",
       "**/middleware.ts",
       "**/next.config.ts",
-      "**/components/**/*.tsx", // Allow default exports in components
+      "**/app/**/not-found.tsx", // Allow default export in not-found.tsx
+      "**/components/ui/**/*.tsx", // Allow default exports in ui components
     ],
     rules: {
       "import/no-default-export": "off",
     },
   },
+  ...pluginQuery.configs["flat/recommended"],
 ];
 
 export default config;

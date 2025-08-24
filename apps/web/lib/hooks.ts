@@ -10,7 +10,13 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } from "@/types/gql";
+import type {
+  FetchJobsParams,
+  FilterMetadata,
+  JobsConnection,
+  PipelineItem,
+  UserProfile,
+} from "@/types/gql";
 
 import {
   fetchJobsApi,
@@ -127,5 +133,62 @@ export function useFilterMetadata(): UseQueryResult<FilterMetadata, Error> {
       return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+}
+
+export function useUserSkills(): UseQueryResult<Pick<UserProfile, "skills">, Error> {
+  return useQuery({
+    queryKey: ["user-skills"],
+    queryFn: async (): Promise<Pick<UserProfile, "skills">> => {
+      const response = await fetch("/api/user/skills");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    enabled: typeof window !== "undefined", // Only run on client side to prevent SSR issues
+    retry: (failureCount, error) => {
+      // Retry up to 3 times, but not for 401/403 errors
+      if (error.message.includes("401") || error.message.includes("403")) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  });
+}
+
+export function useSetUserSkills(): UseMutationResult<
+  Pick<UserProfile, "skills">,
+  Error,
+  Pick<UserProfile, "skills">,
+  unknown
+> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (skills: Pick<UserProfile, "skills">) => {
+      const response = await fetch("/api/user/skills", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(skills),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch user skills query
+      queryClient.invalidateQueries({ queryKey: ["user-skills"] });
+    },
+    onError: (error) => {
+      console.error("Set user skills mutation error:", error);
+    },
   });
 }

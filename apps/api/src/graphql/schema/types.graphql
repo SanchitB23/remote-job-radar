@@ -1,0 +1,169 @@
+"""
+A remote job posting with AI-generated fit score
+"""
+type Job {
+  """
+  Unique identifier for the job posting
+  """
+  id: ID!
+  """
+  Job title or position name
+  """
+  title: String!
+  """
+  Company offering the job
+  """
+  company: String!
+  """
+  Job location (may be null for remote jobs)
+  """
+  location: String
+  """
+  Type of work (e.g. Full-time, Contract, Remote)
+  """
+  workType: String
+  """
+  Minimum salary offered (may be null)
+  """
+  salaryMin: Int
+  """
+  Maximum salary offered (may be null)
+  """
+  salaryMax: Int
+  """
+  AI-generated fit score for the user (0-100)
+  """
+  fitScore: Float!
+  """
+  Direct URL to the job posting
+  """
+  url: String!
+  """
+  ISO 8601 date string when the job was published
+  """
+  publishedAt: DateTime!
+  """
+  Whether the job is bookmarked by the user
+  """
+  bookmarked: Boolean!
+  """
+  Source platform or API for the job (e.g. Remotive)
+  """
+  source: JobSource!
+  """
+  Whether the job is being tracked in the user's pipeline
+  """
+  isTracked: Boolean!
+  """
+  Job description
+  """
+  description: String
+}
+
+"""
+Paginated connection for jobs, following Relay-style pagination
+"""
+type JobsConnection {
+  """
+  List of job edges in the current page
+  """
+  edges: [Job!]!
+  """
+  Cursor for the last item in the current page (for pagination)
+  """
+  endCursor: String
+  """
+  Whether more pages are available after this one
+  """
+  hasNextPage: Boolean!
+}
+
+"""
+An item in the user's job application pipeline (e.g. Kanban column)
+"""
+type PipelineItem {
+  """
+  Unique identifier for the pipeline item
+  """
+  id: ID!
+  """
+  The job associated with this pipeline item
+  """
+  job: Job!
+  """
+  Kanban column name (e.g. wishlist, applied, interview, offer)
+  """
+  column: String!
+  """
+  Position/order of the item within the column
+  """
+  position: Int!
+}
+
+"""
+Range metadata for numeric filters
+"""
+type NumericRange {
+  """
+  Minimum value in the range
+  """
+  min: Float!
+  """
+  Maximum value in the range
+  """
+  max: Float!
+}
+
+"""
+Metadata about available filter options based on current job data
+"""
+type FilterMetadata {
+  """
+  Range of fit scores among all jobs
+  """
+  fitScore: NumericRange!
+  """
+  Range of salaries among all jobs
+  """
+  salary: NumericRange!
+  """
+  List of available job sources
+  """
+  sources: [JobSource!]!
+  """
+  List of available job locations
+  """
+  locations: [String!]!
+  """
+  List of available work types (e.g. Full-time, Contract)
+  """
+  workTypes: [String!]!
+}
+
+"""
+Represents a user's profile information.
+
+Fields:
+- userId: Unique identifier for the user.
+- skills: List of skills associated with the user.
+- updatedAt: Timestamp indicating when the profile was last updated.
+"""
+type UserProfile {
+  """
+  The unique identifier of the user associated with this entity.
+  """
+  userId: ID
+  """
+  A list of skills relevant to the user or entity.
+  """
+  skills: [String!]
+  """
+  The ISO 8601 formatted date and time when this entity was last updated.
+  """
+  updatedAt: DateTime
+}
+
+"""
+A custom scalar representing a date and time in ISO 8601 format.
+"""
+scalar DateTime

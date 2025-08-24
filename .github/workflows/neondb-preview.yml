@@ -1,0 +1,286 @@
+name: PR Preview - Neon + Render + Vercel
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  PR_NUMBER: ${{ github.event.number }}
+  BRANCH_REF: ${{ github.head_ref }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.branch_name.outputs.current_branch }}
+    steps:
+      - name: Get branch name
+        id: branch_name
+        uses: tj-actions/branch-names@v8
+
+  create_neon_branch:
+    name: Neon preview DB
+    needs: setup
+    if: |
+      github.event.action == 'synchronize' ||
+      github.event.action == 'opened' ||
+      github.event.action == 'reopened'
+    runs-on: ubuntu-latest
+    outputs:
+      db_url: ${{ steps.encode.outputs.db_url }}
+      db_url_with_pooler: ${{ steps.encode.outputs.db_url_with_pooler }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install repo deps (root)
+        run: npm ci
+
+      - name: Create Neon Branch
+        id: create
+        uses: neondatabase/create-branch-action@v5
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: preview/pr-${{ env.PR_NUMBER }}-${{ env.BRANCH_REF }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+
+      - name: Expose DB URLs
+        id: encode
+        run: |
+          echo "db_url=${{ steps.create.outputs.db_url }}" >> $GITHUB_OUTPUT
+          echo "db_url_with_pooler=${{ steps.create.outputs.db_url_with_pooler }}" >> $GITHUB_OUTPUT
+
+      - name: Run Prisma migrations on preview DB (from monorepo root)
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: "${{ steps.create.outputs.db_url_with_pooler }}"
+          PG_DATABASE_URL: "${{ steps.create.outputs.db_url_with_pooler }}"
+
+      - name: Comment DB URL on PR (nice to have)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+              body: "🗄️ Neon preview DB ready\n\n`" + process.env.DB + "`"
+            });
+        env:
+          DB: ${{ steps.create.outputs.db_url_with_pooler }}
+
+  wire_previews:
+    name: Wire Render + Vercel (single PATCH + single redeploy per service)
+    needs: create_neon_branch
+    if: |
+      github.event.action == 'synchronize' ||
+      github.event.action == 'opened' ||
+      github.event.action == 'reopened'
+    runs-on: ubuntu-latest
+    outputs:
+      api_preview_url: ${{ steps.render_api.outputs.api_url || vars.STAGE_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Find Render Embedder preview URL (if exists)
+        id: render_embedder
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_EMBEDDER }}
+        run: |
+          if [ -z "${SERVICE_ID}" ]; then
+            echo "No embedder base service id; will use STAGE_EMBEDDER_URL."
+            echo "url=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${SERVICE_ID}/previews")
+          PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
+          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
+            echo "No embedder preview for this branch; will use STAGE_EMBEDDER_URL."
+            echo "url=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${PREVIEW_ID}")
+          if [[ "$DETAILS" =~ ^[0-9]+$ ]]; then
+            echo "Error: Got HTTP status $DETAILS from Render API when fetching preview details."
+            echo "url=" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "Embedder preview URL: ${URL}"
+
+      # --- RENDER: Patch API preview envs (DB + EMBEDDER_URL) and redeploy once ---
+      - name: Set API preview envs (DB + EMBEDDER_URL) and redeploy
+        id: render_api
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_API }}
+          DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
+          STAGE_EMBEDDER_URL: ${{ vars.STAGE_EMBEDDER_URL }}
+          EMBEDDER_PREVIEW_URL: ${{ steps.render_embedder.outputs.url }}
+        run: |
+          set -e
+          # Resolve final EMBEDDER_URL: prefer preview, else stage
+          if [ -n "${EMBEDDER_PREVIEW_URL}" ] && [ "${EMBEDDER_PREVIEW_URL}" != "null" ]; then
+            EMB_URL="${EMBEDDER_PREVIEW_URL}"
+          else
+            EMB_URL="${STAGE_EMBEDDER_URL}"
+          fi
+          # Find API preview service ID
+          PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${SERVICE_ID}/previews")
+          PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
+          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
+            echo "No API preview; will fall back to STAGE for web."
+            echo "api_url=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          # Single PATCH for DB + PG_DB + EMBEDDER_URL
+          curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {"envVars":[
+            { "key":"DATABASE_URL",    "value":"${DB_URL}" },
+            { "key":"PG_DATABASE_URL", "value":"${DB_URL}" },
+            { "key":"EMBEDDER_URL",    "value":"${EMB_URL}" }
+          ]}
+          EOF
+          # Redeploy once
+          curl -s -X POST "https://api.render.com/v1/services/${PREVIEW_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d '{"clearCache":"do_not_clear"}'
+          echo "Redeploy triggered: Render API preview ${PREVIEW_ID}"
+          # Capture API preview URL for Vercel wiring
+          DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${PREVIEW_ID}")
+          API_URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
+          echo "api_url=${API_URL}" >> $GITHUB_OUTPUT
+          echo "API preview URL: ${API_URL}"
+
+      # --- RENDER: Patch Aggregator preview envs (DB + EMBEDDER_URL) and redeploy once ---
+      - name: Set Aggregator preview envs (DB + EMBEDDER_URL) and redeploy
+        id: render_aggregator
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_AGGREGATOR }}
+          DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
+          STAGE_EMBEDDER_URL: ${{ vars.STAGE_EMBEDDER_URL }}
+          EMBEDDER_PREVIEW_URL: ${{ steps.render_embedder.outputs.url }}
+        run: |
+          if [ -z "${SERVICE_ID}" ]; then
+            echo "No aggregator base service id; skipping aggregator wiring."
+            exit 0
+          fi
+          set -e
+          # Resolve final EMBEDDER_URL: prefer preview, else stage
+          if [ -n "${EMBEDDER_PREVIEW_URL}" ] && [ "${EMBEDDER_PREVIEW_URL}" != "null" ]; then
+            EMB_URL="${EMBEDDER_PREVIEW_URL}"
+          else
+            EMB_URL="${STAGE_EMBEDDER_URL}"
+          fi
+          # Find Aggregator preview service ID
+          PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${SERVICE_ID}/previews")
+          PREVIEW_ID=$(echo "$PREVIEWS" | jq -r '.[] | select(.pullRequest.headBranch=="'${{ env.BRANCH_REF }}'") | .id' | head -n1)
+          if [ -z "$PREVIEW_ID" ] || [ "$PREVIEW_ID" = "null" ]; then
+            echo "No Aggregator preview for this branch; skipping."
+            exit 0
+          fi
+          # Single PATCH for DB + PG_DB + EMBEDDER_URL
+          curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {"envVars":[
+            { "key":"DATABASE_URL",    "value":"${DB_URL}" },
+            { "key":"PG_DATABASE_URL", "value":"${DB_URL}" },
+            { "key":"EMBEDDER_URL",    "value":"${EMB_URL}" }
+          ]}
+          EOF
+          # Redeploy once
+          curl -s -X POST "https://api.render.com/v1/services/${PREVIEW_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
+            -d '{"clearCache":"do_not_clear"}'
+          echo "Redeploy triggered: Render Aggregator preview ${PREVIEW_ID}"
+
+      # --- VERCEL (web): set GRAPHQL_BASE_URL (branch-scoped) and redeploy preview ---
+      - name: Decide GRAPHQL_BASE_URL for web (prefer Render API preview, else STAGE)
+        id: decide
+        run: |
+          API_URL="${{ steps.render_api.outputs.api_url }}"
+          if [ -z "$API_URL" ] || [ "$API_URL" = "null" ]; then API_URL="${{ vars.STAGE_API_URL }}"; fi
+          echo "graphql=${API_URL}" >> $GITHUB_OUTPUT
+          echo "GRAPHQL_BASE_URL will be: ${API_URL}"
+
+      - name: Upsert Vercel ENV - GRAPHQL_BASE_URL (branch-scoped, preview)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          GRAPHQL_URL: ${{ steps.decide.outputs.graphql }}
+        run: |
+          curl -s -X POST "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {"type":"plain","key":"GRAPHQL_BASE_URL","value":"${GRAPHQL_URL}",
+           "target":["preview"],"gitBranch":"${{ env.BRANCH_REF }}","configurationId":null}
+          EOF
+
+      - name: Get latest Vercel preview deployment for this branch
+        id: vercel_latest
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          RES=$(curl -s -G "https://api.vercel.com/v6/deployments" \
+            --data-urlencode "projectId=${VERCEL_PROJECT_ID}" \
+            --data-urlencode "target=preview" \
+            --data-urlencode "limit=20" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}")
+          DEPLOY_ID=$(echo "$RES" | jq -r \
+            '.deployments | map(select(.meta.gitBranch=="'${{ env.BRANCH_REF }}'")) | .[0].uid')
+          if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" = "null" ]; then
+            echo "No Vercel preview deployment found for branch; skipping redeploy."
+            echo "id=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+          echo "Found latest Vercel preview deployment: $DEPLOY_ID"
+
+      - name: Redeploy Vercel deployment so new env is applied
+        if: ${{ steps.vercel_latest.outputs.id != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          DEPLOY_ID: ${{ steps.vercel_latest.outputs.id }}
+        run: |
+          curl -s -X POST "https://api.vercel.com/v13/deployments" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
+            -d '{"deploymentId":"'"${DEPLOY_ID}"'"}'
+          echo "Triggered Vercel redeploy for ${DEPLOY_ID}"
+
+  delete_neon_branch:
+    name: Cleanup Neon - Delete Preview Branch (on PR close)
+    needs: setup
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete Neon Branch
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ env.PR_NUMBER }}-${{ env.BRANCH_REF }}
+          api_key: ${{ secrets.NEON_API_KEY }}

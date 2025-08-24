@@ -1,24 +1,18 @@
-import { readFileSync } from "node:fs";
 import http from "node:http";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { makeExecutableSchema } from "@graphql-tools/schema";
 import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import express from "express";
 import { useServer } from "graphql-ws/use/ws";
 import { WebSocketServer } from "ws";
 
-import { getUserId, getUserIdFromToken } from "./auth.js";
-import { getResolvers } from "./resolvers/index.js";
+import { GQL_API_BASE_URL, GQL_API_CORS_ORIGIN, GQL_API_PORT } from "./constants/index.js";
+import { schema } from "./graphql/schema.js";
+import { getUserId, getUserIdFromToken } from "./lib/auth.js";
 
 const prisma = new PrismaClient();
-
-// 1. SDL & resolvers
-const typeDefs = readFileSync("./src/schema.graphql", "utf8");
-const resolvers = getResolvers(prisma);
-const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 // 2. Create HTTP + WS servers
 const app = express();
@@ -73,8 +67,8 @@ useServer(
 
 // 3. Set up Express middleware
 // Parse allowed origins from environment variable (comma-separated)
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",")
+const allowedOrigins = GQL_API_CORS_ORIGIN
+  ? GQL_API_CORS_ORIGIN.split(",")
       .map((origin) => origin.trim())
       .filter(Boolean)
   : undefined;
@@ -92,7 +86,7 @@ app.use(
 app.use(express.json());
 
 // 4. Apollo
-const apolloServer = new ApolloServer({ typeDefs, resolvers });
+const apolloServer = new ApolloServer({ schema });
 await apolloServer.start();
 app.use(
   "/graphql",
@@ -110,6 +104,6 @@ app.use(
   }),
 );
 
-const PORT = 4000;
-const DEPLOYED_URL = process.env.DEPLOYED_URL || `http://localhost:${PORT}`;
+const PORT = GQL_API_PORT || 4000;
+const DEPLOYED_URL = GQL_API_BASE_URL || `http://localhost:${PORT}`;
 httpServer.listen(PORT, () => console.log(`🚀 GraphQL ready at ${DEPLOYED_URL}/graphql`));

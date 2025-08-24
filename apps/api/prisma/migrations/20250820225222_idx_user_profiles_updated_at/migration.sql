@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "idx_user_profiles_updated_at" ON "user_profiles" ("updated_at" DESC);

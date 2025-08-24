@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/services"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
@@ -16,12 +18,14 @@ import (
 type Handlers struct {
 	store      *storage.Store
 	jobService *services.JobService
+	config     *config.Config
 }
 
-func NewHandlers(store *storage.Store, jobService *services.JobService) *Handlers {
+func NewHandlers(store *storage.Store, jobService *services.JobService, cfg *config.Config) *Handlers {
 	return &Handlers{
 		store:      store,
 		jobService: jobService,
+		config:     cfg,
 	}
 }
 
@@ -57,6 +61,35 @@ func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
 
+	// Check authorization token
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		logger.Warn("Missing token parameter", zap.String("remote_addr", r.RemoteAddr))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"ok":      false,
+			"error":   "Missing required token parameter",
+			"message": "Authorization required",
+		})
+		return
+	}
+
+	// Validate token
+	if token != h.config.ManualJobFetchToken {
+		logger.Warn("Invalid token provided", zap.String("remote_addr", r.RemoteAddr))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"ok":      false,
+			"error":   "Invalid token",
+			"message": "Authorization failed",
+		})
+		return
+	}
+
+	logger.Info("Token validation successful", zap.String("remote_addr", r.RemoteAddr))
+
 	// Parse sources parameter from query string
 	var sources []string
 	if sourcesParam := r.URL.Query().Get("sources"); sourcesParam != "" {
@@ -69,15 +102,28 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Parse job_count parameter from query string
+	var jobCount int
+	if jobCountParam := r.URL.Query().Get("job_count"); jobCountParam != "" {
+		if count, err := strconv.Atoi(jobCountParam); err == nil && count > 0 {
+			jobCount = count
+		} else {
+			logger.Warn("Invalid job_count parameter, using default",
+				zap.String("job_count", jobCountParam),
+				zap.Error(err))
+		}
+	}
+
 	logger.Info("Manual fetch with sources",
 		zap.Strings("sources", sources),
+		zap.Int("job_count", jobCount),
 		zap.String("remote_addr", r.RemoteAddr))
 
 	// Run fetch in background to avoid blocking the HTTP response
 	// Use context.Background() instead of r.Context() to prevent cancellation
 	go func() {
 		ctx := context.Background()
-		if err := h.jobService.FetchAndProcessJobsFromSources(ctx, sources); err != nil {
+		if err := h.jobService.FetchAndProcessJobsFromSources(ctx, sources, jobCount); err != nil {
 			logger.Error("Manual fetch failed", zap.Error(err))
 		}
 	}()
@@ -86,11 +132,15 @@ func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	if len(sources) > 0 {
 		message = fmt.Sprintf("fetch triggered for sources: %s", strings.Join(sources, ", "))
 	}
+	if jobCount > 0 {
+		message = fmt.Sprintf("%s (max %d jobs per source)", message, jobCount)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
-		"ok":      true,
-		"message": message,
-		"sources": sources,
+		"ok":        true,
+		"message":   message,
+		"sources":   sources,
+		"job_count": jobCount,
 	})
 }

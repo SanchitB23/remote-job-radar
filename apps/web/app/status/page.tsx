@@ -1,7 +1,11 @@
 "use client";
 
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { useQueries } from "@tanstack/react-query";
 import type { JSX } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 // List of health API endpoints in /api/health
 const HEALTH_APIS = [
@@ -46,31 +50,41 @@ export default function StatusPage(): JSX.Element {
           const query = results[idx];
           if (!query) return null;
           return (
-            <div key={api.name} className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <div className="font-semibold">{api.name}</div>
-                <div className="text-xs text-gray-500 break-all">{api.path}</div>
-                {query.data?.timestamp && (
-                  <div className="text-xs text-gray-400">
-                    Last checked: {new Date(query.data.timestamp).toLocaleString()}
-                  </div>
-                )}
-              </div>
-              <div>
-                {query.isLoading ? (
-                  <span className="text-gray-400">Checking...</span>
-                ) : query.data?.ok ? (
-                  <span className="text-green-600 font-bold">UP</span>
-                ) : (
-                  <>
-                    <span className="text-red-600 font-bold">DOWN</span>
-                    {query.data?.error && (
-                      <div className="text-xs text-red-400">{query.data.error}</div>
+            <Card key={api.name}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold">{api.name}</div>
+                    <div className="text-xs text-muted-foreground break-all">{api.path}</div>
+                    {query.data?.timestamp && (
+                      <div className="text-xs text-muted-foreground">
+                        Last checked: {new Date(query.data.timestamp).toLocaleString()}
+                      </div>
                     )}
-                  </>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {query.isLoading ? (
+                      <Badge variant="secondary">Checking...</Badge>
+                    ) : query.data?.ok ? (
+                      <>
+                        <CheckCircleIcon className="h-5 w-5 text-chart-4" />
+                        <Badge variant="default" className="bg-chart-4">
+                          UP
+                        </Badge>
+                      </>
+                    ) : (
+                      <>
+                        <XCircleIcon className="h-5 w-5 text-destructive" />
+                        <Badge variant="destructive">DOWN</Badge>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {query.data?.error && !query.data.ok && (
+                  <div className="mt-2 text-xs text-destructive">{query.data.error}</div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
       </div>

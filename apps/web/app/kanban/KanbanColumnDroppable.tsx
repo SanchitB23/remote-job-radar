@@ -12,7 +12,7 @@ export function KanbanColumnDroppable({
   return (
     <div
       ref={setNodeRef}
-      className={isOver ? "bg-blue-50 dark:bg-blue-900/20 transition-colors" : ""}
+      className={isOver ? "bg-primary/10 dark:bg-primary/20 transition-colors" : ""}
       style={{ minHeight: 40 }}
     >
       {children}
