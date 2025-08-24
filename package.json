@@ -15,7 +15,8 @@
     "precommit:fast": "lint-staged",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "typecheck": "turbo run typecheck --parallel"
+    "typecheck": "turbo run typecheck --parallel",
+    "db:migrate": "npm run db:migrate --workspace=apps/api --force"
   },
   "workspaces": [
     "apps/*",
