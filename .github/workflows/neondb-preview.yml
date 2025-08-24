@@ -115,6 +115,11 @@ jobs:
           fi
           DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
             "https://api.render.com/v1/services/${PREVIEW_ID}")
+          if [[ "$DETAILS" =~ ^[0-9]+$ ]]; then
+            echo "Error: Got HTTP status $DETAILS from Render API when fetching preview details."
+            echo "url=" >> $GITHUB_OUTPUT
+            exit 1
+          fi
           URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
           echo "url=${URL}" >> $GITHUB_OUTPUT
           echo "Embedder preview URL: ${URL}"
