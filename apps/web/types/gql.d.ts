@@ -12,6 +12,7 @@ export interface Job {
   bookmarked: boolean;
   source: string;
   isTracked?: boolean; // Whether the job is in the user's pipeline
+  description?: string;
 }
 
 export interface PipelineItem {

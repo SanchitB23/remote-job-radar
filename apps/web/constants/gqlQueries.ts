@@ -39,6 +39,7 @@ export const JOBS_QUERY = /* GraphQL */ `
         bookmarked
         source
         isTracked
+        description
       }
       endCursor
       hasNextPage
