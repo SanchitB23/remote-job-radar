@@ -1,3 +1,9 @@
+## 2.0.0-beta.5 (2025-08-24)
+
+- feat(aggregator): add manual job fetch token and implement authorization in trigger fetch handler (# ([0310c0c](https://github.com/SanchitB23/remote-job-radar/commit/0310c0c)), closes [#61](https://github.com/SanchitB23/remote-job-radar/issues/61)
+- docs: add comprehensive roadmap and next steps for Remote Job Radar ([4c1528d](https://github.com/SanchitB23/remote-job-radar/commit/4c1528d))
+- Refactor UI components for improved styling and consistency (#60) ([7a528da](https://github.com/SanchitB23/remote-job-radar/commit/7a528da)), closes [#60](https://github.com/SanchitB23/remote-job-radar/issues/60)
+
 ## 2.0.0-beta.4 (2025-08-24)
 
 - feat(graphql): add description field to Job type and update related components (#59) ([1bed082](https://github.com/SanchitB23/remote-job-radar/commit/1bed082)), closes [#59](https://github.com/SanchitB23/remote-job-radar/issues/59)
