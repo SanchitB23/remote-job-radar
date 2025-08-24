@@ -1,6 +1,4 @@
-import { filterMetadata } from "./queries/filterMetadata.js";
-import { jobs } from "./queries/jobs.js";
-import { pipeline } from "./queries/pipeline.js";
+import { filterMetadata, jobs, meProfile, pipeline } from "./queries/index.js";
 
 /**
  * Returns an object containing GraphQL query resolvers for jobs and pipeline items.
@@ -8,11 +6,12 @@ import { pipeline } from "./queries/pipeline.js";
  * @param _prisma - The Prisma client instance used for database operations.
  * @returns An object with resolvers for the `jobs`, `pipeline`, and `filterMetadata` queries.
  */
-export function getQueryResolvers(_prisma: unknown): any {
+export function getQueryResolvers(_prisma: unknown): Record<string, unknown> {
   // The split resolvers use ctx.prisma, so _prisma is not needed here
   return {
     jobs,
     pipeline,
     filterMetadata,
+    meProfile,
   };
 }

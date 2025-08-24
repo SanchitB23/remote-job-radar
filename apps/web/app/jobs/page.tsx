@@ -33,7 +33,7 @@ export default async function JobsPageServer({
 
   // Prefetch the first page of infinite query
   await queryClient.prefetchInfiniteQuery({
-    queryKey: ["jobs-infinite", infiniteParams],
+    queryKey: ["jobs-infinite", infiniteParams, token],
     queryFn: async () => {
       return await fetchJobsShared(infiniteParams, token || "");
     },
@@ -43,20 +43,13 @@ export default async function JobsPageServer({
     },
   });
 
-  // Prefetch filter metadata to prevent hydration mismatch
-  try {
-    await queryClient.prefetchQuery({
-      queryKey: ["filter-metadata"],
-      queryFn: async () => {
-        return await fetchFilterMetadataShared(token || "");
-      },
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    });
-  } catch (error) {
-    // If filter metadata fails to load on server, log it but don't break the page
-    // The client will fall back to default values
-    console.warn("Failed to prefetch filter metadata:", error);
-  }
+  await queryClient.prefetchQuery({
+    queryKey: ["filter-metadata", token],
+    queryFn: async () => {
+      return await fetchFilterMetadataShared(token || "");
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

@@ -1,12 +1,11 @@
-import { bookmark } from "./mutations/bookmark.js";
-import { pipelineReorder } from "./mutations/pipelineReorder.js";
-import { pipelineUpsert } from "./mutations/pipelineUpsert.js";
+import { bookmark, pipelineReorder, pipelineUpsert, setSkills } from "./mutations/index.js";
 
-export function getMutationResolvers(_prisma: unknown): any {
+export function getMutationResolvers(_prisma: unknown): Record<string, unknown> {
   // The split resolvers use ctx.prisma, so _prisma is not needed here
   return {
     bookmark,
     pipelineUpsert,
     pipelineReorder,
+    setSkills,
   };
 }
