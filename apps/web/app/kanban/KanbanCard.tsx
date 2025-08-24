@@ -31,7 +31,7 @@ export function KanbanCard({
     // Render a static card for DragOverlay (no drag handles, no listeners)
     return (
       <Card
-        className="border-blue-400 dark:border-blue-500 shadow-lg"
+        className="border-primary shadow-lg"
         style={{ opacity: 0.95, zIndex: 100, pointerEvents: "none" }}
       >
         <CardContent className="p-3">

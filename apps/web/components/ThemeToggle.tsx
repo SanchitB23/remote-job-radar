@@ -25,9 +25,9 @@ export function ThemeToggle(): JSX.Element | null {
       className="p-2 h-auto cursor-pointer"
     >
       {theme === "dark" ? (
-        <SunIcon className="h-5 w-5 text-yellow-400" />
+        <SunIcon className="h-5 w-5 text-secondary" />
       ) : (
-        <MoonIcon className="h-5 w-5 text-gray-800 dark:text-gray-200" />
+        <MoonIcon className="h-5 w-5 text-foreground" />
       )}
     </Button>
   );

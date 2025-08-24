@@ -54,22 +54,22 @@ export function BookmarkButton({
       title={optimisticBookmarked ? "Remove bookmark" : "Add bookmark"}
       disabled={bookmarkMutation.isPending}
       onClick={handleToggle}
-      className={`ml-2 h-auto cursor-pointer rounded-full shadow-sm transition-colors duration-150
+      className={`ml-2 h-auto cursor-pointer rounded-full shadow-sm transition-all duration-150
         ${size === "lg" ? "p-3" : "p-2"}
-        ${variant === "cta" ? "bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-300 focus:ring-2 focus:ring-yellow-400" : ""}
-        ${optimisticBookmarked && variant === "cta" ? "bg-yellow-200 text-yellow-800" : ""}
+        ${variant === "cta" ? "bg-secondary/10 hover:bg-secondary/20 text-secondary border border-secondary/30 focus:ring-2 focus:ring-secondary/40" : ""}
+        ${optimisticBookmarked && variant === "cta" ? "bg-secondary/20 text-secondary" : ""}
       `}
     >
       {optimisticBookmarked ? (
         <StarIconSolid
-          className={size === "lg" ? "h-6 w-6 text-yellow-500" : "h-4 w-4 text-yellow-500"}
+          className={size === "lg" ? "h-6 w-6 text-secondary" : "h-4 w-4 text-secondary"}
         />
       ) : (
         <StarIcon
           className={
             size === "lg"
-              ? "h-6 w-6 text-gray-400 hover:text-yellow-500"
-              : "h-4 w-4 text-gray-400 hover:text-yellow-500"
+              ? "h-6 w-6 text-muted-foreground hover:text-secondary"
+              : "h-4 w-4 text-muted-foreground hover:text-secondary"
           }
         />
       )}

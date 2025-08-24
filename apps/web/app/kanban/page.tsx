@@ -73,11 +73,9 @@ export default function Kanban(): JSX.Element {
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6">
             <div className="flex justify-center mb-4">
-              <ExclamationTriangleIcon className="h-12 w-12 text-red-600" />
+              <ExclamationTriangleIcon className="h-12 w-12 text-destructive" />
             </div>
-            <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">
-              Failed to load pipeline.
-            </p>
+            <p className="mt-4 text-destructive font-semibold">Failed to load pipeline.</p>
             <p className="mt-2 text-muted-foreground text-sm">
               {error instanceof Error ? error.message : "An unknown error occurred"}
             </p>

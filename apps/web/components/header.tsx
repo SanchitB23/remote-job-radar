@@ -9,18 +9,27 @@ export function Header() {
     <header className="border-b p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold hover:text-blue-600 transition-colors">
+          <Link href="/" className="text-xl font-bold hover:text-primary transition-colors">
             Remote Job Radar
           </Link>
           <SignedIn>
             <nav className="flex gap-4">
-              <Link href="/jobs" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link
+                href="/jobs"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 Jobs
               </Link>
-              <Link href="/kanban" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link
+                href="/kanban"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 Kanban
               </Link>
-              <Link href="/status" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link
+                href="/status"
+                className="text-muted-foreground hover:text-primary transition-colors"
+              >
                 Server Status
               </Link>
             </nav>

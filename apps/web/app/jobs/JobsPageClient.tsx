@@ -16,11 +16,11 @@ import { parseUrlJobParams } from "./utils";
 function JobsError({ error }: { error: unknown }): JSX.Element {
   return (
     <div className="text-center py-12">
-      <div className="rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto flex items-center justify-center text-3xl text-red-600">
+      <div className="rounded-full h-12 w-12 border-b-2 border-destructive mx-auto flex items-center justify-center text-3xl text-destructive">
         !
       </div>
-      <p className="mt-4 text-red-600 dark:text-red-400 font-semibold">Failed to load jobs.</p>
-      <p className="mt-2 text-gray-500 text-sm">
+      <p className="mt-4 text-destructive font-semibold">Failed to load jobs.</p>
+      <p className="mt-2 text-muted-foreground text-sm">
         {error instanceof Error ? error.message : "An unknown error occurred."}
       </p>
     </div>
@@ -84,9 +84,9 @@ export function JobsPageClient(): JSX.Element {
     !isErrorUserSkills &&
     userSkills?.skills &&
     userSkills.skills.length > 0 ? (
-      <span className="ml-3 inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800 border border-emerald-200 shadow-sm dark:bg-emerald-900 dark:text-emerald-100 dark:border-emerald-700">
+      <span className="ml-3 inline-flex items-center rounded-full bg-chart-4/10 px-3 py-1 text-xs font-medium text-chart-4 border border-chart-4/20 shadow-sm">
         <svg
-          className="w-3.5 h-3.5 mr-1.5 text-emerald-500 dark:text-emerald-300"
+          className="w-3.5 h-3.5 mr-1.5 text-chart-4"
           fill="currentColor"
           viewBox="0 0 20 20"
           aria-hidden="true"
@@ -114,7 +114,7 @@ export function JobsPageClient(): JSX.Element {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-2 text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex items-center gap-3 mb-2 text-sm text-muted-foreground">
         {renderPersonalizedChip()}
         {jobs.length > 0 && (
           <span>
@@ -153,7 +153,7 @@ export function JobsPageClient(): JSX.Element {
 
       {/* End of results indicator */}
       {!hasNextPage && jobs.length > 0 && (
-        <div className="mt-6 text-center text-gray-500 text-sm">
+        <div className="mt-6 text-center text-muted-foreground text-sm">
           You&apos;ve reached the end of the job listings.
         </div>
       )}
@@ -161,11 +161,11 @@ export function JobsPageClient(): JSX.Element {
       {/* No jobs found */}
       {!isLoading && jobs.length === 0 && (
         <div className="text-center py-12">
-          <div className="rounded-full h-12 w-12 border-b-2 border-gray-300 mx-auto flex items-center justify-center text-3xl text-gray-400">
+          <div className="rounded-full h-12 w-12 border-b-2 border-muted mx-auto flex items-center justify-center text-3xl text-muted-foreground">
             📋
           </div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400 font-semibold">No jobs found</p>
-          <p className="mt-2 text-gray-500 text-sm">
+          <p className="mt-4 text-muted-foreground font-semibold">No jobs found</p>
+          <p className="mt-2 text-muted-foreground text-sm">
             Try adjusting your filters to see more results.
           </p>
         </div>

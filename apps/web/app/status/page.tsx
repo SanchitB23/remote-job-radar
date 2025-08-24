@@ -67,21 +67,21 @@ export default function StatusPage(): JSX.Element {
                       <Badge variant="secondary">Checking...</Badge>
                     ) : query.data?.ok ? (
                       <>
-                        <CheckCircleIcon className="h-5 w-5 text-green-600" />
-                        <Badge variant="default" className="bg-green-600">
+                        <CheckCircleIcon className="h-5 w-5 text-chart-4" />
+                        <Badge variant="default" className="bg-chart-4">
                           UP
                         </Badge>
                       </>
                     ) : (
                       <>
-                        <XCircleIcon className="h-5 w-5 text-red-600" />
+                        <XCircleIcon className="h-5 w-5 text-destructive" />
                         <Badge variant="destructive">DOWN</Badge>
                       </>
                     )}
                   </div>
                 </div>
                 {query.data?.error && !query.data.ok && (
-                  <div className="mt-2 text-xs text-red-500">{query.data.error}</div>
+                  <div className="mt-2 text-xs text-destructive">{query.data.error}</div>
                 )}
               </CardContent>
             </Card>

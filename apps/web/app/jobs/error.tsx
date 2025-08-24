@@ -18,9 +18,9 @@ export default function Error({
       <Card className="max-w-md mx-auto">
         <CardContent className="p-6">
           <div className="flex justify-center mb-4">
-            <ExclamationTriangleIcon className="h-12 w-12 text-red-600" />
+            <ExclamationTriangleIcon className="h-12 w-12 text-destructive" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">Something went wrong</h1>
+          <h1 className="text-2xl font-bold mb-4 text-destructive">Something went wrong</h1>
           <p className="mb-6 text-muted-foreground">
             {error.message ||
               "An unexpected error occurred while loading jobs or updating bookmarks."}

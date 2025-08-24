@@ -79,7 +79,7 @@ export function NotificationsPanel() {
         {saving ? "Saving…" : "Save"}
       </button>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         (Coming soon) Alerts are sent when new high‑fit jobs match your profile.
       </p>
     </div>

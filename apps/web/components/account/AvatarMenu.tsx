@@ -17,7 +17,7 @@ export function AvatarMenu() {
         url="personalization"
         labelIcon={
           <UserStar
-            className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-colors duration-200 group-hover:text-emerald-200 group-hover:dark:text-emerald-200"
+            className="w-4 h-4 text-muted-foreground transition-colors duration-200 group-hover:text-chart-4"
             fill="currentColor"
           />
         }
@@ -30,7 +30,7 @@ export function AvatarMenu() {
         url="notifications"
         labelIcon={
           <Bell
-            className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-colors duration-200 group-hover:text-amber-300 group-hover:dark:text-amber-200"
+            className="w-4 h-4 text-muted-foreground transition-colors duration-200 group-hover:text-chart-5"
             fill="currentColor"
           />
         }
@@ -43,7 +43,7 @@ export function AvatarMenu() {
         url="privacy"
         labelIcon={
           <KeySquare
-            className="w-4 h-4 text-gray-500 dark:text-gray-400 transition-colors duration-200 group-hover:text-sky-400 group-hover:dark:text-sky-200"
+            className="w-4 h-4 text-muted-foreground transition-colors duration-200 group-hover:text-primary"
             fill="currentColor"
           />
         }
