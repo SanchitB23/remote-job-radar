@@ -33,7 +33,7 @@ export default async function JobsPageServer({
 
   // Prefetch the first page of infinite query
   await queryClient.prefetchInfiniteQuery({
-    queryKey: ["jobs-infinite", infiniteParams],
+    queryKey: ["jobs-infinite", infiniteParams, token],
     queryFn: async () => {
       return await fetchJobsShared(infiniteParams, token || "");
     },
@@ -44,7 +44,7 @@ export default async function JobsPageServer({
   });
 
   await queryClient.prefetchQuery({
-    queryKey: ["filter-metadata"],
+    queryKey: ["filter-metadata", token],
     queryFn: async () => {
       return await fetchFilterMetadataShared(token || "");
     },
