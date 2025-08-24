@@ -1,3 +1,7 @@
+## 2.0.0-beta.4 (2025-08-24)
+
+- feat(graphql): add description field to Job type and update related components (#59) ([1bed082](https://github.com/SanchitB23/remote-job-radar/commit/1bed082)), closes [#59](https://github.com/SanchitB23/remote-job-radar/issues/59)
+
 ## 2.0.0-beta.3 (2025-08-24)
 
 - fix: update UserProfile fields to allow null values for userId, skill… (#58) ([eb9dd41](https://github.com/SanchitB23/remote-job-radar/commit/eb9dd41)), closes [#58](https://github.com/SanchitB23/remote-job-radar/issues/58)
