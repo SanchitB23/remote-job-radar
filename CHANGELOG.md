@@ -1,3 +1,9 @@
+## 2.0.0-beta.2 (2025-08-24)
+
+- feat: implementation of per user skills based fitscore (#50) ([2f97577](https://github.com/SanchitB23/remote-job-radar/commit/2f97577)), closes [#50](https://github.com/SanchitB23/remote-job-radar/issues/50)
+- chore: connect preview deployed services (#56) ([d36bfbf](https://github.com/SanchitB23/remote-job-radar/commit/d36bfbf)), closes [#56](https://github.com/SanchitB23/remote-job-radar/issues/56)
+- refactor: improve file structure of gql in apps/api (#52) ([0abc36c](https://github.com/SanchitB23/remote-job-radar/commit/0abc36c)), closes [#52](https://github.com/SanchitB23/remote-job-radar/issues/52)
+
 ## 2.0.0-beta.1 (2025-08-20)
 
 - feat(web)!: migrate NEXT_PUBLIC_GRAPHQL_BASE_URL to GRAPHQL_BASE_URL (#45) ([f1b940f](https://github.com/SanchitB23/remote-job-radar/commit/f1b940f)), closes [#45](https://github.com/SanchitB23/remote-job-radar/issues/45)
