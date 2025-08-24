@@ -37,6 +37,9 @@ export function JobCard({ job }: JobCardProps): JSX.Element {
           <div className="flex-1 w-full">
             <h3 className="font-semibold text-lg">{job.title}</h3>
             <p className="text-muted-foreground">{job.company}</p>
+            {job.description && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{job.description}</p>
+            )}
             <Badge variant={job.fitScore === 0 ? "secondary" : "default"} className="mt-2">
               Fit Score: {job.fitScore === 0 ? "N/A" : `${Math.round(job.fitScore)}%`}
             </Badge>
