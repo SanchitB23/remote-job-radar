@@ -95,14 +95,13 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # --- RENDER: API preview wiring ---
+      # --- RENDER: API preview wiring (set DB envs + redeploy) ---
       - name: Patch Render API preview with Neon DB (if preview exists)
         id: render_api
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_API }}
           DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
-          STAGE_WEB_URL: ${{ vars.STAGE_WEB_URL }}
         run: |
           set -e
           PREVIEWS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
@@ -115,13 +114,13 @@ jobs:
             exit 0
           fi
 
-          # Patch env vars on preview instance (DB URL; optional CORS widen)
+          # Set BOTH Prisma URLs (your schema uses PG_DATABASE_URL)
           curl -s -X PATCH "https://api.render.com/v1/services/${PREVIEW_ID}/env-vars" \
             -H "Authorization: Bearer ${RENDER_API_KEY}" -H "Content-Type: application/json" \
             -d @- <<EOF
           {"envVars":[
-            { "key":"DATABASE_URL", "value":"${DB_URL}" }
-            /* , { "key":"GQL_API_CORS_ORIGIN", "value":"https://*.vercel.app,${STAGE_WEB_URL}" } */
+            { "key":"DATABASE_URL",    "value":"${DB_URL}" },
+            { "key":"PG_DATABASE_URL", "value":"${DB_URL}" }
           ]}
           EOF
 
@@ -131,7 +130,7 @@ jobs:
             -d '{"clearCache":"do_not_clear"}'
           echo "Triggered redeploy for Render API preview ${PREVIEW_ID}"
 
-          # Fetch the public URL of preview
+          # Capture preview URL
           DETAILS=$(curl -s -H "Authorization: Bearer ${RENDER_API_KEY}" \
             "https://api.render.com/v1/services/${PREVIEW_ID}")
           API_URL=$(echo "$DETAILS" | jq -r '.serviceDetails.url // .service.url // .url // empty')
@@ -185,39 +184,25 @@ jobs:
               -d '{"clearCache":"do_not_clear"}'
             echo "Patched API preview with EMBEDDER_URL and redeployed"
           fi
-
-      # --- VERCEL: upsert envs (branch-scoped) ---
-      - name: Upsert Vercel ENV - DATABASE_URL (branch-scoped preview)
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          DB_URL: ${{ needs.create_neon_branch.outputs.db_url_with_pooler }}
-        run: |
-          curl -s -X POST "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env" \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
-            -d @- <<EOF
-          {"type":"encrypted","key":"DATABASE_URL","value":"${DB_URL}",
-           "target":["preview"],"gitBranch":"${{ env.BRANCH_REF }}","configurationId":null}
-          EOF
-
-      - name: Decide API URL for web (prefer Render preview, else STAGE)
+      # --- VERCEL: upsert GRAPHQL_BASE_URL (branch-scoped) + redeploy web preview ---
+      - name: Decide GRAPHQL_BASE_URL for web (prefer Render preview, else STAGE)
         id: decide
         run: |
           API_URL="${{ steps.render_api.outputs.api_url }}"
           if [ -z "$API_URL" ] || [ "$API_URL" = "null" ]; then API_URL="${{ vars.STAGE_API_URL }}"; fi
-          echo "api=${API_URL}" >> $GITHUB_OUTPUT
-          echo "NEXT_PUBLIC_API_URL will be: ${API_URL}"
+          echo "graphql=${API_URL}" >> $GITHUB_OUTPUT
+          echo "GRAPHQL_BASE_URL will be: ${API_URL}"
 
-      - name: Upsert Vercel ENV - NEXT_PUBLIC_API_URL (branch-scoped preview)
+      - name: Upsert Vercel ENV - GRAPHQL_BASE_URL (branch-scoped, preview)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          API_URL: ${{ steps.decide.outputs.api }}
+          GRAPHQL_URL: ${{ steps.decide.outputs.graphql }}
         run: |
           curl -s -X POST "https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/env" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}" -H "Content-Type: application/json" \
             -d @- <<EOF
-          {"type":"plain","key":"NEXT_PUBLIC_API_URL","value":"${API_URL}",
+          {"type":"plain","key":"GRAPHQL_BASE_URL","value":"${GRAPHQL_URL}",
            "target":["preview"],"gitBranch":"${{ env.BRANCH_REF }}","configurationId":null}
           EOF
 
