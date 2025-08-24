@@ -30,7 +30,7 @@ func NewJobService(store *storage.Store, skillVec []float32, timeout time.Durati
 }
 
 // fetchFromSources fetches jobs from specified sources, or all if sources is nil/empty
-func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]storage.JobRow, error) {
+func (j *JobService) fetchFromSources(ctx context.Context, sources []string, jobCount int) ([]storage.JobRow, error) {
 	var allJobs []storage.JobRow
 
 	// Create a map for quick source lookup
@@ -42,8 +42,8 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]
 
 	// Fetch jobs from Remotive if requested or if fetching all
 	if fetchAll || sourceMap["remotive"] {
-		logger.Info("Fetching jobs from Remotive API")
-		remotiveJobs, err := fetch.Remotive(j.config.RemotiveBaseURL)
+		logger.Info("Fetching jobs from Remotive API", zap.Int("jobCount", jobCount))
+		remotiveJobs, err := fetch.Remotive(j.config.RemotiveBaseURL, jobCount)
 		if err != nil {
 			logger.Error("Remotive fetch error", zap.Error(err))
 			// Don't return here - continue with other sources
@@ -55,7 +55,7 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]
 
 	// Fetch jobs from Adzuna if configured and requested
 	if j.config.IsAdzunaEnabled() && (fetchAll || sourceMap["adzuna"]) {
-		adzunaJobs, err := j.fetchFromAdzuna(ctx)
+		adzunaJobs, err := j.fetchFromAdzuna(ctx, jobCount)
 		if err != nil {
 			logger.Error("Adzuna fetch failed", zap.Error(err))
 			// Continue with other sources
@@ -71,12 +71,26 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string) ([]
 }
 
 // fetchFromAdzuna fetches jobs from Adzuna API with pagination
-func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, error) {
-	logger.Info("Fetching jobs from Adzuna API")
+func (j *JobService) fetchFromAdzuna(ctx context.Context, jobCount int) ([]storage.JobRow, error) {
+	logger.Info("Fetching jobs from Adzuna API", zap.Int("jobCount", jobCount))
 	var allAdzunaJobs []storage.JobRow
 
+	// Calculate how many pages we need to fetch based on jobCount
+	maxPages := j.config.FetcherMaxPageNum
+	if jobCount > 0 {
+		// Calculate pages needed: jobCount / 50 (results per page) + 1 for remainder
+		calculatedPages := (jobCount + 49) / 50 // Ceiling division
+		if calculatedPages < maxPages {
+			maxPages = calculatedPages
+		}
+		logger.Info("Calculated pages needed for job count",
+			zap.Int("jobCount", jobCount),
+			zap.Int("pagesNeeded", calculatedPages),
+			zap.Int("maxPages", maxPages))
+	}
+
 	// Fetch multiple pages from Adzuna (since it's paginated)
-	for page := 1; page <= j.config.FetcherMaxPageNum; page++ {
+	for page := 1; page <= maxPages; page++ {
 		select {
 		case <-ctx.Done():
 			logger.Warn("Adzuna fetch interrupted by context cancellation",
@@ -88,7 +102,7 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 
 		// Create a timeout for individual page fetch
 		pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-		adzunaJobs, err := fetch.Adzuna(pageCtx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey, j.config.AdzunaBaseURL)
+		adzunaJobs, err := fetch.Adzuna(pageCtx, page, j.config.AdzunaAppID, j.config.AdzunaAppKey, j.config.AdzunaBaseURL, jobCount)
 		cancel()
 
 		if err != nil {
@@ -107,9 +121,15 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 		allAdzunaJobs = append(allAdzunaJobs, adzunaJobs...)
 
 		// Break early if we get fewer results than expected (last page)
-		if len(adzunaJobs) < 50 {
+		// or if we've reached the job count limit
+		if len(adzunaJobs) < 50 || (jobCount > 0 && len(allAdzunaJobs) >= jobCount) {
 			break
 		}
+	}
+
+	// Limit the total jobs if jobCount is specified
+	if jobCount > 0 && len(allAdzunaJobs) > jobCount {
+		allAdzunaJobs = allAdzunaJobs[:jobCount]
 	}
 
 	logger.Info("Total jobs fetched from Adzuna", zap.Int("count", len(allAdzunaJobs)))
@@ -117,10 +137,10 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context) ([]storage.JobRow, err
 }
 
 func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {
-	return j.FetchAndProcessJobsFromSources(ctx, nil)
+	return j.FetchAndProcessJobsFromSources(ctx, nil, 0)
 }
 
-func (j *JobService) FetchAndProcessJobsFromSources(ctx context.Context, sources []string) error {
+func (j *JobService) FetchAndProcessJobsFromSources(ctx context.Context, sources []string, jobCount int) error {
 	startTime := time.Now()
 	if len(sources) > 0 {
 		logger.Info("Starting job fetch operation from specific sources", zap.Strings("sources", sources))
@@ -128,12 +148,18 @@ func (j *JobService) FetchAndProcessJobsFromSources(ctx context.Context, sources
 		logger.Info("Starting job fetch operation from all sources")
 	}
 
+	if jobCount > 0 {
+		logger.Info("Job count limit specified", zap.Int("jobCount", jobCount))
+	} else {
+		logger.Info("No job count limit specified, fetching all available jobs")
+	}
+
 	// Create context with timeout
 	fetchCtx, cancel := context.WithTimeout(ctx, j.timeout)
 	defer cancel()
 
 	// Fetch jobs from specified sources (or all if sources is nil)
-	allJobs, err := j.fetchFromSources(fetchCtx, sources)
+	allJobs, err := j.fetchFromSources(fetchCtx, sources, jobCount)
 	if err != nil {
 		logger.Error("Error fetching from sources", zap.Error(err))
 		return err

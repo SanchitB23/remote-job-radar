@@ -22,8 +22,14 @@ type remotiveResp struct {
 	} `json:"jobs"`
 }
 
-func Remotive(baseURL string) ([]storage.JobRow, error) {
-	resp, err := http.Get(baseURL + "/api/remote-jobs")
+func Remotive(baseURL string, jobCount int) ([]storage.JobRow, error) {
+	// Build URL with limit parameter if jobCount is specified
+	url := baseURL + "/api/remote-jobs"
+	if jobCount > 0 {
+		url = fmt.Sprintf("%s?limit=%d", url, jobCount)
+	}
+
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
