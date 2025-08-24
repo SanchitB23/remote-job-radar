@@ -33,15 +33,26 @@ type adzResp struct {
 	} `json:"results"`
 }
 
-func Adzuna(ctx context.Context, page int, appID, appKey, baseURL string) ([]storage.JobRow, error) {
+func Adzuna(ctx context.Context, page int, appID, appKey, baseURL string, jobCount int) ([]storage.JobRow, error) {
 	if appID == "" || appKey == "" {
 		return nil, fmt.Errorf("adzuna API credentials are required")
+	}
+
+	// Calculate results_per_page based on jobCount
+	resultsPerPage := 50 // default
+	if jobCount > 0 {
+		// If jobCount is specified, calculate how many results we need per page
+		// For the first page, we might need fewer results if jobCount < 50
+		if page == 1 && jobCount < 50 {
+			resultsPerPage = jobCount
+		}
+		// For subsequent pages, we'll use the standard 50 but the calling logic will handle limiting
 	}
 
 	q := url.Values{
 		"app_id":           {appID},
 		"app_key":          {appKey},
-		"results_per_page": {"50"},
+		"results_per_page": {fmt.Sprintf("%d", resultsPerPage)},
 		"sort_by":          {"date"},
 	}
 

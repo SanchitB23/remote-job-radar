@@ -45,6 +45,9 @@ type Config struct {
 	EmbedderMaxTextLength  int
 	EmbedderWorkerCount    int
 
+	// Security
+	ManualJobFetchToken string
+
 	// Environment
 	Environment string
 }
@@ -89,6 +92,9 @@ func Load() (*Config, error) {
 		EmbedderClientTimeout:  getDurationWithDefault("EMBEDDER_CLIENT_TIMEOUT", 5*time.Minute),
 		EmbedderMaxTextLength:  getIntEnvWithDefault("EMBEDDER_MAX_TEXT_LENGTH", 10000),
 		EmbedderWorkerCount:    getIntEnvWithDefault("EMBEDDER_WORKER_COUNT", 5),
+
+		// Security
+		ManualJobFetchToken: getRequiredEnv("MANUAL_JOB_FETCH_TOKEN"),
 	}
 
 	logger.Info("Configuration loaded successfully",
@@ -101,7 +107,8 @@ func Load() (*Config, error) {
 		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
 		zap.Duration("embedderRequestTimeout", cfg.EmbedderRequestTimeout),
 		zap.Int("embedderWorkerCount", cfg.EmbedderWorkerCount),
-		zap.Int("embedderMaxTextLength", cfg.EmbedderMaxTextLength))
+		zap.Int("embedderMaxTextLength", cfg.EmbedderMaxTextLength),
+		zap.Bool("manualJobFetchTokenConfigured", cfg.ManualJobFetchToken != ""))
 
 	return cfg, nil
 }
