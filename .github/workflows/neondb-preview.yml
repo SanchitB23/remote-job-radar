@@ -1,4 +1,4 @@
-name: Create/Delete Neon Branch for Pull Request
+name: Preview DB for PR (Neon)
 
 on:
   pull_request:
@@ -23,10 +23,7 @@ jobs:
         uses: tj-actions/branch-names@v8
 
   create_neon_branch:
-    name: Create Neon Branch
-    outputs:
-      db_url: ${{ steps.create_neon_branch_encode.outputs.db_url }}
-      db_url_with_pooler: ${{ steps.create_neon_branch_encode.outputs.db_url_with_pooler }}
+    name: Create Neon Branch + Migrate
     needs: setup
     if: |
       github.event_name == 'pull_request' && (
@@ -34,11 +31,15 @@ jobs:
       || github.event.action == 'opened'
       || github.event.action == 'reopened')
     runs-on: ubuntu-latest
+    outputs:
+      db_url: ${{ steps.encode.outputs.db_url }}
+      db_url_with_pooler: ${{ steps.encode.outputs.db_url_with_pooler }}
     steps:
       - uses: actions/checkout@v4 # ✅ checkout code to run migrations
       - uses: actions/setup-node@v4 # ✅ install Node for prisma migrate
         with:
           node-version: 20
+
       - run: npm ci
 
       - name: Create Neon Branch
@@ -49,34 +50,44 @@ jobs:
           branch_name: preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}
           api_key: ${{ secrets.NEON_API_KEY }}
 
-      - name: Expose encoded DB URLs
+      - name: Expose encoded DB URLs (job outputs)
         id: encode
         run: |
           echo "db_url=${{ steps.create.outputs.db_url }}" >> $GITHUB_OUTPUT
           echo "db_url_with_pooler=${{ steps.create.outputs.db_url_with_pooler }}" >> $GITHUB_OUTPUT
 
-      - name: Run Migrations
+      - name: Run Prisma migrations against Neon preview DB
         run: npm run db:migrate
         env:
           DATABASE_URL: "${{ steps.create.outputs.db_url_with_pooler }}"
           PG_DATABASE_URL: "${{ steps.create.outputs.db_url_with_pooler }}"
 
-      - name: Create Comment
+      - name: (Optional) Comment DB URL on PR
+        if: ${{ success() }}
         uses: actions/github-script@v7
-        if: always()
         with:
           script: |
+            const body = [
+              "🗄️ **Neon Preview DB created**",
+              "",
+              `• Branch: \`preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}\``,
+              "• Use this in preview services:",
+              "`DATABASE_URL`:",
+              "`" + process.env.DB + "`"
+            ].join("\n");
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🗄️ Preview DB ready\n\nDB URL: \`${{ steps.encode.outputs.db_url_with_pooler }}\``
-            })
+              issue_number: context.issue.number,
+              body
+            });
+        env:
+          DB: ${{ steps.create.outputs.db_url_with_pooler }}
 
   delete_neon_branch:
-    name: Delete Neon Branch
+    name: Delete Neon Branch (on PR close)
     needs: setup
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Delete Neon Branch
