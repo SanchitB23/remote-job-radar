@@ -1,3 +1,7 @@
+## 2.0.0-beta.6 (2025-08-24)
+
+- feat(render): add initial render configuration for web services ([105ebcf](https://github.com/SanchitB23/remote-job-radar/commit/105ebcf))
+
 ## 2.0.0-beta.5 (2025-08-24)
 
 - feat(aggregator): add manual job fetch token and implement authorization in trigger fetch handler (# ([0310c0c](https://github.com/SanchitB23/remote-job-radar/commit/0310c0c)), closes [#61](https://github.com/SanchitB23/remote-job-radar/issues/61)
