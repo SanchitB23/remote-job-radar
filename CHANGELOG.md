@@ -1,3 +1,7 @@
+## 2.0.0-beta.7 (2025-08-25)
+
+- feat: add new job sources (#64) ([1c11ca3](https://github.com/SanchitB23/remote-job-radar/commit/1c11ca3)), closes [#64](https://github.com/SanchitB23/remote-job-radar/issues/64)
+
 ## 2.0.0-beta.6 (2025-08-24)
 
 - feat(render): add initial render configuration for web services ([105ebcf](https://github.com/SanchitB23/remote-job-radar/commit/105ebcf))
