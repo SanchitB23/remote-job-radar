@@ -31,7 +31,7 @@ func RemoteOK(baseURL string, jobCount int) ([]storage.JobRow, error) {
 		baseURL = "https://remoteok.com"
 	}
 	url := baseURL + "/api"
-	
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func RemoteOK(baseURL string, jobCount int) ([]storage.JobRow, error) {
 			SalaryMin:   r.SalaryMin,
 			SalaryMax:   r.SalaryMax,
 		})
-		
+
 		// Limit results if jobCount is specified
 		if jobCount > 0 && len(jobs) >= jobCount {
 			break

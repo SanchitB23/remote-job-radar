@@ -14,7 +14,7 @@ func WWR(baseURL string, jobCount int) ([]storage.JobRow, error) {
 		baseURL = "https://weworkremotely.com"
 	}
 	url := baseURL + "/remote-jobs.rss"
-	
+
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(url)
 	if err != nil {
@@ -65,7 +65,7 @@ func WWR(baseURL string, jobCount int) ([]storage.JobRow, error) {
 			SalaryMin:   0, // WWR doesn't provide salary info in RSS
 			SalaryMax:   0,
 		})
-		
+
 		// Limit results if jobCount is specified
 		if jobCount > 0 && len(jobs) >= jobCount {
 			break
