@@ -15,20 +15,31 @@ import (
 
 type JoobleResp struct {
 	Jobs []struct {
-		ID       string `json:"id"`
-		Title    string `json:"title"`
-		Company  string `json:"company"`
-		Location string `json:"location"`
-		Snippet  string `json:"snippet"`
-		Link     string `json:"link"`
-		Updated  string `json:"updated"`
-		Salary   string `json:"salary"`
+		ID       json.Number `json:"id"`
+		Title    string      `json:"title"`
+		Company  string      `json:"company"`
+		Location string      `json:"location"`
+		Snippet  string      `json:"snippet"`
+		Link     string      `json:"link"`
+		Updated  string      `json:"updated"`
+		Salary   string      `json:"salary"`
 	} `json:"jobs"`
 }
 
-func Jooble(ctx context.Context, apiKey string, keywords string, location string, page int, jobCount int) ([]storage.JobRow, error) {
+func Jooble(ctx context.Context, page int, apiKey string, keywords string, location string, jobCount int) ([]storage.JobRow, error) {
 	if apiKey == "" {
 		return nil, fmt.Errorf("jooble API key is required")
+	}
+
+	// Calculate results per page based on jobCount
+	resultsPerPage := 50 // default Jooble page size
+	if jobCount > 0 {
+		// If jobCount is specified, calculate how many results we need per page
+		// For the first page, we might need fewer results if jobCount < 50
+		if page == 1 && jobCount < 50 {
+			resultsPerPage = jobCount
+		}
+		// For subsequent pages, we'll use the standard 50 but the calling logic will handle limiting
 	}
 
 	// Build request body with configurable parameters
@@ -36,11 +47,7 @@ func Jooble(ctx context.Context, apiKey string, keywords string, location string
 		"keywords": keywords,
 		"location": location,
 		"page":     page,
-	}
-
-	// Add limit if jobCount is specified
-	if jobCount > 0 {
-		requestBody["limit"] = jobCount
+		"limit":    resultsPerPage,
 	}
 
 	// Convert to JSON
@@ -70,7 +77,7 @@ func Jooble(ctx context.Context, apiKey string, keywords string, location string
 
 	var jr JoobleResp
 	if err := json.NewDecoder(resp.Body).Decode(&jr); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decode Jooble response: %w", err)
 	}
 
 	var jobs []storage.JobRow
@@ -92,8 +99,17 @@ func Jooble(ctx context.Context, apiKey string, keywords string, location string
 			}
 		}
 
+		// Convert ID to string safely
+		jobID := "jooble-" + j.ID.String()
+
+		// Validate that we have a valid ID
+		if jobID == "jooble-" {
+			// Skip jobs with empty IDs
+			continue
+		}
+
 		jobs = append(jobs, storage.JobRow{
-			ID:          "jooble-" + j.ID,
+			ID:          jobID,
 			Source:      "jooble",
 			Title:       j.Title,
 			Company:     j.Company,

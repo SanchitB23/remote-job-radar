@@ -2,7 +2,10 @@ package services
 
 import (
 	"context"
+	"sort"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
@@ -11,6 +14,7 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/scorer"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 type JobService struct {
@@ -70,7 +74,7 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string, job
 	// Fetch jobs from Jooble if configured and requested
 	if j.config.IsJoobleEnabled() && (fetchAll || sourceMap["jooble"]) {
 		logger.Info("Fetching jobs from Jooble API", zap.Int("jobCount", jobCount))
-		joobleJobs, err := fetch.Jooble(ctx, j.config.JoobleAPIKey, "software engineer", "remote", 1, jobCount)
+		joobleJobs, err := j.fetchFromJooble(ctx, jobCount)
 		if err != nil {
 			logger.Error("Jooble fetch error", zap.Error(err))
 			// Continue with other sources
@@ -85,7 +89,7 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string, job
 	// Fetch jobs from RemoteOK if requested or if fetching all
 	if fetchAll || sourceMap["remoteok"] {
 		logger.Info("Fetching jobs from RemoteOK API", zap.Int("jobCount", jobCount))
-		remoteokJobs, err := fetch.FetchRemoteOK()
+		remoteokJobs, err := fetch.RemoteOK("", jobCount) // Empty baseURL will use default
 		if err != nil {
 			logger.Error("RemoteOK fetch error", zap.Error(err))
 			// Don't return here - continue with other sources
@@ -98,7 +102,7 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string, job
 	// Fetch jobs from WWR if requested or if fetching all
 	if fetchAll || sourceMap["wwr"] {
 		logger.Info("Fetching jobs from WWR API", zap.Int("jobCount", jobCount))
-		wwrJobs, err := fetch.FetchWWR()
+		wwrJobs, err := fetch.WWR("", jobCount) // Empty baseURL will use default
 		if err != nil {
 			logger.Error("WWR fetch error", zap.Error(err))
 			// Don't return here - continue with other sources
@@ -175,6 +179,271 @@ func (j *JobService) fetchFromAdzuna(ctx context.Context, jobCount int) ([]stora
 
 	logger.Info("Total jobs fetched from Adzuna", zap.Int("count", len(allAdzunaJobs)))
 	return allAdzunaJobs, nil
+}
+
+// getAdaptiveSearchStrategy adjusts search strategy based on job count and time constraints
+func (j *JobService) getAdaptiveSearchStrategy(jobCount int) (int, []struct {
+	keyword  string
+	location string
+	weight   int
+}) {
+	// Get base queries
+	baseQueries := j.getOptimizedSearchQueries()
+
+	// Adaptive strategy based on job count
+	if jobCount > 0 {
+		if jobCount <= 50 {
+			// Small job count: focus on high-priority queries only
+			return 1, baseQueries[:3] // Top 3 queries
+		} else if jobCount <= 200 {
+			// Medium job count: use moderate number of queries
+			return 2, baseQueries[:6] // Top 6 queries
+		}
+		// Large job count: use all queries
+		return j.config.JoobleConcurrency, baseQueries
+	}
+
+	// No job count limit: use all queries with full concurrency
+	return j.config.JoobleConcurrency, baseQueries
+}
+
+// getOptimizedSearchQueries returns weighted search queries for optimal job discovery
+func (j *JobService) getOptimizedSearchQueries() []struct {
+	keyword  string
+	location string
+	weight   int
+} {
+	// Base search queries with weights (higher weight = search first)
+	baseQueries := []struct {
+		keyword  string
+		location string
+		weight   int
+	}{
+		{"*", "remote", 10}, // Most general, highest priority
+		{"engineer", "remote", 9},
+		{"developer", "remote", 9},
+		{"software", "remote", 8},
+		{"*", "india", 7},
+		{"engineer", "india", 6},
+		{"developer", "india", 6},
+		{"*", "united states", 5},
+		{"*", "europe", 4},
+	}
+
+	// Sort by weight (highest first)
+	sort.Slice(baseQueries, func(i, j int) bool {
+		return baseQueries[i].weight > baseQueries[j].weight
+	})
+
+	return baseQueries
+}
+
+// fetchFromJooble fetches jobs from Jooble API with pagination & multiple keywords/locations
+func (j *JobService) fetchFromJooble(ctx context.Context, jobCount int) ([]storage.JobRow, error) {
+	logger.Info("Fetching jobs from Jooble API", zap.Int("jobCount", jobCount))
+
+	// Pre-allocate slice with estimated capacity to reduce memory allocations
+	estimatedCapacity := jobCount
+	if estimatedCapacity == 0 {
+		estimatedCapacity = j.config.FetcherMaxPageNum * 50 * 4 // maxPages * pageSize * keyword/location combinations
+	}
+	allJoobleJobs := make([]storage.JobRow, 0, estimatedCapacity)
+
+	// Use sync.Map for thread-safe deduplication with better memory efficiency
+	seen := make(map[string]struct{}, estimatedCapacity)
+
+	// Get adaptive search strategy based on job count
+	concurrency, searchQueries := j.getAdaptiveSearchStrategy(jobCount)
+	logger.Info("Using adaptive search strategy",
+		zap.Int("concurrency", concurrency),
+		zap.Int("searchQueries", len(searchQueries)),
+		zap.Int("jobCount", jobCount),
+		zap.Int("maxPages", j.config.FetcherMaxPageNum))
+
+	// Calculate optimal max pages based on jobCount - distribute across queries
+	maxPages := j.config.FetcherMaxPageNum
+	if jobCount > 0 {
+		// Calculate total pages needed across all queries
+		totalPagesNeeded := (jobCount + 49) / 50 // Ceiling division
+		// Distribute pages across queries, but ensure each query gets at least 1 page
+		pagesPerQuery := totalPagesNeeded / len(searchQueries)
+		if pagesPerQuery < 1 {
+			pagesPerQuery = 1
+		}
+		if pagesPerQuery < maxPages {
+			maxPages = pagesPerQuery
+		}
+		logger.Info("Calculated pages distribution",
+			zap.Int("jobCount", jobCount),
+			zap.Int("totalPagesNeeded", totalPagesNeeded),
+			zap.Int("searchQueries", len(searchQueries)),
+			zap.Int("pagesPerQuery", pagesPerQuery),
+			zap.Int("maxPages", maxPages))
+	}
+
+	// Use buffered channel for concurrent fetching with adaptive concurrency
+	semaphore := make(chan struct{}, concurrency)
+
+	// Create a context with timeout for the entire operation
+	operationCtx, cancel := context.WithTimeout(ctx, j.config.JoobleTimeout)
+	defer cancel()
+
+	// Use errgroup for better error handling and cancellation
+	g, gCtx := errgroup.WithContext(operationCtx)
+
+	// Track successful fetches for early termination
+	var totalFetched int32
+	var mu sync.Mutex
+
+	for _, query := range searchQueries {
+		// Early termination if we have enough jobs
+		if jobCount > 0 && atomic.LoadInt32(&totalFetched) >= int32(jobCount) {
+			break
+		}
+
+		query := query // Capture for goroutine
+		g.Go(func() error {
+			return j.fetchJoobleQuery(gCtx, query.keyword, query.location, maxPages, jobCount,
+				&allJoobleJobs, seen, &totalFetched, &mu, semaphore)
+		})
+	}
+
+	// Wait for all goroutines to complete
+	if err := g.Wait(); err != nil {
+		logger.Warn("Some Jooble queries failed", zap.Error(err))
+		// Continue with partial results
+	}
+
+	// Trim if overshot
+	if jobCount > 0 && len(allJoobleJobs) > jobCount {
+		allJoobleJobs = allJoobleJobs[:jobCount]
+	}
+
+	logger.Info("Total jobs fetched from Jooble",
+		zap.Int("count", len(allJoobleJobs)),
+		zap.Int("uniqueJobs", len(seen)))
+
+	return allJoobleJobs, nil
+}
+
+// fetchJoobleQuery handles fetching for a single keyword/location combination
+func (j *JobService) fetchJoobleQuery(ctx context.Context, keyword, location string, maxPages, jobCount int,
+	allJobs *[]storage.JobRow, seen map[string]struct{}, totalFetched *int32, mu *sync.Mutex, semaphore chan struct{}) error {
+
+	// Acquire semaphore to limit concurrency
+	select {
+	case semaphore <- struct{}{}:
+		defer func() { <-semaphore }()
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+
+	logger.Info("Fetching Jooble jobs",
+		zap.String("keyword", keyword),
+		zap.String("location", location))
+
+	var queryJobs []storage.JobRow
+	seenLocal := make(map[string]struct{}) // Local deduplication for this query
+
+	for page := 1; page <= maxPages; page++ {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		// Check if we've already reached the global job count limit
+		if jobCount > 0 && atomic.LoadInt32(totalFetched) >= int32(jobCount) {
+			break
+		}
+
+		// Per-page timeout with exponential backoff for retries
+		pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		joobleJobs, err := fetch.Jooble(pageCtx, page, j.config.JoobleAPIKey, keyword, location, jobCount)
+		cancel()
+
+		if err != nil {
+			logger.Error("Jooble fetch error",
+				zap.Error(err),
+				zap.String("keyword", keyword),
+				zap.String("location", location),
+				zap.Int("page", page))
+
+			// Implement exponential backoff for transient errors
+			if isRetryableError(err) && page < maxPages {
+				backoff := time.Duration(page) * time.Second
+				logger.Info("Retrying after backoff", zap.Duration("backoff", backoff))
+				time.Sleep(backoff)
+				continue
+			}
+			break
+		}
+
+		logger.Debug("Retrieved jobs from Jooble",
+			zap.Int("count", len(joobleJobs)),
+			zap.String("keyword", keyword),
+			zap.String("location", location),
+			zap.Int("page", page))
+
+		// Local deduplication
+		for _, job := range joobleJobs {
+			if _, exists := seenLocal[job.ID]; exists {
+				continue
+			}
+			seenLocal[job.ID] = struct{}{}
+			queryJobs = append(queryJobs, job)
+		}
+
+		// Stop if no more results or if we have enough jobs locally
+		if len(joobleJobs) < 50 {
+			break
+		}
+
+		// Check again if we've reached the job count limit after processing this page
+		if jobCount > 0 && atomic.LoadInt32(totalFetched) >= int32(jobCount) {
+			break
+		}
+	}
+
+	// Merge results with thread-safe access and early termination
+	if len(queryJobs) > 0 {
+		mu.Lock()
+		for _, job := range queryJobs {
+			// Check if we've reached the job count limit before adding more jobs
+			if jobCount > 0 && atomic.LoadInt32(totalFetched) >= int32(jobCount) {
+				break
+			}
+			if _, exists := seen[job.ID]; !exists {
+				seen[job.ID] = struct{}{}
+				*allJobs = append(*allJobs, job)
+				atomic.AddInt32(totalFetched, 1)
+			}
+		}
+		mu.Unlock()
+	}
+
+	return nil
+}
+
+// isRetryableError determines if an error should trigger a retry
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errStr := err.Error()
+	// Retry on network timeouts, rate limits, and temporary server errors
+	retryablePatterns := []string{
+		"timeout", "deadline exceeded", "rate limit", "429", "503", "502", "500",
+		"connection refused", "network is unreachable",
+	}
+
+	for _, pattern := range retryablePatterns {
+		if strings.Contains(strings.ToLower(errStr), pattern) {
+			return true
+		}
+	}
+	return false
 }
 
 func (j *JobService) FetchAndProcessJobs(ctx context.Context) error {

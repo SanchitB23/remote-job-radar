@@ -9,9 +9,14 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/utils"
 )
 
-func FetchWWR() ([]storage.JobRow, error) {
+func WWR(baseURL string, jobCount int) ([]storage.JobRow, error) {
+	if baseURL == "" {
+		baseURL = "https://weworkremotely.com"
+	}
+	url := baseURL + "/remote-jobs.rss"
+	
 	fp := gofeed.NewParser()
-	feed, err := fp.ParseURL("https://weworkremotely.com/remote-jobs.rss")
+	feed, err := fp.ParseURL(url)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +65,11 @@ func FetchWWR() ([]storage.JobRow, error) {
 			SalaryMin:   0, // WWR doesn't provide salary info in RSS
 			SalaryMax:   0,
 		})
+		
+		// Limit results if jobCount is specified
+		if jobCount > 0 && len(jobs) >= jobCount {
+			break
+		}
 	}
 	return jobs, nil
 }

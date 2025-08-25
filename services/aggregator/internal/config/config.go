@@ -25,6 +25,8 @@ type Config struct {
 	AdzunaAppID       string
 	AdzunaAppKey      string
 	JoobleAPIKey      string
+	JoobleConcurrency int
+	JoobleTimeout     time.Duration
 	RemotiveBaseURL   string
 	FetcherMaxPageNum int
 
@@ -78,6 +80,8 @@ func Load() (*Config, error) {
 		AdzunaAppID:       os.Getenv("ADZUNA_APP_ID"),
 		AdzunaAppKey:      os.Getenv("ADZUNA_APP_KEY"),
 		JoobleAPIKey:      os.Getenv("JOOBLE_API_KEY"),
+		JoobleConcurrency: getIntEnvWithDefault("JOOBLE_CONCURRENCY", 3),
+		JoobleTimeout:     getDurationWithDefault("JOOBLE_TIMEOUT", 5*time.Minute),
 		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),
 
 		// Scheduling defaults

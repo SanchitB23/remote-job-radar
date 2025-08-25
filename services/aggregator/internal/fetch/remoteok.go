@@ -26,8 +26,13 @@ type RemoteOKJob struct {
 	URL         string   `json:"url"`
 }
 
-func FetchRemoteOK() ([]storage.JobRow, error) {
-	resp, err := http.Get("https://remoteok.com/api")
+func RemoteOK(baseURL string, jobCount int) ([]storage.JobRow, error) {
+	if baseURL == "" {
+		baseURL = "https://remoteok.com"
+	}
+	url := baseURL + "/api"
+	
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +43,14 @@ func FetchRemoteOK() ([]storage.JobRow, error) {
 		return nil, err
 	}
 
+	// RemoteOK's first element is often metadata, skip it if it has ID 0 or empty
+	jobsData := data
+	if len(data) > 0 && (data[0].ID == "" || data[0].ID == "0") {
+		jobsData = data[1:]
+	}
+
 	var jobs []storage.JobRow
-	for _, r := range data {
+	for _, r := range jobsData {
 		// Convert HTML description to plain text using utility function
 		description, _ := utils.PreprocessText(r.Description, 0)
 
@@ -62,6 +73,11 @@ func FetchRemoteOK() ([]storage.JobRow, error) {
 			SalaryMin:   r.SalaryMin,
 			SalaryMax:   r.SalaryMax,
 		})
+		
+		// Limit results if jobCount is specified
+		if jobCount > 0 && len(jobs) >= jobCount {
+			break
+		}
 	}
 	return jobs, nil
 }
