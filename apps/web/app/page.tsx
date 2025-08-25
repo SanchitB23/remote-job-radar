@@ -302,13 +302,18 @@ export default function Home(): JSX.Element {
           <Separator className="my-6 bg-border" />
 
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; 2024 Remote Job Radar. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Remote Job Radar. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/jobs" className="hover:text-foreground transition-colors">
-                Jobs
-              </Link>
-              <Link href="/kanban" className="hover:text-foreground transition-colors">
-                Pipeline
+              <SignedIn>
+                <Link href="/jobs" className="hover:text-foreground transition-colors">
+                  Jobs
+                </Link>
+                <Link href="/kanban" className="hover:text-foreground transition-colors">
+                  Pipeline
+                </Link>
+              </SignedIn>
+              <Link href="/status" className="hover:text-foreground transition-colors">
+                Server Status
               </Link>
               <span className="text-muted-foreground">|</span>
               <span className="text-muted-foreground">Built with ❤️ for remote workers</span>
