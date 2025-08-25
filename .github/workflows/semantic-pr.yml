@@ -2,10 +2,11 @@ name: Semantic PR Title
 
 on:
   pull_request_target:
-    types: [opened, edited, synchronize]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
 
 jobs:
   semantic-pr:
+    name: PR title must be semantic
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
@@ -22,4 +23,13 @@ jobs:
             build
             ci
             chore
+            release
           requireScope: false
+          # Enforce non-empty, sentence-case-ish subject
+          subjectPattern: "^[a-z].+"
+          subjectPatternError: "Start the subject lowercase and be descriptive, e.g. 'feat: add job aggregator API endpoint'"
+          # Ignore bots (optional)
+          ignoreLabels: |
+            dependencies
+          # Allow draft PRs to pass (optional)
+          allowDrafts: true

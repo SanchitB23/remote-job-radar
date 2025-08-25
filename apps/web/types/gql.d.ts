@@ -12,6 +12,7 @@ export interface Job {
   bookmarked: boolean;
   source: string;
   isTracked?: boolean; // Whether the job is in the user's pipeline
+  description?: string;
 }
 
 export interface PipelineItem {
@@ -53,4 +54,10 @@ export interface FilterMetadata {
   sources: string[];
   locations: string[];
   workTypes: string[];
+}
+
+export interface UserProfile {
+  userId: string;
+  skills: string[];
+  updatedAt: string;
 }

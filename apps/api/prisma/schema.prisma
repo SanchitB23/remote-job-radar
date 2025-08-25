@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // point to the same DB as aggregator
+  url      = env("PG_DATABASE_URL") // point to the same DB as aggregator
 }
 
 generator client {
@@ -28,10 +28,12 @@ model job {
 }
 
 model bookmark {
-  id      String @id @default(uuid())
-  job_id  String
-  user_id String
-  job     job    @relation(fields: [job_id], references: [id])
+  id                  String        @id @default(uuid())
+  job_id              String
+  user_id             String
+
+  job                 job           @relation(fields: [job_id], references: [id])
+  user                user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, job_id])
   @@index([user_id])
@@ -47,9 +49,23 @@ model PipelineItem {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  job job @relation(fields: [job_id], references: [id])
+  job                 job           @relation(fields: [job_id], references: [id])
+  user                user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, job_id])
   @@index([user_id, column, position])
   @@map("pipeline_items")
+}
+
+model user_profile {
+  user_id      String                 @id
+  skills       String[]               @default([])
+  skill_vector Unsupported("vector")?
+  updated_at   DateTime               @updatedAt
+
+  // optional back-relations (handy in Prisma)
+  bookmarks      bookmark[]
+  pipeline_items PipelineItem[]
+
+  @@map("user_profiles")
 }

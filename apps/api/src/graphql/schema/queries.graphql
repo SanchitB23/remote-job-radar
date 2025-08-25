@@ -1,0 +1,73 @@
+"""
+Root query type for fetching jobs, pipeline, and filter metadata.
+"""
+type Query {
+  """
+  Fetch a paginated list of jobs matching the provided filters.
+  Returns a JobsConnection for Relay-style pagination.
+  """
+  jobs(
+    """
+    Minimum fit score for jobs (AI-generated)
+    """
+    minFit: Float
+    """
+    Full-text search string for job title, company, or description
+    """
+    search: String
+    """
+    Minimum salary filter
+    """
+    minSalary: Int
+    """
+    Filter by job location
+    """
+    location: String
+    """
+    Filter by work type (e.g. Full-time, Contract)
+    """
+    workType: String
+    """
+    Filter by job sources (platforms/APIs)
+    """
+    sources: [JobSource!]
+    """
+    Sort jobs by fit score, date, or salary (default: FIT)
+    """
+    sortBy: SortBy = FIT
+    """
+    Cursor for pagination (fetch jobs after this cursor)
+    """
+    after: String
+    """
+    Number of jobs to fetch (default: 50)
+    """
+    first: Int = 50
+    """
+    Filter for bookmarked jobs only
+    """
+    bookmarked: Boolean
+    """
+    Filter for jobs tracked in the user's pipeline
+    """
+    isTracked: Boolean
+  ): JobsConnection!
+
+  """
+  Fetch the user's current job application pipeline (Kanban board).
+  Returns a list of PipelineItems grouped by column.
+  """
+  pipeline: [PipelineItem!]!
+
+  """
+  Fetch metadata for available filters (fit score, salary, sources, locations, work types).
+  Useful for building dynamic filter UIs.
+  """
+  filterMetadata: FilterMetadata!
+
+  """
+  Retrieves the profile information of the currently authenticated user.
+  Returns a `UserProfile` object containing user-specific details.
+  """
+  meProfile: UserProfile
+}

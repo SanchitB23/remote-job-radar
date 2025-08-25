@@ -1,19 +1,27 @@
 // Shared GraphQL utilities and types
 import { GraphQLClient } from "graphql-request";
 
-import { GRAPHQL_HTTP_ENDPOINT } from "@/constants";
+import { GRAPHQL_BASE_URL } from "@/constants";
 import {
   BOOKMARK_MUTATION,
   FILTER_METADATA_QUERY,
   JOBS_QUERY,
   PIPELINE_QUERY,
   PIPELINE_UPSERT_MUTATION,
+  SET_USER_SKILLS_MUTATION,
+  USER_SKILLS_QUERY,
 } from "@/constants/gqlQueries";
-import type { FetchJobsParams, FilterMetadata, JobsConnection, PipelineItem } from "@/types/gql";
+import type {
+  FetchJobsParams,
+  FilterMetadata,
+  JobsConnection,
+  PipelineItem,
+  UserProfile,
+} from "@/types/gql";
 
 // Utility function to create a GraphQL client with consistent configuration
 export function createGraphQLClient(token?: string | null): GraphQLClient {
-  return new GraphQLClient(GRAPHQL_HTTP_ENDPOINT, {
+  return new GraphQLClient(`${GRAPHQL_BASE_URL}/graphql`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 }
@@ -99,4 +107,15 @@ export async function fetchFilterMetadataShared(token?: string | null): Promise<
     filterMetadata: FilterMetadata;
   }>(FILTER_METADATA_QUERY, {}, token);
   return response.filterMetadata;
+}
+
+export async function fetchUserSkills(token?: string | null): Promise<Pick<UserProfile, "skills">> {
+  const response = await executeGraphQLQuery<{
+    meProfile: UserProfile;
+  }>(USER_SKILLS_QUERY, {}, token);
+  return { skills: response.meProfile.skills };
+}
+
+export async function saveUserSkills(token: string | null, skills: string[]): Promise<void> {
+  await executeGraphQLQuery(SET_USER_SKILLS_MUTATION, { skills }, token);
 }

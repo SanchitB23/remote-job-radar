@@ -1,0 +1,16 @@
+"""
+Subscription root type for real-time updates.
+Currently supports new job alerts for users.
+"""
+type Subscription {
+  """
+  Subscribe to new jobs that match the minimum fit score.
+  Returns a single Job object when a new job is available.
+  """
+  newJob(
+    """
+    Minimum fit score for job alerts (default: 10)
+    """
+    minFit: Float = 10
+  ): Job!
+}

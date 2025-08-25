@@ -1,0 +1,115 @@
+name: Create Branch from Issue
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number
+        required: true
+      type:
+        description: feat|bug|chore|docs|refactor
+        required: true
+        default: feat
+
+jobs:
+  create-branch:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request == null &&
+       contains(github.event.comment.body, '/branch'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Derive inputs
+        id: derive
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "ISSUE_NUMBER=${{ github.event.inputs.issue_number }}" >> $GITHUB_OUTPUT
+            echo "TYPE=${{ github.event.inputs.type }}" >> $GITHUB_OUTPUT
+          else
+            # Parse type from comment like: /branch feat
+            RAW="${{ github.event.comment.body }}"
+            TYPE=$(echo "$RAW" | awk '{print $2}')
+            [[ -z "$TYPE" ]] && TYPE="feat"
+            echo "ISSUE_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+            echo "TYPE=$TYPE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create branch via GitHub API
+        uses: actions/github-script@v7
+        id: make
+        with:
+          script: |
+            const TYPE_ALLOW = new Set(["feat","bug","chore","docs","refactor"]);
+            const issueNumber = parseInt("${{ steps.derive.outputs.ISSUE_NUMBER }}", 10);
+            let type = "${{ steps.derive.outputs.TYPE }}".toLowerCase();
+            if (!TYPE_ALLOW.has(type)) type = "feat";
+
+            // Get issue to read title
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+
+            // Base off default branch
+            const { data: repo } = await github.rest.repos.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const base = repo.default_branch;
+            const { data: baseRef } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `heads/${base}`
+            });
+            const sha = baseRef.object.sha;
+
+            // Slugify title
+            const slug = issue.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+              .slice(0, 50);
+
+            const branch = `${type}/${issue.number}-${slug}`;
+
+            // Create ref if it doesn't exist
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/heads/${branch}`,
+                sha
+              });
+            } catch (e) {
+              if (e.status === 422) {
+                core.setOutput("branch", branch);
+                core.setOutput("already", "true");
+              } else {
+                throw e;
+              }
+            }
+
+            core.setOutput("branch", branch);
+            core.setOutput("base", base);
+
+      - name: Comment back on issue
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = "${{ steps.make.outputs.branch }}";
+            const base = "${{ steps.make.outputs.base || '' }}";
+            const already = "${{ steps.make.outputs.already || '' }}";
+            const msg = already === "true"
+              ? `Branch \`${branch}\` already exists.\n\n**Checkout:**\n\`\`\`\ngit fetch origin ${branch}\ngit switch ${branch}\n\`\`\`\n`
+              : `Created branch \`${branch}\` off \`${base}\`.\n\n**Checkout:**\n\`\`\`\ngit fetch origin ${branch}\ngit switch -c ${branch} --track origin/${branch}\n\`\`\`\n`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: msg
+            });

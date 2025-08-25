@@ -8,8 +8,6 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
 )
 
-const remotiveURL = "https://remotive.com/api/remote-jobs"
-
 type remotiveResp struct {
 	Jobs []struct {
 		ID          int    `json:"id"`
@@ -24,8 +22,14 @@ type remotiveResp struct {
 	} `json:"jobs"`
 }
 
-func Remotive() ([]storage.JobRow, error) {
-	resp, err := http.Get(remotiveURL)
+func Remotive(baseURL string, jobCount int) ([]storage.JobRow, error) {
+	// Build URL with limit parameter if jobCount is specified
+	url := baseURL + "/api/remote-jobs"
+	if jobCount > 0 {
+		url = fmt.Sprintf("%s?limit=%d", url, jobCount)
+	}
+
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
