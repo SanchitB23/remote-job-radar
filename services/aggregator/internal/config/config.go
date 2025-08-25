@@ -24,6 +24,7 @@ type Config struct {
 	AdzunaBaseURL     string
 	AdzunaAppID       string
 	AdzunaAppKey      string
+	JoobleAPIKey      string
 	RemotiveBaseURL   string
 	FetcherMaxPageNum int
 
@@ -76,6 +77,7 @@ func Load() (*Config, error) {
 		AdzunaBaseURL:     os.Getenv("ADZUNA_BASE_URL"),
 		AdzunaAppID:       os.Getenv("ADZUNA_APP_ID"),
 		AdzunaAppKey:      os.Getenv("ADZUNA_APP_KEY"),
+		JoobleAPIKey:      os.Getenv("JOOBLE_API_KEY"),
 		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),
 
 		// Scheduling defaults
@@ -104,6 +106,7 @@ func Load() (*Config, error) {
 		zap.Duration("scoreInterval", cfg.ScoreInterval),
 		zap.Bool("runInitialFetch", cfg.RunInitialFetch),
 		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""),
+		zap.Bool("joobleEnabled", cfg.JoobleAPIKey != ""),
 		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
 		zap.Duration("embedderRequestTimeout", cfg.EmbedderRequestTimeout),
 		zap.Int("embedderWorkerCount", cfg.EmbedderWorkerCount),
@@ -185,4 +188,9 @@ func getBoolEnvWithDefault(key string, defaultValue bool) bool {
 // IsAdzunaEnabled returns true if Adzuna API credentials are configured
 func (c *Config) IsAdzunaEnabled() bool {
 	return c.AdzunaAppID != "" && c.AdzunaAppKey != ""
+}
+
+// IsJoobleEnabled returns true if Jooble API key is configured
+func (c *Config) IsJoobleEnabled() bool {
+	return c.JoobleAPIKey != ""
 }

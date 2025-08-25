@@ -67,6 +67,47 @@ func (j *JobService) fetchFromSources(ctx context.Context, sources []string, job
 		logger.Info("Adzuna API not configured, skipping")
 	}
 
+	// Fetch jobs from Jooble if configured and requested
+	if j.config.IsJoobleEnabled() && (fetchAll || sourceMap["jooble"]) {
+		logger.Info("Fetching jobs from Jooble API", zap.Int("jobCount", jobCount))
+		joobleJobs, err := fetch.Jooble(ctx, j.config.JoobleAPIKey, "software engineer", "remote", 1, jobCount)
+		if err != nil {
+			logger.Error("Jooble fetch error", zap.Error(err))
+			// Continue with other sources
+		} else {
+			logger.Info("Retrieved jobs from Jooble", zap.Int("count", len(joobleJobs)))
+			allJobs = append(allJobs, joobleJobs...)
+		}
+	} else if !j.config.IsJoobleEnabled() && (fetchAll || sourceMap["jooble"]) {
+		logger.Info("Jooble API not configured, skipping")
+	}
+
+	// Fetch jobs from RemoteOK if requested or if fetching all
+	if fetchAll || sourceMap["remoteok"] {
+		logger.Info("Fetching jobs from RemoteOK API", zap.Int("jobCount", jobCount))
+		remoteokJobs, err := fetch.FetchRemoteOK()
+		if err != nil {
+			logger.Error("RemoteOK fetch error", zap.Error(err))
+			// Don't return here - continue with other sources
+		} else {
+			logger.Info("Retrieved jobs from RemoteOK", zap.Int("count", len(remoteokJobs)))
+			allJobs = append(allJobs, remoteokJobs...)
+		}
+	}
+
+	// Fetch jobs from WWR if requested or if fetching all
+	if fetchAll || sourceMap["wwr"] {
+		logger.Info("Fetching jobs from WWR API", zap.Int("jobCount", jobCount))
+		wwrJobs, err := fetch.FetchWWR()
+		if err != nil {
+			logger.Error("WWR fetch error", zap.Error(err))
+			// Don't return here - continue with other sources
+		} else {
+			logger.Info("Retrieved jobs from WWR", zap.Int("count", len(wwrJobs)))
+			allJobs = append(allJobs, wwrJobs...)
+		}
+	}
+
 	return allJobs, nil
 }
 
