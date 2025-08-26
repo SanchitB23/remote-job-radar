@@ -16,32 +16,47 @@ import type { HealthResponse } from "@/types/api/health";
  * }
  */
 export async function GET(): Promise<NextResponse> {
-  const cronUrl = process.env.CRON_SERVER_BASE_URL || "http://localhost:4000";
-  const gqlUrl = GRAPHQL_BASE_URL;
-  const timestamp = new Date().toISOString();
+  try {
+    const cronUrl = process.env.CRON_SERVER_BASE_URL || "http://localhost:4000";
+    const gqlUrl = GRAPHQL_BASE_URL;
+    const timestamp = new Date().toISOString();
 
-  // Wait for the first successful (ok: true) response, or return the last error if all fail
-  const results = await Promise.allSettled([
-    fetchHealth(cronUrl, "/health/db", 5000, timestamp),
-    fetchHealth(gqlUrl, "/health/db", 5000, timestamp),
-  ]);
+    // Return the first successful health check, or error if all fail
+    const result = await Promise.any([
+      fetchHealth(cronUrl, "/health/db", 5000, timestamp),
+      fetchHealth(gqlUrl, "/health/db", 5000, timestamp),
+    ]);
 
-  const success = results.find(
-    (r): r is PromiseFulfilledResult<HealthResponse & { status: number }> =>
-      isFulfilled(r) && r.value.ok,
-  );
-
-  const result =
-    success?.value ||
-    (results.find(isFulfilled)?.value ?? {
-      ok: false,
-      error: "All health checks failed",
-      timestamp: new Date().toISOString(),
-      status: 503,
-    });
-
-  const { status, ...rest } = result;
-  return NextResponse.json({ ...rest }, { status });
+    const { status, ...rest } = result;
+    return NextResponse.json({ ...rest }, { status });
+  } catch (error) {
+    // If all health checks fail, Promise.any throws an AggregateError
+    let errorMsg = "All health checks failed";
+    if (error instanceof AggregateError && error.errors?.length) {
+      errorMsg = error.errors
+        .map((e: unknown) => {
+          if (typeof e === "object" && e !== null && "error" in e) {
+            return (e as { error: string }).error;
+          }
+          if (typeof e === "object" && e !== null && "message" in e) {
+            return (e as { message: string }).message;
+          }
+          return String(e);
+        })
+        .join("; ");
+    } else if (error instanceof Error) {
+      errorMsg = error.message;
+    }
+    return NextResponse.json(
+      {
+        ok: false,
+        error: errorMsg,
+        timestamp: new Date().toISOString(),
+        status: 503,
+      },
+      { status: 503 },
+    );
+  }
 }
 
 const fetchHealth = async (
@@ -72,7 +87,3 @@ const fetchHealth = async (
     };
   }
 };
-
-const isFulfilled = (
-  r: PromiseSettledResult<HealthResponse & { status: number }>,
-): r is PromiseFulfilledResult<HealthResponse & { status: number }> => r.status === "fulfilled";
