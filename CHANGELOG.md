@@ -1,3 +1,8 @@
+## 2.0.0-beta.10 (2025-08-26)
+
+- fix(api): rename mutation for setting user skills to improve clarity (#80) ([8adeff0](https://github.com/SanchitB23/remote-job-radar/commit/8adeff0)), closes [#80](https://github.com/SanchitB23/remote-job-radar/issues/80)
+- refactor(aggregator): remove scheduler code from aggregator (#68) (#78) ([6b8dd39](https://github.com/SanchitB23/remote-job-radar/commit/6b8dd39)), closes [#68](https://github.com/SanchitB23/remote-job-radar/issues/68) [#78](https://github.com/SanchitB23/remote-job-radar/issues/78)
+
 ## 2.0.0-beta.9 (2025-08-26)
 
 - feat(web): add '/status' route to public route matcher (#75) ([fecb1d9](https://github.com/SanchitB23/remote-job-radar/commit/fecb1d9)), closes [#75](https://github.com/SanchitB23/remote-job-radar/issues/75)
