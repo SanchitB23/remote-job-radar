@@ -1,3 +1,7 @@
+## 2.0.0-beta.8 (2025-08-26)
+
+- feat(footer): update copyright year dynamically and add server status link (#66) ([19d1124](https://github.com/SanchitB23/remote-job-radar/commit/19d1124)), closes [#66](https://github.com/SanchitB23/remote-job-radar/issues/66)
+
 ## 2.0.0-beta.7 (2025-08-25)
 
 - feat: add new job sources (#64) ([1c11ca3](https://github.com/SanchitB23/remote-job-radar/commit/1c11ca3)), closes [#64](https://github.com/SanchitB23/remote-job-radar/issues/64)
