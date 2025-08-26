@@ -8,7 +8,6 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/handlers"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
-	"github.com/sanchitb23/remote-job-radar/aggregator/internal/scheduler"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/scorer"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/services"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/storage"
@@ -16,10 +15,9 @@ import (
 )
 
 type App struct {
-	Config    *config.Config
-	Store     *storage.Store
-	Handlers  *handlers.Handlers
-	Scheduler *scheduler.Scheduler
+	Config   *config.Config
+	Store    *storage.Store
+	Handlers *handlers.Handlers
 }
 
 func NewApp() (*App, error) {
@@ -64,23 +62,15 @@ func NewApp() (*App, error) {
 	// Initialize handlers
 	handlers := handlers.NewHandlers(store, jobService, cfg)
 
-	// Initialize scheduler
-	scheduler := scheduler.NewScheduler(jobService, cfg.FetchInterval, cfg.ScoreInterval, cfg.RunInitialFetch)
-
 	return &App{
-		Config:    cfg,
-		Store:     store,
-		Handlers:  handlers,
-		Scheduler: scheduler,
+		Config:   cfg,
+		Store:    store,
+		Handlers: handlers,
 	}, nil
 }
 
 func (a *App) Cleanup() {
 	logger.Info("Cleaning up application resources...")
-
-	if a.Scheduler != nil {
-		a.Scheduler.Stop()
-	}
 
 	if a.Store != nil && a.Store.DB != nil {
 		// Use a timeout for database cleanup to prevent hanging

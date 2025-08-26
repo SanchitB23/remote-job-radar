@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/utils"
@@ -19,9 +20,11 @@ import (
 )
 
 type Embedder struct {
-	URL    string
-	Client *http.Client
-	Config *config.Config
+	URL         string
+	Client      *http.Client
+	Config      *config.Config
+	warmupDone  bool
+	warmupMutex sync.Mutex
 }
 
 // EmbedRequest represents the request payload for embedding
@@ -32,6 +35,13 @@ type EmbedRequest struct {
 // EmbedResponse represents the response from the embedding service
 type EmbedResponse struct {
 	Vector []float32 `json:"vector"`
+}
+
+// HealthResponse represents the response from the web app health endpoint
+type HealthResponse struct {
+	Ok        bool   `json:"ok"`
+	Error     string `json:"error,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
 }
 
 func NewEmbedder(cfg *config.Config) (*Embedder, error) {
@@ -46,6 +56,82 @@ func NewEmbedder(cfg *config.Config) (*Embedder, error) {
 			Timeout: cfg.EmbedderClientTimeout,
 		},
 	}, nil
+}
+
+// ensureEmbedderWarmedUp ensures the embedder service is warmed up before making calls
+func (e *Embedder) ensureEmbedderWarmedUp(ctx context.Context) error {
+	e.warmupMutex.Lock()
+	defer e.warmupMutex.Unlock()
+
+	// If already warmed up, return immediately
+	if e.warmupDone {
+		return nil
+	}
+
+	// Attempt to warm up the embedder
+	if err := e.warmupEmbedder(ctx); err != nil {
+		logger.Warn("[EMBEDDER_WARMUP] Warmup failed, proceeding with direct embedder call",
+			zap.Error(err))
+		// Don't return error here - proceed with direct call as fallback
+		// This ensures backward compatibility if the web app is not available
+	} else {
+		e.warmupDone = true
+		logger.Info("[EMBEDDER_WARMUP] Embedder successfully warmed up")
+	}
+
+	return nil
+}
+
+// warmupEmbedder warms up the embedder service by calling the web app's health endpoint
+func (e *Embedder) warmupEmbedder(ctx context.Context) error {
+	if e.Config.WebAppURL == "" {
+		return fmt.Errorf("WEB_APP_BASE_URL not configured")
+	}
+
+	// Build the health endpoint URL
+	webAppURL := strings.TrimRight(e.Config.WebAppURL, "/")
+	healthURL := webAppURL + "/api/health/embedder"
+
+	logger.Info("[EMBEDDER_WARMUP] Starting embedder warmup via web app health endpoint",
+		zap.String("healthURL", healthURL))
+
+	// Create request with context and timeout - use embedder request timeout since cold starts can take time
+	warmupCtx, cancel := context.WithTimeout(ctx, e.Config.EmbedderRequestTimeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(warmupCtx, "GET", healthURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create warmup request: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("User-Agent", "aggregator-service/warmup")
+	req.Header.Set("Accept", "application/json")
+
+	// Make the request
+	resp, err := e.Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to call web app health endpoint: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	var healthResp HealthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&healthResp); err != nil {
+		return fmt.Errorf("failed to decode health response: %w", err)
+	}
+
+	// Check if the embedder is healthy
+	if !healthResp.Ok {
+		return fmt.Errorf("embedder health check failed: %s", healthResp.Error)
+	}
+
+	logger.Info("[EMBEDDER_WARMUP] Embedder successfully warmed up",
+		zap.String("healthURL", healthURL),
+		zap.Int("statusCode", resp.StatusCode),
+		zap.String("timestamp", healthResp.Timestamp))
+
+	return nil
 }
 
 func minDuration(a, b time.Duration) time.Duration {
@@ -63,6 +149,12 @@ func minInt(a, b int) int {
 }
 
 func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
+	// Ensure embedder is warmed up before proceeding
+	if err := e.ensureEmbedderWarmedUp(ctx); err != nil {
+		logger.Warn("[EMBEDDER_WARMUP] Warmup process encountered an issue, proceeding anyway",
+			zap.Error(err))
+	}
+
 	// Preprocess the text using shared utils
 	processedText, wasHTML := utils.PreprocessText(text, e.Config.EmbedderMaxTextLength)
 	if processedText == "" {

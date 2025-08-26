@@ -19,22 +19,23 @@ type Config struct {
 
 	// External services
 	EmbedderURL string
+	WebAppURL   string // Web app URL for warming up embedder via health check
 
 	// Job Sources
 	AdzunaBaseURL     string
 	AdzunaAppID       string
 	AdzunaAppKey      string
+	JoobleAPIKey      string
+	JoobleConcurrency int
+	JoobleTimeout     time.Duration
 	RemotiveBaseURL   string
 	FetcherMaxPageNum int
 
 	// Skills
 	SkillsFile string
 
-	// Scheduling
-	FetchInterval   time.Duration
-	ScoreInterval   time.Duration
-	FetchTimeout    time.Duration
-	RunInitialFetch bool
+	// Fetch Configuration
+	FetchTimeout time.Duration
 
 	// Embedder Configuration
 	EmbedderMaxRetries     int
@@ -68,6 +69,7 @@ func Load() (*Config, error) {
 		Port:        getEnvWithDefault("PORT", "8080"),
 		DatabaseDSN: getRequiredEnv("PG_DATABASE_URL"),
 		EmbedderURL: getRequiredEnv("EMBEDDER_BASE_URL"),
+		WebAppURL:   getEnvWithDefault("WEB_APP_BASE_URL", "http://localhost:3000"),
 		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
 		Environment: getEnvWithDefault("ENV", "development"),
 
@@ -76,13 +78,13 @@ func Load() (*Config, error) {
 		AdzunaBaseURL:     os.Getenv("ADZUNA_BASE_URL"),
 		AdzunaAppID:       os.Getenv("ADZUNA_APP_ID"),
 		AdzunaAppKey:      os.Getenv("ADZUNA_APP_KEY"),
+		JoobleAPIKey:      os.Getenv("JOOBLE_API_KEY"),
+		JoobleConcurrency: getIntEnvWithDefault("JOOBLE_CONCURRENCY", 3),
+		JoobleTimeout:     getDurationWithDefault("JOOBLE_TIMEOUT", 5*time.Minute),
 		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),
 
-		// Scheduling defaults
-		FetchInterval:   getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
-		ScoreInterval:   getDurationWithDefault("SCORE_INTERVAL", 4*time.Hour),
-		FetchTimeout:    getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
-		RunInitialFetch: getBoolEnvWithDefault("RUN_INITIAL_FETCH", false),
+		// Fetch Configuration
+		FetchTimeout: getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
 
 		// Embedder Configuration
 		EmbedderMaxRetries:     getIntEnvWithDefault("EMBEDDER_MAX_RETRIES", 10),
@@ -100,10 +102,8 @@ func Load() (*Config, error) {
 	logger.Info("Configuration loaded successfully",
 		zap.String("port", cfg.Port),
 		zap.String("environment", cfg.Environment),
-		zap.Duration("fetchInterval", cfg.FetchInterval),
-		zap.Duration("scoreInterval", cfg.ScoreInterval),
-		zap.Bool("runInitialFetch", cfg.RunInitialFetch),
 		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""),
+		zap.Bool("joobleEnabled", cfg.JoobleAPIKey != ""),
 		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
 		zap.Duration("embedderRequestTimeout", cfg.EmbedderRequestTimeout),
 		zap.Int("embedderWorkerCount", cfg.EmbedderWorkerCount),
@@ -166,23 +166,12 @@ func getIntEnvWithDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-// getBoolEnvWithDefault returns the bool value of an environment variable, or the default if unset or invalid
-func getBoolEnvWithDefault(key string, defaultValue bool) bool {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	if parsed, err := strconv.ParseBool(value); err == nil {
-		return parsed
-	}
-	logger.Warn("Invalid bool format, using default",
-		zap.String("key", key),
-		zap.String("value", value),
-		zap.Bool("default", defaultValue))
-	return defaultValue
-}
-
 // IsAdzunaEnabled returns true if Adzuna API credentials are configured
 func (c *Config) IsAdzunaEnabled() bool {
 	return c.AdzunaAppID != "" && c.AdzunaAppKey != ""
+}
+
+// IsJoobleEnabled returns true if Jooble API key is configured
+func (c *Config) IsJoobleEnabled() bool {
+	return c.JoobleAPIKey != ""
 }

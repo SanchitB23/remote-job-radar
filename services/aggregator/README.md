@@ -25,26 +25,28 @@ This is the **Go microservice** responsible for fetching, deduplicating, and sco
 - `internal/services/` – Business logic (job fetching, skills)
 - `internal/fetch/` – External API clients (Remotive, Adzuna, etc.)
 - `internal/scorer/` – Embedding and scoring logic
-- `internal/scheduler/` – Background job scheduling
 - `internal/storage/` – Database operations
 - `internal/logger/` – Logging
 - `skills.yml` – User skills configuration
 
 ## Environment Variables
 
-| Variable            | Required | Default | Description                      |
-| ------------------- | -------- | ------- | -------------------------------- |
-| `DB_DSN`            | Yes      | -       | Database connection string       |
-| `EMBEDDER_URL`      | Yes      | -       | Embedder service URL             |
-| `SKILLS_FILE`       | Yes      | -       | Path to skills YAML file         |
-| `ADZUNA_APP_ID`     | No       | -       | Adzuna API application ID        |
-| `ADZUNA_APP_KEY`    | No       | -       | Adzuna API application key       |
-| `PORT`              | No       | 8080    | HTTP server port                 |
-| `FETCH_INTERVAL`    | No       | 2h      | Job fetch interval               |
-| `SCORE_INTERVAL`    | No       | 4h      | Scoring interval                 |
-| `FETCH_TIMEOUT`     | No       | 30s     | Fetch operation timeout          |
-| `RUN_INITIAL_FETCH` | No       | false   | Run initial job fetch on startup |
-| `ENV`               | No       | -       | Environment name                 |
+| Variable                 | Required | Default                 | Description                     |
+| ------------------------ | -------- | ----------------------- | ------------------------------- |
+| `PG_DATABASE_URL`        | Yes      | -                       | PostgreSQL connection           |
+| `EMBEDDER_BASE_URL`      | Yes      | -                       | Python embedder service         |
+| `WEB_APP_BASE_URL`       | No       | `http://localhost:3000` | Web app URL for embedder warmup |
+| `SKILLS_FILE`            | Yes      | -                       | Path to skills YAML file        |
+| `MANUAL_JOB_FETCH_TOKEN` | Yes      | -                       | Security token for manual fetch |
+| `REMOTIVE_BASE_URL`      | No       | -                       | Remotive API base URL           |
+| `ADZUNA_APP_ID`          | No       | -                       | Adzuna API application ID       |
+| `ADZUNA_APP_KEY`         | No       | -                       | Adzuna API application key      |
+| `JOOBLE_API_KEY`         | No       | -                       | Jooble API key                  |
+| `JOOBLE_CONCURRENCY`     | No       | 3                       | Jooble concurrent requests      |
+| `JOOBLE_TIMEOUT`         | No       | 5m                      | Jooble request timeout          |
+| `PORT`                   | No       | 8080                    | HTTP server port                |
+| `FETCH_TIMEOUT`          | No       | 5m                      | Fetch operation timeout         |
+| `ENV`                    | No       | -                       | Environment name                |
 
 ## Development Commands
 
@@ -82,9 +84,19 @@ npm run start
 
 - **Concurrent job fetching and scoring**
 - **Robust error handling and logging**
-- **Configurable batch sizes and intervals**
+- **Configurable batch sizes and timeouts**
 - **Extensible for new job sources**
-- **Graceful shutdown and background scheduling**
+- **Graceful shutdown and on-demand fetching**
+- **Embedder cold start protection**: Automatically warms up the embedder service via the web app health endpoint to prevent cold start failures
+
+## Embedder Cold Start Solution
+
+In production environments, the embedder service may spin down after periods of inactivity, causing cold start delays and potential failures when the aggregator tries to make embedding calls. To address this:
+
+1. **Automatic Warmup**: Before making embedding calls, the aggregator automatically calls the web app's `/api/health/embedder` endpoint
+2. **Graceful Fallback**: If the warmup fails, the aggregator continues with direct embedder calls (backward compatibility)
+3. **One-time Warmup**: Each embedder instance only performs warmup once per session
+4. **Configuration**: Set `WEB_APP_BASE_URL` to enable this feature (optional)
 
 ## More Info
 

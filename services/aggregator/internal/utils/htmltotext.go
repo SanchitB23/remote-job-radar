@@ -7,12 +7,14 @@ import (
 )
 
 var (
-	htmlDetectionRegex = regexp.MustCompile(`<[a-zA-Z][^>]*>`)
-	blockElements      = regexp.MustCompile(`(?i)</(div|p|br|h[1-6]|li|tr)>`)
-	listItems          = regexp.MustCompile(`(?i)<li[^>]*>`)
-	htmlTagRegex       = regexp.MustCompile(`<[^>]*>`)
-	whitespaceRegex    = regexp.MustCompile(`[ \t]+`)
-	lineBreakRegex     = regexp.MustCompile(`\n\s*\n`)
+	htmlDetectionRegex  = regexp.MustCompile(`<[a-zA-Z][^>]*>`)
+	blockElements       = regexp.MustCompile(`(?i)</(div|p|br|h[1-6]|li|tr)>`)
+	listItems           = regexp.MustCompile(`(?i)<li[^>]*>`)
+	spanTags            = regexp.MustCompile(`(?i)<span[^>]*>`)
+	htmlTagRegex        = regexp.MustCompile(`<[^>]*>`)
+	whitespaceRegex     = regexp.MustCompile(`[ \t]+`)
+	lineBreakRegex      = regexp.MustCompile(`\n\s*\n`)
+	escapedNewlineRegex = regexp.MustCompile(`\\n`)
 )
 
 // ConvertHTMLToText converts HTML content to plain text
@@ -20,11 +22,17 @@ func ConvertHTMLToText(htmlContent string) string {
 	// First, unescape HTML entities
 	text := html.UnescapeString(htmlContent)
 
+	// Handle escaped newlines (like \\n in RemoteOK descriptions)
+	text = escapedNewlineRegex.ReplaceAllString(text, "\n")
+
 	// Replace common block elements with line breaks for better readability
 	text = blockElements.ReplaceAllString(text, "\n")
 
 	// Replace list items with bullet points
 	text = listItems.ReplaceAllString(text, "\n• ")
+
+	// Handle span tags (often contain styling info, just remove them)
+	text = spanTags.ReplaceAllString(text, "")
 
 	// Remove all remaining HTML tags
 	text = htmlTagRegex.ReplaceAllString(text, " ")
