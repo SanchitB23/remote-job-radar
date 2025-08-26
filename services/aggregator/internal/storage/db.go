@@ -169,6 +169,23 @@ func vectorToString(vector []float32) string {
 	return "[" + strings.Join(parts, ",") + "]"
 }
 
+// CleanUpOldJobs removes jobs older than 1 month based on published_at
+func (s *Store) CleanUpOldJobs(ctx context.Context) (int64, error) {
+	stmt := `DELETE FROM jobs WHERE published_at < NOW() - INTERVAL '1 month'`
+	
+	result, err := s.DB.ExecContext(ctx, stmt)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
 // Ping checks the database connection
 func (s *Store) Ping(ctx context.Context) error {
 	return s.DB.PingContext(ctx)
