@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 // Optionally, use an env var for a secret to protect the cron endpoint
 const CRON_SECRET = process.env.CRON_SECRET;
-const AGGREGATOR_URL = process.env.CRON_SERVER_BASE_URL || "http://localhost:8080/api/fetch";
+const AGGREGATOR_URL = process.env.CRON_SERVER_BASE_URL || "http://localhost:8080";
 
 export async function POST(req: NextRequest): Promise<ReturnType<typeof NextResponse.json>> {
   // Simple secret check (header or query param)
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest): Promise<ReturnType<typeof NextResp
   }
 
   try {
-    const aggregatorRes = await fetch(`${AGGREGATOR_URL}`, {
+    const aggregatorRes = await fetch(`${AGGREGATOR_URL}/api/fetch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     });
