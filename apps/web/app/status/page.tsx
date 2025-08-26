@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 // List of health API endpoints in /api/health
 const HEALTH_APIS = [
   { name: "GraphQL API", path: "/api/health/graphql" },
-  { name: "Aggregator (Cron)", path: "/api/health/cron" },
+  { name: "Aggregator", path: "/api/health/aggregator" },
   { name: "DB", path: "/api/health/db" },
   { name: "Embedder", path: "/api/health/embedder" },
   { name: "Web", path: "/api/health/web" },
