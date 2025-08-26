@@ -1,3 +1,19 @@
+## 2.1.0-beta.1 (2025-08-26)
+
+- Merge branch 'main' into develop ([3d97c83](https://github.com/SanchitB23/remote-job-radar/commit/3d97c83))
+- feat: add new job sources (#64) ([1c11ca3](https://github.com/SanchitB23/remote-job-radar/commit/1c11ca3)), closes [#64](https://github.com/SanchitB23/remote-job-radar/issues/64)
+- feat(aggregator): implement warmup mechanism for embedder service via web app health check (#81) ([0c6da04](https://github.com/SanchitB23/remote-job-radar/commit/0c6da04)), closes [#81](https://github.com/SanchitB23/remote-job-radar/issues/81)
+- feat(footer): update copyright year dynamically and add server status link (#66) ([19d1124](https://github.com/SanchitB23/remote-job-radar/commit/19d1124)), closes [#66](https://github.com/SanchitB23/remote-job-radar/issues/66)
+- feat(web): add '/status' route to public route matcher (#75) ([fecb1d9](https://github.com/SanchitB23/remote-job-radar/commit/fecb1d9)), closes [#75](https://github.com/SanchitB23/remote-job-radar/issues/75)
+- chore(release): 2.0.0-beta.10 [skip ci] ([ef8dcde](https://github.com/SanchitB23/remote-job-radar/commit/ef8dcde))
+- chore(release): 2.0.0-beta.7 [skip ci] ([456a29f](https://github.com/SanchitB23/remote-job-radar/commit/456a29f))
+- chore(release): 2.0.0-beta.8 [skip ci] ([bcb84d0](https://github.com/SanchitB23/remote-job-radar/commit/bcb84d0))
+- chore(release): 2.0.0-beta.9 [skip ci] ([ce1bc03](https://github.com/SanchitB23/remote-job-radar/commit/ce1bc03))
+- fix(api): rename mutation for setting user skills to improve clarity (#80) ([8adeff0](https://github.com/SanchitB23/remote-job-radar/commit/8adeff0)), closes [#80](https://github.com/SanchitB23/remote-job-radar/issues/80)
+- fix(web): update button styles on landing page (#74) ([c210f69](https://github.com/SanchitB23/remote-job-radar/commit/c210f69)), closes [#74](https://github.com/SanchitB23/remote-job-radar/issues/74)
+- refactor(aggregator): remove scheduler code from aggregator (#68) (#78) ([6b8dd39](https://github.com/SanchitB23/remote-job-radar/commit/6b8dd39)), closes [#68](https://github.com/SanchitB23/remote-job-radar/issues/68) [#78](https://github.com/SanchitB23/remote-job-radar/issues/78)
+- refactor(web): simplify health check logic using Promise.any (#76) ([a80a676](https://github.com/SanchitB23/remote-job-radar/commit/a80a676)), closes [#76](https://github.com/SanchitB23/remote-job-radar/issues/76)
+
 ## 2.0.0-beta.10 (2025-08-26)
 
 - fix(api): rename mutation for setting user skills to improve clarity (#80) ([8adeff0](https://github.com/SanchitB23/remote-job-radar/commit/8adeff0)), closes [#80](https://github.com/SanchitB23/remote-job-radar/issues/80)
