@@ -34,10 +34,6 @@ func main() {
 		serverErrors <- server.ListenAndServe()
 	}()
 
-	// Start scheduler
-	ctx := context.Background()
-	application.Scheduler.Start(ctx)
-
 	logger.Info("Service fully initialized and ready to serve requests")
 
 	// Wait for shutdown signals or server errors
@@ -53,9 +49,6 @@ func main() {
 
 	// Graceful shutdown
 	logger.Info("Starting graceful shutdown...")
-
-	// Stop scheduler first
-	application.Scheduler.Stop()
 
 	// Shutdown HTTP server with timeout
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
