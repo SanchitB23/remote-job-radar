@@ -19,6 +19,7 @@ type Config struct {
 
 	// External services
 	EmbedderURL string
+	WebAppURL   string // Web app URL for warming up embedder via health check
 
 	// Job Sources
 	AdzunaBaseURL     string
@@ -68,6 +69,7 @@ func Load() (*Config, error) {
 		Port:        getEnvWithDefault("PORT", "8080"),
 		DatabaseDSN: getRequiredEnv("PG_DATABASE_URL"),
 		EmbedderURL: getRequiredEnv("EMBEDDER_BASE_URL"),
+		WebAppURL:   getEnvWithDefault("WEB_APP_BASE_URL", "http://localhost:3000"),
 		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
 		Environment: getEnvWithDefault("ENV", "development"),
 
