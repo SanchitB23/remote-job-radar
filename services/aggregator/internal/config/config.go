@@ -164,22 +164,6 @@ func getIntEnvWithDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-// getBoolEnvWithDefault returns the bool value of an environment variable, or the default if unset or invalid
-func getBoolEnvWithDefault(key string, defaultValue bool) bool {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	if parsed, err := strconv.ParseBool(value); err == nil {
-		return parsed
-	}
-	logger.Warn("Invalid bool format, using default",
-		zap.String("key", key),
-		zap.String("value", value),
-		zap.Bool("default", defaultValue))
-	return defaultValue
-}
-
 // IsAdzunaEnabled returns true if Adzuna API credentials are configured
 func (c *Config) IsAdzunaEnabled() bool {
 	return c.AdzunaAppID != "" && c.AdzunaAppKey != ""
