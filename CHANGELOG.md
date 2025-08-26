@@ -1,3 +1,9 @@
+## 2.0.0-beta.9 (2025-08-26)
+
+- feat(web): add '/status' route to public route matcher (#75) ([fecb1d9](https://github.com/SanchitB23/remote-job-radar/commit/fecb1d9)), closes [#75](https://github.com/SanchitB23/remote-job-radar/issues/75)
+- fix(web): update button styles on landing page (#74) ([c210f69](https://github.com/SanchitB23/remote-job-radar/commit/c210f69)), closes [#74](https://github.com/SanchitB23/remote-job-radar/issues/74)
+- refactor(web): simplify health check logic using Promise.any (#76) ([a80a676](https://github.com/SanchitB23/remote-job-radar/commit/a80a676)), closes [#76](https://github.com/SanchitB23/remote-job-radar/issues/76)
+
 ## 2.0.0-beta.8 (2025-08-26)
 
 - feat(footer): update copyright year dynamically and add server status link (#66) ([19d1124](https://github.com/SanchitB23/remote-job-radar/commit/19d1124)), closes [#66](https://github.com/SanchitB23/remote-job-radar/issues/66)
