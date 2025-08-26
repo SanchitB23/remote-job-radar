@@ -24,10 +24,10 @@ export async function PUT(request: Request): Promise<NextResponse> {
   const token = await getToken({ template: "remote-job-radar" });
 
   try {
-    const skills = await request.json();
-    console.debug("[PUT /api/user/skills] Saving user skills:", skills);
+    const requestBody = await request.json();
+    console.debug("[PUT /api/user/skills] Saving user skills:", requestBody.skills);
 
-    await saveUserSkills(token, skills);
+    await saveUserSkills(token, requestBody.skills);
 
     return NextResponse.json({ success: true });
   } catch (error) {
