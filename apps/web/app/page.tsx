@@ -54,7 +54,7 @@ export default function Home(): JSX.Element {
             <Button
               variant="outline"
               size="lg"
-              className="text-lg px-8 py-6 h-auto border-2 hover:bg-muted transition-all duration-300"
+              className="text-lg px-8 py-6 h-auto border-2 text-primary hover:bg-muted hover:text-foreground transition-all duration-300"
             >
               <Link href="/jobs">Browse All Jobs</Link>
             </Button>
@@ -272,7 +272,7 @@ export default function Home(): JSX.Element {
               <Button
                 asChild
                 size="lg"
-                className="text-lg px-8 py-6 h-auto bg-white text-primary hover:bg-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                className="text-lg px-8 py-6 h-auto bg-white text-primary hover:bg-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:text-foreground"
               >
                 <Link href="/jobs">Explore Jobs</Link>
               </Button>
@@ -281,7 +281,7 @@ export default function Home(): JSX.Element {
             <Button
               variant="outline"
               size="lg"
-              className="text-lg px-8 py-6 h-auto border-white text-white hover:bg-white hover:text-primary transition-all duration-300"
+              className="text-lg px-8 py-6 h-auto border-white text-primary hover:bg-primary-foreground hover:text-foreground transition-all duration-300"
             >
               <Link href="/jobs">Browse All</Link>
             </Button>
