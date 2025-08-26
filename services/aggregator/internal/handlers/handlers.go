@@ -61,34 +61,30 @@ func (h *Handlers) HealthDB(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) TriggerFetch(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Manual fetch triggered", zap.String("remote_addr", r.RemoteAddr))
 
-	// Check authorization token
+	// Accept either ?token=... or ?cron_secret=... for authorization
 	token := r.URL.Query().Get("token")
-	if token == "" {
-		logger.Warn("Missing token parameter", zap.String("remote_addr", r.RemoteAddr))
+	cronSecret := r.Header.Get("X-Cron-Secret")
+
+	validToken := token != "" && token == h.config.ManualJobFetchToken
+	validCronSecret := cronSecret != "" && h.config.CronSecret != "" && cronSecret == h.config.CronSecret
+
+	if !validToken && !validCronSecret {
+		logger.Warn("Missing or invalid token or X-Cron-Secret header", zap.String("remote_addr", r.RemoteAddr))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"ok":      false,
-			"error":   "Missing required token parameter",
+			"error":   "Missing or invalid token or X-Cron-Secret header",
 			"message": "Authorization required",
 		})
 		return
 	}
 
-	// Validate token
-	if token != h.config.ManualJobFetchToken {
-		logger.Warn("Invalid token provided", zap.String("remote_addr", r.RemoteAddr))
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"ok":      false,
-			"error":   "Invalid token",
-			"message": "Authorization failed",
-		})
-		return
+	if validToken {
+		logger.Info("Token validation successful", zap.String("remote_addr", r.RemoteAddr))
+	} else if validCronSecret {
+		logger.Info("Cron secret validation successful", zap.String("remote_addr", r.RemoteAddr))
 	}
-
-	logger.Info("Token validation successful", zap.String("remote_addr", r.RemoteAddr))
 
 	// Parse sources parameter from query string
 	var sources []string
