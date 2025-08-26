@@ -117,9 +117,7 @@ export const USER_SKILLS_QUERY = /* GraphQL */ `
 `;
 
 export const SET_USER_SKILLS_MUTATION = /* GraphQL */ `
-  mutation SetUserSkills($skills: [String!]!) {
-    setUserSkills(skills: $skills) {
-      success
-    }
+  mutation SetSkills($skills: [String!]!) {
+    setSkills(skills: $skills)
   }
 `;
