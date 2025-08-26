@@ -33,11 +33,8 @@ type Config struct {
 	// Skills
 	SkillsFile string
 
-	// Scheduling
-	FetchInterval   time.Duration
-	ScoreInterval   time.Duration
-	FetchTimeout    time.Duration
-	RunInitialFetch bool
+	// Fetch Configuration
+	FetchTimeout time.Duration
 
 	// Embedder Configuration
 	EmbedderMaxRetries     int
@@ -84,11 +81,8 @@ func Load() (*Config, error) {
 		JoobleTimeout:     getDurationWithDefault("JOOBLE_TIMEOUT", 5*time.Minute),
 		FetcherMaxPageNum: getIntEnvWithDefault("FETCHER_MAX_PAGE_NUM", 3),
 
-		// Scheduling defaults
-		FetchInterval:   getDurationWithDefault("FETCH_INTERVAL", 2*time.Hour),
-		ScoreInterval:   getDurationWithDefault("SCORE_INTERVAL", 4*time.Hour),
-		FetchTimeout:    getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
-		RunInitialFetch: getBoolEnvWithDefault("RUN_INITIAL_FETCH", false),
+		// Fetch Configuration
+		FetchTimeout: getDurationWithDefault("FETCH_TIMEOUT", 5*time.Minute),
 
 		// Embedder Configuration
 		EmbedderMaxRetries:     getIntEnvWithDefault("EMBEDDER_MAX_RETRIES", 10),
@@ -106,9 +100,6 @@ func Load() (*Config, error) {
 	logger.Info("Configuration loaded successfully",
 		zap.String("port", cfg.Port),
 		zap.String("environment", cfg.Environment),
-		zap.Duration("fetchInterval", cfg.FetchInterval),
-		zap.Duration("scoreInterval", cfg.ScoreInterval),
-		zap.Bool("runInitialFetch", cfg.RunInitialFetch),
 		zap.Bool("adzunaEnabled", cfg.AdzunaAppID != "" && cfg.AdzunaAppKey != ""),
 		zap.Bool("joobleEnabled", cfg.JoobleAPIKey != ""),
 		zap.Int("embedderMaxRetries", cfg.EmbedderMaxRetries),
@@ -170,22 +161,6 @@ func getIntEnvWithDefault(key string, defaultValue int) int {
 		zap.String("key", key),
 		zap.String("value", value),
 		zap.Int("default", defaultValue))
-	return defaultValue
-}
-
-// getBoolEnvWithDefault returns the bool value of an environment variable, or the default if unset or invalid
-func getBoolEnvWithDefault(key string, defaultValue bool) bool {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	if parsed, err := strconv.ParseBool(value); err == nil {
-		return parsed
-	}
-	logger.Warn("Invalid bool format, using default",
-		zap.String("key", key),
-		zap.String("value", value),
-		zap.Bool("default", defaultValue))
 	return defaultValue
 }
 
