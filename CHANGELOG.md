@@ -1,3 +1,9 @@
+## 2.2.0 (2025-08-29)
+
+- Merge branch 'develop' into main ([c707efd](https://github.com/SanchitB23/remote-job-radar/commit/c707efd))
+- chore(release): 2.1.0-beta.2 [skip ci] ([19d9b78](https://github.com/SanchitB23/remote-job-radar/commit/19d9b78))
+- feat(cron/web): implement cron job endpoint with authorization and fe… (#85) ([ba09955](https://github.com/SanchitB23/remote-job-radar/commit/ba09955)), closes [#85](https://github.com/SanchitB23/remote-job-radar/issues/85)
+
 ## 2.1.0 (2025-08-26)
 
 - Merge branch 'main' into develop ([3d97c83](https://github.com/SanchitB23/remote-job-radar/commit/3d97c83))
