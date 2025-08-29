@@ -20,6 +20,7 @@ func (h *Handlers) SetupRoutes() http.Handler {
 	r.Get("/health/db", h.HealthDB)
 	r.Post("/fetch", h.TriggerFetch)
 	r.Get("/healthz", h.Healthz)
+	r.Delete("/clean", h.TriggerClean)
 
 	return r
 }

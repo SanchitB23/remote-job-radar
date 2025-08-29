@@ -16,6 +16,10 @@
 - refactor(aggregator): remove scheduler code from aggregator (#68) (#78) ([6b8dd39](https://github.com/SanchitB23/remote-job-radar/commit/6b8dd39)), closes [#68](https://github.com/SanchitB23/remote-job-radar/issues/68) [#78](https://github.com/SanchitB23/remote-job-radar/issues/78)
 - refactor(web): simplify health check logic using Promise.any (#76) ([a80a676](https://github.com/SanchitB23/remote-job-radar/commit/a80a676)), closes [#76](https://github.com/SanchitB23/remote-job-radar/issues/76)
 
+## 2.1.0-beta.2 (2025-08-29)
+
+- feat(cron/web): implement cron job endpoint with authorization and fe… (#85) ([ba09955](https://github.com/SanchitB23/remote-job-radar/commit/ba09955)), closes [#85](https://github.com/SanchitB23/remote-job-radar/issues/85)
+
 ## 2.1.0-beta.1 (2025-08-26)
 
 - Merge branch 'main' into develop ([3d97c83](https://github.com/SanchitB23/remote-job-radar/commit/3d97c83))

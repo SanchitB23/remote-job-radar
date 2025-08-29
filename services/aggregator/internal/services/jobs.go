@@ -24,6 +24,25 @@ type JobService struct {
 	config   *config.Config
 }
 
+func (j *JobService) CleanUpJobs(ctx context.Context) error {
+	logger.Info("Starting job cleanup operation")
+	startTime := time.Now()
+
+	// Use the store method to delete old jobs
+	deletedCount, err := j.store.CleanUpOldJobs(ctx)
+	if err != nil {
+		logger.Error("Failed to delete old jobs", zap.Error(err))
+		return err
+	}
+
+	duration := time.Since(startTime)
+	logger.Info("Job cleanup completed",
+		zap.Int64("deletedJobs", deletedCount),
+		zap.Duration("duration", duration))
+
+	return nil
+}
+
 func NewJobService(store *storage.Store, skillVec []float32, timeout time.Duration, cfg *config.Config) *JobService {
 	return &JobService{
 		store:    store,

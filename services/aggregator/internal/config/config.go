@@ -48,6 +48,7 @@ type Config struct {
 
 	// Security
 	ManualJobFetchToken string
+	CronSecret          string
 
 	// Environment
 	Environment string
@@ -97,6 +98,7 @@ func Load() (*Config, error) {
 
 		// Security
 		ManualJobFetchToken: getRequiredEnv("MANUAL_JOB_FETCH_TOKEN"),
+		CronSecret:          getEnvWithDefault("CRON_SECRET", ""),
 	}
 
 	logger.Info("Configuration loaded successfully",
