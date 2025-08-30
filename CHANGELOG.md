@@ -1,3 +1,7 @@
+## 2.1.0-beta.3 (2025-08-30)
+
+- fix(config): update environment variable key for web app URL (#88) ([8f91909](https://github.com/SanchitB23/remote-job-radar/commit/8f91909)), closes [#88](https://github.com/SanchitB23/remote-job-radar/issues/88)
+
 ## 2.1.0-beta.2 (2025-08-29)
 
 - feat(cron/web): implement cron job endpoint with authorization and fe… (#85) ([ba09955](https://github.com/SanchitB23/remote-job-radar/commit/ba09955)), closes [#85](https://github.com/SanchitB23/remote-job-radar/issues/85)
