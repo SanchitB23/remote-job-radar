@@ -1,3 +1,4 @@
+
 ## <small>2.2.1 (2025-08-30)</small>
 
 - Merge branch 'main' into develop ([c0ffe2d](https://github.com/SanchitB23/remote-job-radar/commit/c0ffe2d))
@@ -7,6 +8,17 @@
 - chore(release): 2.2.1-beta.1 [skip ci] ([771841c](https://github.com/SanchitB23/remote-job-radar/commit/771841c))
 - fix: update pr workflow (#90) ([1d78bca](https://github.com/SanchitB23/remote-job-radar/commit/1d78bca)), closes [#90](https://github.com/SanchitB23/remote-job-radar/issues/90)
 - fix(config): update environment variable key for web app URL (#88) ([8f91909](https://github.com/SanchitB23/remote-job-radar/commit/8f91909)), closes [#88](https://github.com/SanchitB23/remote-job-radar/issues/88)
+
+
+## <small>2.2.1-beta.3 (2025-08-30)</small>
+
+- fix(web): reload refresh jobs when skills update (#92) ([2fded75](https://github.com/SanchitB23/remote-job-radar/commit/2fded75)), closes [#92](https://github.com/SanchitB23/remote-job-radar/issues/92)
+- Chore/93 chore semantic pr workflow issue (#96) ([baadd6f](https://github.com/SanchitB23/remote-job-radar/commit/baadd6f)), closes [#96](https://github.com/SanchitB23/remote-job-radar/issues/96)
+- Chore/93 chore semantic pr workflow issue (#98) ([6160f98](https://github.com/SanchitB23/remote-job-radar/commit/6160f98)), closes [#98](https://github.com/SanchitB23/remote-job-radar/issues/98)
+
+## <small>2.2.1-beta.2 (2025-08-30)</small>
+
+- fix(workflow): update semantic PR action to v6 and refine configuration (#94) ([ceca254](https://github.com/SanchitB23/remote-job-radar/commit/ceca254)), closes [#94](https://github.com/SanchitB23/remote-job-radar/issues/94)
 
 ## <small>2.2.1-beta.1 (2025-08-30)</small>
 

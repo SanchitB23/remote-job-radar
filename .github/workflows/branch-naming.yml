@@ -11,7 +11,7 @@ jobs:
       - name: Validate branch name
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
-          if [[ "$BRANCH" == "main" || "$BRANCH" == "develop" ]]; then
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "next" || "$BRANCH" == "develop" ]]; then
             echo "✅ Skipping branch name check for protected branch: $BRANCH"
             exit 0
           fi
