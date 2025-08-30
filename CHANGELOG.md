@@ -1,3 +1,7 @@
+## 2.1.0-beta.4 (2025-08-30)
+
+- fix: update pr workflow (#90) ([1d78bca](https://github.com/SanchitB23/remote-job-radar/commit/1d78bca)), closes [#90](https://github.com/SanchitB23/remote-job-radar/issues/90)
+
 ## 2.1.0-beta.3 (2025-08-30)
 
 - fix(config): update environment variable key for web app URL (#88) ([8f91909](https://github.com/SanchitB23/remote-job-radar/commit/8f91909)), closes [#88](https://github.com/SanchitB23/remote-job-radar/issues/88)
