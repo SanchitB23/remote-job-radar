@@ -8,6 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function Home(): JSX.Element {
+  fetch("/api/health")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Health check data:", data);
+    })
+    .catch((error) => {
+      console.error("Error fetching health check:", error);
+    });
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
