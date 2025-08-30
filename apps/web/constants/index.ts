@@ -7,3 +7,10 @@ export const CLERK_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_placeholder_for_build";
 
 export * as gqlQueries from "./gqlQueries";
+
+export const WEB_URL =
+  process.env.VERCEL_ENV === "production"
+    ? "https://" + process.env.VERCEL_PROJECT_PRODUCTION_URL
+    : process.env.VERCEL_URL
+      ? "https://" + process.env.VERCEL_URL
+      : "http://localhost:3000";
