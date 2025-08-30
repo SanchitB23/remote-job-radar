@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -120,9 +121,18 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Parse the response
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read health response body: %w", err)
+	}
+
+	// Attempt to parse the response as JSON
 	var healthResp HealthResponse
-	if err := json.NewDecoder(resp.Body).Decode(&healthResp); err != nil {
+	if err := json.Unmarshal(body, &healthResp); err != nil {
+		logger.Warn("[EMBEDDER_WARMUP] Failed to decode health response as JSON",
+			zap.String("rawResponse", string(body)),
+			zap.Error(err))
 		return fmt.Errorf("failed to decode health response: %w", err)
 	}
 
