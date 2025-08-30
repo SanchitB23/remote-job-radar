@@ -90,6 +90,15 @@ export function PersonalizationPanel() {
     }
   }, [userSkills]);
 
+  const ctaToolTipMsg = useMemo(() => {
+    let tooltipMsg = null;
+    if (isSavingSkills) tooltipMsg = "Saving, please wait…";
+    else if (_.isEmpty(skillsText)) tooltipMsg = "Enter skills";
+    else if (_.isEqual(memoizedSkills, userSkills?.skills))
+      tooltipMsg = "Make changes to your skills";
+    return tooltipMsg;
+  }, [isSavingSkills, skillsText, memoizedSkills, userSkills]);
+
   if (!isLoaded || isLoadingUserSkills) return <LoadingSkillsCard />;
   if (isErrorUserSkills) return <ErrorSkillsCard handleRefresh={refetch} />;
 
@@ -113,10 +122,10 @@ export function PersonalizationPanel() {
         <div className="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild className="disabled:pointer-events-auto">
                 <Button
                   onClick={() => setUserSkills({ skills: memoizedSkills })}
-                  disabled={isSavingSkills || _.isEmpty(skillsText)}
+                  disabled={!!ctaToolTipMsg}
                   variant="default"
                   className={`flex-shrink-0 w-24 h-9 flex items-center justify-center gap-2${isSavingSkills ? " cursor-wait" : ""}`}
                 >
@@ -126,19 +135,9 @@ export function PersonalizationPanel() {
                   </span>
                 </Button>
               </TooltipTrigger>
-              {(() => {
-                let tooltipMsg = "";
-                if (isSavingSkills) tooltipMsg = "Saving, please wait…";
-                else if (_.isEmpty(skillsText)) tooltipMsg = "Enter skills";
-                else if (_.isEqual(memoizedSkills, userSkills.skills))
-                  tooltipMsg = "Make changes to your skills";
-                if (!tooltipMsg) return null;
-                return (
-                  <TooltipContent side="top" align="center" className="z-[100001]">
-                    {tooltipMsg}
-                  </TooltipContent>
-                );
-              })()}
+              <TooltipContent side="top" align="center" className="z-[100001]">
+                {ctaToolTipMsg || "Save Changes"}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           {isSuccessSavingSkills && (
