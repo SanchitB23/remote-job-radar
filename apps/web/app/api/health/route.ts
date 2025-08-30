@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { WEB_URL } from "@/constants";
+
 export async function GET(): Promise<NextResponse> {
   const healthUrls = [
     "/api/health/aggregator", // Aggregator health route
@@ -12,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
   const healthChecks = await Promise.all(
     healthUrls.map(async (url) => {
       try {
-        const response = await fetch(url);
+        const response = await fetch(WEB_URL + url);
         if (!response.ok) {
           throw new Error(`Service at ${url} returned status ${response.status}`);
         }
@@ -24,5 +26,5 @@ export async function GET(): Promise<NextResponse> {
     }),
   );
 
-  return NextResponse.json({ services: healthChecks });
+  return NextResponse.json({ services: healthChecks }, { status: 200 });
 }

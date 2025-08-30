@@ -6,15 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { WEB_URL } from "@/constants";
 
 export default function Home(): JSX.Element {
-  fetch("/api/health")
+  fetch(`${WEB_URL}/api/health`)
     .then((response) => response.json())
-    .then((data) => {
-      console.log("Health check data:", data);
-    })
     .catch((error) => {
-      console.error("Error fetching health check:", error);
+      console.error("Error fetching health check:", error, WEB_URL);
     });
 
   return (
