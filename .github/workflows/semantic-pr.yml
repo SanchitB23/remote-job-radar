@@ -6,6 +6,8 @@ on:
 
 permissions:
   pull-requests: write # needed if wip: true to keep check pending
+  statuses: write
+  checks: write
 
 jobs:
   semantic-pr:
