@@ -7,10 +7,11 @@ import { AlertCircleIcon, Loader2, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSetUserSkills, useUserSkills } from "@/lib/hooks";
 
@@ -62,9 +63,66 @@ function ErrorSkillsCard({
   );
 }
 
+function TagInput({ tags, setTags }: { tags: string[]; setTags: (tags: string[]) => void }) {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || e.key === ",") && inputValue.trim()) {
+      e.preventDefault();
+      if (!tags.includes(inputValue.trim())) {
+        setTags([...tags, inputValue.trim()]);
+      }
+      setInputValue("");
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter((t) => t !== tag));
+  };
+
+  const handleClearTags = () => {
+    setTags([]);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <Badge
+            key={tag}
+            variant="secondary"
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => handleRemoveTag(tag)}
+          >
+            {tag}
+            <span className="ml-1">&times;</span>
+          </Badge>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <Input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleAddTag}
+          placeholder="Type a skill and press Enter or ,"
+          className="flex-1"
+        />
+        <Button
+          onClick={handleClearTags}
+          disabled={tags.length === 0}
+          variant="destructive"
+          className="flex-shrink-0"
+        >
+          Reset
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function PersonalizationPanel() {
   const { isSignedIn, isLoaded } = useAuth();
-  const [skillsText, setSkillsText] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const {
     data: userSkills,
     isPending: isLoadingUserSkills,
@@ -79,16 +137,18 @@ export function PersonalizationPanel() {
     isSuccess: isSuccessSavingSkills,
   } = useSetUserSkills();
 
-  const memoizedSkills = useMemo(
-    () => _.chain(skillsText).split(",").map(_.trim).filter(Boolean).take(64).value(),
-    [skillsText],
-  );
-
   useEffect(() => {
     if (userSkills && userSkills.skills) {
-      setSkillsText(userSkills.skills.join(", "));
+      setTags(userSkills.skills);
     }
   }, [userSkills]);
+
+  const ctaToolTipMsg = useMemo(() => {
+    let tooltipMsg = null;
+    if (isSavingSkills) tooltipMsg = "Saving, please wait…";
+    else if (_.isEqual(tags, userSkills?.skills)) tooltipMsg = "Make changes to your skills";
+    return tooltipMsg;
+  }, [isSavingSkills, tags, userSkills]);
 
   if (!isLoaded || isLoadingUserSkills) return <LoadingSkillsCard />;
   if (isErrorUserSkills) return <ErrorSkillsCard handleRefresh={refetch} />;
@@ -98,27 +158,23 @@ export function PersonalizationPanel() {
       <CardContent className="space-y-3 p-0">
         <h2 className="text-base font-semibold">Personalization</h2>
         <p className="text-xs text-muted-foreground">
-          Add your skills (comma‑separated). We&apos;ll use these to calculate fit scores and
-          personalize your job recommendations. Later, you can upload a résumé to auto‑extract
-          skills.
+          Add your skills. We&apos;ll use these to calculate fit scores and personalize your job
+          recommendations. Later, you can upload a résumé to auto‑extract skills.
         </p>
 
-        <Textarea
-          className="min-h-[120px]"
-          placeholder="react, typescript, graphql, nextjs, tailwind"
-          value={skillsText}
-          onChange={(e) => setSkillsText(e.target.value)}
-        />
+        <TagInput tags={tags} setTags={setTags} />
 
         <div className="flex items-center gap-2">
           <TooltipProvider>
             <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild className="disabled:pointer-events-auto">
                 <Button
-                  onClick={() => setUserSkills({ skills: memoizedSkills })}
-                  disabled={isSavingSkills || _.isEmpty(skillsText)}
+                  onClick={() => setUserSkills({ skills: tags })}
+                  disabled={!!ctaToolTipMsg}
                   variant="default"
-                  className={`flex-shrink-0 w-24 h-9 flex items-center justify-center gap-2${isSavingSkills ? " cursor-wait" : ""}`}
+                  className={`flex-shrink-0 w-24 h-9 flex items-center justify-center gap-2${
+                    isSavingSkills ? " cursor-wait" : ""
+                  }`}
                 >
                   {isSavingSkills && <Loader2 className="h-4 w-4 animate-spin" />}
                   <span>
@@ -126,19 +182,9 @@ export function PersonalizationPanel() {
                   </span>
                 </Button>
               </TooltipTrigger>
-              {(() => {
-                let tooltipMsg = "";
-                if (isSavingSkills) tooltipMsg = "Saving, please wait…";
-                else if (_.isEmpty(skillsText)) tooltipMsg = "Enter skills";
-                else if (_.isEqual(memoizedSkills, userSkills.skills))
-                  tooltipMsg = "Make changes to your skills";
-                if (!tooltipMsg) return null;
-                return (
-                  <TooltipContent side="top" align="center" className="z-[100001]">
-                    {tooltipMsg}
-                  </TooltipContent>
-                );
-              })()}
+              <TooltipContent side="top" align="center" className="z-[100001]">
+                {ctaToolTipMsg || "Save Changes"}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           {isSuccessSavingSkills && (
