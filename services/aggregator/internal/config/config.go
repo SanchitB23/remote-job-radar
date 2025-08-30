@@ -70,7 +70,7 @@ func Load() (*Config, error) {
 		Port:        getEnvWithDefault("PORT", "8080"),
 		DatabaseDSN: getRequiredEnv("PG_DATABASE_URL"),
 		EmbedderURL: getRequiredEnv("EMBEDDER_BASE_URL"),
-		WebAppURL:   getEnvWithDefault("WEB_APP_BASE_URL", "http://localhost:3000"),
+		WebAppURL:   getEnvWithDefault("WEB_SERVER_BASE_URL", "http://localhost:3000"),
 		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
 		Environment: getEnvWithDefault("ENV", "development"),
 
