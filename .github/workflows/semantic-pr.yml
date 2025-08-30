@@ -13,6 +13,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SEMREL_PAT }}
         with:
+          ignoreLabels: |
+            dependencies
+          subjectPattern: "^[a-z].+"
+          subjectPatternError: "Start the subject lowercase and be descriptive, e.g. 'feat: add job aggregator API endpoint'"
           types: |
             feat
             fix
@@ -24,12 +28,3 @@ jobs:
             ci
             chore
             release
-          requireScope: false
-          # Enforce non-empty, sentence-case-ish subject
-          subjectPattern: "^[a-z].+"
-          subjectPatternError: "Start the subject lowercase and be descriptive, e.g. 'feat: add job aggregator API endpoint'"
-          # Ignore bots (optional)
-          ignoreLabels: |
-            dependencies
-          # Allow draft PRs to pass (optional)
-          allowDrafts: true

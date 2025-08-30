@@ -6,8 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { WEB_URL } from "@/constants";
 
 export default function Home(): JSX.Element {
+  fetch(`${WEB_URL}/api/health`)
+    .then((response) => {
+      console.log("Health check response:", response);
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("Error fetching health check:", error, WEB_URL);
+    });
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
