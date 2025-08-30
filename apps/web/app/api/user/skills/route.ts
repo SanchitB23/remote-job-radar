@@ -24,6 +24,16 @@ export async function PUT(request: Request): Promise<NextResponse> {
   const token = await getToken({ template: "remote-job-radar" });
 
   try {
+    // Check embedder health
+    fetch("/api/health/embedder").then((healthResponse) => {
+      if (!healthResponse.ok) {
+        console.error(
+          "[PUT /api/user/skills] Embedder health check failed:",
+          healthResponse.statusText,
+        );
+      }
+    });
+
     const requestBody = await request.json();
     console.debug("[PUT /api/user/skills] Saving user skills:", requestBody.skills);
 
