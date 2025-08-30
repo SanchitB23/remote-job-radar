@@ -1,3 +1,7 @@
+## <small>2.2.1-beta.2 (2025-08-30)</small>
+
+- fix(workflow): update semantic PR action to v6 and refine configuration (#94) ([ceca254](https://github.com/SanchitB23/remote-job-radar/commit/ceca254)), closes [#94](https://github.com/SanchitB23/remote-job-radar/issues/94)
+
 ## <small>2.2.1-beta.1 (2025-08-30)</small>
 
 - Merge branch 'main' into develop ([c0ffe2d](https://github.com/SanchitB23/remote-job-radar/commit/c0ffe2d))
