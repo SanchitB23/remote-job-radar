@@ -156,7 +156,7 @@ export function useUserSkills(): UseQueryResult<Pick<UserProfile, "skills">, Err
       }
       return failureCount < 3;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff,
   });
 }
 
@@ -185,7 +185,7 @@ export function useSetUserSkills(): UseMutationResult<
     },
     onSuccess: () => {
       // Invalidate and refetch user skills query
-      queryClient.invalidateQueries({ queryKey: ["user-skills"] });
+      queryClient.invalidateQueries({ queryKey: ["user-skills", "jobs-infinite"] });
     },
     onError: (error) => {
       console.error("Set user skills mutation error:", error);
