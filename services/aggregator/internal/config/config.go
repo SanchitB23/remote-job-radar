@@ -18,8 +18,9 @@ type Config struct {
 	DatabaseDSN string
 
 	// External services
-	EmbedderURL string
-	WebAppURL   string // Web app URL for warming up embedder via health check
+	EmbedderURL  string
+	WebAppURL    string // Web app URL for warming up embedder via health check
+	VercelBypass string // Secret to bypass Vercel branch protection for embedder warmup
 
 	// Job Sources
 	AdzunaBaseURL     string
@@ -67,12 +68,13 @@ func Load() (*Config, error) {
 	}
 
 	cfg := &Config{
-		Port:        getEnvWithDefault("PORT", "8080"),
-		DatabaseDSN: getRequiredEnv("PG_DATABASE_URL"),
-		EmbedderURL: getRequiredEnv("EMBEDDER_BASE_URL"),
-		WebAppURL:   getEnvWithDefault("WEB_SERVER_BASE_URL", "http://localhost:3000"),
-		SkillsFile:  getRequiredEnv("SKILLS_FILE"),
-		Environment: getEnvWithDefault("ENV", "development"),
+		Port:         getEnvWithDefault("PORT", "8080"),
+		DatabaseDSN:  getRequiredEnv("PG_DATABASE_URL"),
+		EmbedderURL:  getRequiredEnv("EMBEDDER_BASE_URL"),
+		WebAppURL:    getEnvWithDefault("WEB_SERVER_BASE_URL", "http://localhost:3000"),
+		SkillsFile:   getRequiredEnv("SKILLS_FILE"),
+		Environment:  getEnvWithDefault("ENV", "development"),
+		VercelBypass: getEnvWithDefault("VERCEL_PROTECTION_BRANCH_BYPASS_SECRET", ""),
 
 		// Job Sources (optional)
 		RemotiveBaseURL:   os.Getenv("REMOTIVE_BASE_URL"),

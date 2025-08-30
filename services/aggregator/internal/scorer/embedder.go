@@ -109,7 +109,7 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to create warmup request: %w", err)
 	}
-
+	req.Header.Set("x-vercel-protection-bypass", e.Config.VercelBypass)
 	// Set headers
 	req.Header.Set("User-Agent", "aggregator-service/warmup")
 	req.Header.Set("Accept", "application/json")
