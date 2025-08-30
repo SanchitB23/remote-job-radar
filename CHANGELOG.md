@@ -1,3 +1,13 @@
+## <small>2.2.1 (2025-08-30)</small>
+
+- Merge branch 'main' into develop ([c0ffe2d](https://github.com/SanchitB23/remote-job-radar/commit/c0ffe2d))
+- Merge pull request #89 from SanchitB23/develop ([8264294](https://github.com/SanchitB23/remote-job-radar/commit/8264294)), closes [#89](https://github.com/SanchitB23/remote-job-radar/issues/89)
+- chore(release): 2.1.0-beta.3 [skip ci] ([b9d216a](https://github.com/SanchitB23/remote-job-radar/commit/b9d216a))
+- chore(release): 2.1.0-beta.4 [skip ci] ([1ffc6df](https://github.com/SanchitB23/remote-job-radar/commit/1ffc6df))
+- chore(release): 2.2.1-beta.1 [skip ci] ([771841c](https://github.com/SanchitB23/remote-job-radar/commit/771841c))
+- fix: update pr workflow (#90) ([1d78bca](https://github.com/SanchitB23/remote-job-radar/commit/1d78bca)), closes [#90](https://github.com/SanchitB23/remote-job-radar/issues/90)
+- fix(config): update environment variable key for web app URL (#88) ([8f91909](https://github.com/SanchitB23/remote-job-radar/commit/8f91909)), closes [#88](https://github.com/SanchitB23/remote-job-radar/issues/88)
+
 ## <small>2.2.1-beta.1 (2025-08-30)</small>
 
 - Merge branch 'main' into develop ([c0ffe2d](https://github.com/SanchitB23/remote-job-radar/commit/c0ffe2d))
