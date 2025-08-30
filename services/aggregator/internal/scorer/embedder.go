@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -88,6 +89,11 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 		return fmt.Errorf("WEB_APP_BASE_URL not configured")
 	}
 
+	// Validate that WEB_APP_BASE_URL includes a protocol
+	if !strings.HasPrefix(e.Config.WebAppURL, "http://") && !strings.HasPrefix(e.Config.WebAppURL, "https://") {
+		return fmt.Errorf("WEB_APP_BASE_URL must include a protocol (http:// or https://), got: %s", e.Config.WebAppURL)
+	}
+
 	// Build the health endpoint URL
 	webAppURL := strings.TrimRight(e.Config.WebAppURL, "/")
 	healthURL := webAppURL + "/api/health/embedder"
@@ -103,7 +109,7 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to create warmup request: %w", err)
 	}
-
+	req.Header.Set("x-vercel-protection-bypass", e.Config.VercelBypass)
 	// Set headers
 	req.Header.Set("User-Agent", "aggregator-service/warmup")
 	req.Header.Set("Accept", "application/json")
@@ -115,9 +121,18 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Parse the response
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read health response body: %w", err)
+	}
+
+	// Attempt to parse the response as JSON
 	var healthResp HealthResponse
-	if err := json.NewDecoder(resp.Body).Decode(&healthResp); err != nil {
+	if err := json.Unmarshal(body, &healthResp); err != nil {
+		logger.Warn("[EMBEDDER_WARMUP] Failed to decode health response as JSON",
+			zap.String("rawResponse", string(body)),
+			zap.Error(err))
 		return fmt.Errorf("failed to decode health response: %w", err)
 	}
 

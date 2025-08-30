@@ -32,4 +32,4 @@ jobs:
           ignoreLabels: |
             dependencies
           # Allow draft PRs to pass (optional)
-          allowDrafts: true
+          wip: true
