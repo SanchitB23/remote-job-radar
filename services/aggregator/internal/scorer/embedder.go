@@ -88,6 +88,11 @@ func (e *Embedder) warmupEmbedder(ctx context.Context) error {
 		return fmt.Errorf("WEB_APP_BASE_URL not configured")
 	}
 
+	// Validate that WEB_APP_BASE_URL includes a protocol
+	if !strings.HasPrefix(e.Config.WebAppURL, "http://") && !strings.HasPrefix(e.Config.WebAppURL, "https://") {
+		return fmt.Errorf("WEB_APP_BASE_URL must include a protocol (http:// or https://), got: %s", e.Config.WebAppURL)
+	}
+
 	// Build the health endpoint URL
 	webAppURL := strings.TrimRight(e.Config.WebAppURL, "/")
 	healthURL := webAppURL + "/api/health/embedder"
