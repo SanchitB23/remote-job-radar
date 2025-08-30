@@ -10,7 +10,10 @@ import { WEB_URL } from "@/constants";
 
 export default function Home(): JSX.Element {
   fetch(`${WEB_URL}/api/health`)
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("Health check response:", response);
+      return response.json();
+    })
     .catch((error) => {
       console.error("Error fetching health check:", error, WEB_URL);
     });
