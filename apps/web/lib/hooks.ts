@@ -39,8 +39,11 @@ export function useInfiniteJobs(
       return lastPage.hasNextPage ? lastPage.endCursor : undefined;
     },
     initialPageParam: undefined as string | undefined,
-    staleTime: 30 * 1000, // Consider data fresh for 30 seconds
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     enabled: true,
+    placeholderData: (prev) => prev,
+    maxPages: 3,
   });
 }
 
