@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 const CRON_SECRET = process.env.CRON_SECRET;
 const AGGREGATOR_URL = process.env.CRON_SERVER_BASE_URL || "http://localhost:8080";
 
-
 export async function DELETE(req: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const requestSecret = req.headers.get("x-cron-secret");
 
