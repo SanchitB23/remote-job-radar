@@ -1,5 +1,6 @@
 "use client";
 
+import { useClerk } from "@clerk/nextjs";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
@@ -28,6 +29,7 @@ function JobsError({ error }: { error: unknown }): JSX.Element {
 }
 
 export function JobsPageClient(): JSX.Element {
+  const clerkClient = useClerk();
   const searchParams = useSearchParams();
   const params = parseUrlJobParams(searchParams);
 
@@ -122,6 +124,14 @@ export function JobsPageClient(): JSX.Element {
             {hasNextPage && " (loading more as you scroll)"}
           </span>
         )}
+        {/* Prompt to add skills if none are found */}
+
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">
+            Add your skills to personalize job recommendations:
+          </span>
+          <button onClick={() => clerkClient.openUserProfile()}>hello</button>
+        </div>
       </div>
       <ul className="space-y-2">
         {jobs.map((j: Job) => (
