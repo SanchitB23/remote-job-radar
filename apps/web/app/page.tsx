@@ -6,16 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { WEB_URL } from "@/constants";
+import { getServicesStatusApi } from "@/services/api-client";
 
 export default function Home(): JSX.Element {
-  fetch(`${WEB_URL}/api/health`)
-    .then((response) => {
-      console.log("Health check response:", response);
-      return response.json();
+  getServicesStatusApi()
+    .then((status) => {
+      console.log("Services status:", status);
     })
     .catch((error) => {
-      console.error("Error fetching health check:", error, WEB_URL);
+      console.error("Error fetching services status:", error);
     });
 
   return (

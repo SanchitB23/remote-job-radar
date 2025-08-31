@@ -21,6 +21,7 @@ import type {
 import {
   fetchJobsApi,
   fetchPipelineApi,
+  getServicesStatusApi,
   toggleBookmarkApi,
   upsertPipelineItemApi,
 } from "../services/api-client";
@@ -193,5 +194,15 @@ export function useSetUserSkills(): UseMutationResult<
     onError: (error) => {
       console.error("Set user skills mutation error:", error);
     },
+  });
+}
+
+export function useGetHealthStatus(
+  throwOnError: boolean = false,
+): UseQueryResult<{ [key: string]: string }, Error> {
+  return useQuery({
+    queryKey: ["health-all-services"],
+    queryFn: getServicesStatusApi,
+    throwOnError,
   });
 }
