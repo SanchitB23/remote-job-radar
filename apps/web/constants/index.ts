@@ -14,3 +14,10 @@ export const WEB_URL =
     : process.env.VERCEL_URL
       ? "https://" + process.env.VERCEL_URL
       : "http://localhost:3000";
+
+export const AGGREGATOR_URL = process.env.CRON_SERVER_BASE_URL || "http://localhost:8080";
+
+export const MANUAL_FETCH_TOKEN_CRON =
+  process.env.MANUAL_FETCH_TOKEN_CRON || "manual_fetch_token_placeholder";
+
+export const CRON_SECRET = process.env.CRON_SECRET || "cron_secret_placeholder";
