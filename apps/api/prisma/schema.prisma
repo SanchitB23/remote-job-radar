@@ -3,6 +3,13 @@ datasource db {
   url      = env("PG_DATABASE_URL") // point to the same DB as aggregator
 }
 
+enum UserProfileEmbedJobStatus {
+  pending
+  processing
+  done
+  failed
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -71,15 +78,15 @@ model user_profile {
 }
 
 model user_profile_embed_jobs {
-  id          String   @id @default(uuid())
-  user_id     String   @unique
+  id          String                    @id @default(uuid())
+  user_id     String                    @unique
   skills      String[] // snapshot when enqueued
-  status      String   @default("pending") // "pending" | "processing" | "done" | "failed"
-  attempts    Int      @default(0)
+  status      UserProfileEmbedJobStatus @default(pending)
+  attempts    Int                       @default(0)
   last_error  String?
-  next_run_at DateTime @default(now())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  next_run_at DateTime                  @default(now())
+  created_at  DateTime                  @default(now())
+  updated_at  DateTime                  @updatedAt
 
   @@index([status, next_run_at])
   @@map("user_profile_embed_jobs")

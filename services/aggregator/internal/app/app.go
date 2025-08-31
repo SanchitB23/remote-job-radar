@@ -49,7 +49,7 @@ func NewApp() (*App, error) {
 	}
 
 	// Initialize skills service and load skill vector
-	skillsService := services.NewSkillsService(embedder, cfg.SkillsFile)
+	skillsService := services.NewSkillsService(store, embedder, cfg.SkillsFile)
 	logger.Info("Loading skills configuration")
 	skillVec, err := skillsService.LoadSkillVector(context.Background())
 	if err != nil {
@@ -60,7 +60,7 @@ func NewApp() (*App, error) {
 	jobService := services.NewJobService(store, skillVec, cfg.FetchTimeout, cfg)
 
 	// Initialize handlers
-	handlers := handlers.NewHandlers(store, jobService, cfg)
+	handlers := handlers.NewHandlers(store, jobService, skillsService, cfg)
 
 	return &App{
 		Config:   cfg,
