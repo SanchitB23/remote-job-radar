@@ -8,6 +8,7 @@ import type { JSX } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { ClerkProvider } from "@/components/clerk-provider";
+import FooterSection from "@/components/footer";
 import { Header } from "@/components/header";
 import JobAlerts from "@/components/jobAlertToast";
 import { ReactQueryProvider } from "@/components/ReactQueryProvider";
@@ -52,6 +53,7 @@ export default function RootLayout({
             <ReactQueryProvider>
               <Header />
               <main className="max-w-7xl mx-auto p-4">{children}</main>
+              <FooterSection />
               <JobAlerts />
               <Toaster position="top-right" />
             </ReactQueryProvider>
