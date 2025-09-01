@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 import { AvatarMenu } from "./account/AvatarMenu";
-import { ThemeToggle } from "./ThemeToggle";
+import { AnimatedThemeToggler } from "./magicui/animated-theme-toggler";
 
 export function Header() {
   return (
@@ -36,7 +36,7 @@ export function Header() {
           </SignedIn>
         </div>
         <div className="flex items-center gap-4">
-          <ThemeToggle />
+          <AnimatedThemeToggler />
           <SignedOut>
             <SignInButton />
             <SignUpButton />
