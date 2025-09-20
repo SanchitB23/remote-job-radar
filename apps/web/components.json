@@ -10,6 +10,12 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "registries": {
+    "@smoothui": "https://smoothui.dev/r/{name}.json",
+    "@kokonutui": "https://kokonutui.com/r/{name}.json",
+    "@motion-primitives": "https://motion-primitives.com/r/{name}.json",
+    "@reui": "https://reui.io/r/{name}.json"
+  },
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
