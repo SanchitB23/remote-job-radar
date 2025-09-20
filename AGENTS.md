@@ -668,8 +668,8 @@ npx prisma studio  # (in apps/api)
 6. **🛠️ Implement Changes** following code standards
 7. **📝 Commit & Push** with conventional commit messages
 8. **✅ Mark PR Ready** when implementation is complete
-9. **💬 Request User Review** explicitly in PR comments
-10. **🔍 Automated Validation** (branch naming, semantic PR, CI tests)
+9. **🔍 Wait for CI Validation** - ensure all checks pass before requesting review
+10. **💬 Request User Review** explicitly in PR comments only after CI passes
 11. **🔎 Code Review** (automatic CODEOWNERS assignment)
 12. **⏳ Wait for User Approval** - agents must NOT merge
 13. **🔀 User Merges** to develop (then eventually to main)
@@ -901,18 +901,24 @@ The project is **heavily automated**. Work **with** the automation, not against 
 - **Create draft PR to develop immediately** after checkout
 - **Update draft PR regularly** as you implement changes
 - **Use GitHub MCP tools** for all GitHub-related tasks
-- **Request user review explicitly** when PR is ready
+- **🚨 ENSURE ALL CI CHECKS PASS** before requesting review
+- **Monitor CI pipeline status** and fix failures immediately
+- **Test formatting/linting locally** before pushing
+- **Request user review explicitly** only after CI is green
 - **Wait for user approval** before any merge consideration
 - Follow naming conventions exactly (enforced automatically)
 - Use conventional commits consistently
 - Fill out PR templates completely
 - Reference issues in commits and PRs
-- **Convert draft to ready** only when implementation is complete
+- **Convert draft to ready** only when implementation is complete AND CI passes
 
 **❌ Bad Practices**:
 - Starting work without commenting `/branch` first
 - Creating branches manually with non-standard names
 - Ignoring automated responses and checkout instructions
+- **🚨 Requesting review while CI checks are failing**
+- **🚨 Ignoring or dismissing CI failures without fixing them**
+- **🚨 Pushing code without local format/lint validation**
 - **Merging PRs without user review and approval**
 - **Using merge commands or tools as an agent**
 - **Auto-approving or bypassing review requirements**
@@ -920,6 +926,100 @@ The project is **heavily automated**. Work **with** the automation, not against 
 - Using non-conventional commit messages
 - Creating PRs without linking issues
 - Ignoring CI failures or validation errors
+
+### ⚠️ **MANDATORY: CI Validation Before Review**
+
+**🚨 CRITICAL WORKFLOW RULE: Never request review until ALL CI checks pass!**
+
+#### CI Check Requirements
+**Before marking PR ready for review, you MUST ensure:**
+
+1. **✅ All CI jobs pass** - No red X marks on the PR
+2. **✅ Format checks pass** - Prettier/ESLint for JS/TS, Ruff for Python
+3. **✅ Type checking passes** - TypeScript compiler, MyPy for Python
+4. **✅ Linting passes** - ESLint for JS/TS, golangci-lint for Go, Ruff for Python
+5. **✅ Build succeeds** - All applications build without errors
+6. **✅ Tests pass** - Unit tests and integration tests run successfully
+
+#### CI Failure Response Process
+**If ANY CI check fails:**
+
+1. **🔍 Examine the CI logs** to identify the specific failure
+2. **🔧 Fix the issues locally** (formatting, linting, type errors, etc.)
+3. **🧪 Test fixes locally** before pushing:
+   ```bash
+   # For formatting issues
+   npm run format --workspace apps/web
+   npm run format --workspace apps/api
+   
+   # For linting issues  
+   npm run lint --workspace apps/web
+   npm run lint --workspace apps/api
+   
+   # For type checking
+   npm run typecheck --workspace apps/web
+   npm run typecheck --workspace apps/api
+   
+   # For Go issues
+   cd services/aggregator && golangci-lint run
+   cd services/aggregator && go vet ./...
+   
+   # For Python issues
+   cd services/embedder && ruff check .
+   cd services/embedder && mypy .
+   ```
+4. **📝 Commit fixes** with conventional commit messages
+5. **🚀 Push changes** and wait for CI to re-run
+6. **🔁 Repeat until all checks pass**
+
+#### Common CI Failures and Fixes
+
+**❌ Prettier/Formatting Failures:**
+- **Cause**: Code not formatted according to project standards
+- **Fix**: Run `npm run format` in affected workspace
+- **Prevention**: Set up IDE auto-formatting on save
+
+**❌ ESLint/Linting Failures:**
+- **Cause**: Code style violations or potential issues
+- **Fix**: Run `npm run lint` and address reported issues
+- **Auto-fix**: Many issues can be fixed with `npm run lint -- --fix`
+
+**❌ TypeScript Compilation Failures:**
+- **Cause**: Type errors, missing types, or incorrect imports
+- **Fix**: Run `npm run typecheck` and resolve type issues
+- **Common**: Import paths, missing return types, incorrect prop types
+
+**❌ Go Linting Failures:**
+- **Cause**: Go code style violations or potential bugs
+- **Fix**: Run `golangci-lint run` in `services/aggregator/`
+- **Common**: Unused variables, inefficient code, formatting
+
+**❌ Python Linting Failures:**
+- **Cause**: Python code style violations
+- **Fix**: Run `ruff check .` and `mypy .` in `services/embedder/`
+- **Common**: Import sorting, unused imports, type annotations
+
+#### Why CI Validation is Mandatory
+
+**🎯 Quality Assurance:**
+- Ensures consistent code quality across the entire codebase
+- Prevents introduction of formatting inconsistencies
+- Catches type errors and potential bugs early
+
+**⚡ Review Efficiency:**
+- Reviewers can focus on logic and implementation rather than style
+- Reduces back-and-forth on formatting and linting issues
+- Speeds up the overall review and merge process
+
+**🔧 Continuous Integration:**
+- Maintains the integrity of the CI pipeline
+- Prevents CI failures from accumulating
+- Ensures the main/develop branches stay stable
+
+**📋 Professional Standards:**
+- Demonstrates attention to detail and code quality
+- Maintains professional development practices
+- Sets a good example for collaborative development
 
 ### 🛠️ Developer Tools Integration
 
