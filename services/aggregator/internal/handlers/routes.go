@@ -22,5 +22,6 @@ func (h *Handlers) SetupRoutes() http.Handler {
 	r.Get("/healthz", h.Healthz)
 	r.Delete("/clean", h.TriggerClean)
 	r.Patch("/embed-pending-skills", h.TriggerEmbedPendingSkills)
+
 	return r
 }

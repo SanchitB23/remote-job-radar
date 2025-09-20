@@ -99,7 +99,9 @@ func (s *SkillsService) ProcessPendingEmbeds(ctx context.Context, limit int) (*S
 			// write vector with correct cast (float4 if your column is vector(384))
 			wErr := s.store.UpdateUsersSkillVector(ctx, j.UserID, vec32)
 			if wErr == nil {
-				_ = s.store.DeleteSucceededUserSkillEmbedJobs(ctx, j.UserID)
+				if err := s.store.DeleteSucceededUserSkillEmbedJobs(ctx, j.UserID); err != nil {
+					logger.Error("Failed to delete succeeded user skill embed jobs", zap.Error(err), zap.String("userID", j.UserID))
+				}
 				sum.Succeeded++
 				continue
 			}
@@ -117,7 +119,9 @@ func (s *SkillsService) ProcessPendingEmbeds(ctx context.Context, limit int) (*S
 		}
 		delay := time.Duration(min(next*30, 10*60)) * time.Second
 
-		_ = s.store.UpdateUserSkillEmbedJobStatusWithError(ctx, j.UserID, status, utils.TruncateErr(err), next, delay.String())
+		if updateErr := s.store.UpdateUserSkillEmbedJobStatusWithError(ctx, j.UserID, status, utils.TruncateErr(err), next, delay.String()); updateErr != nil {
+			logger.Error("Failed to update user skill embed job status with error", zap.Error(updateErr), zap.String("userID", j.UserID))
+		}
 	}
 
 	return sum, nil
