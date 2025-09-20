@@ -9,7 +9,6 @@ import (
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/utils"
 
-	"github.com/lib/pq"
 	"go.uber.org/zap"
 )
 
@@ -191,10 +190,74 @@ func (s *Store) Ping(ctx context.Context) error {
 	return s.DB.PingContext(ctx)
 }
 
-type JobRow struct {
-	ID, Source, Title, Company, Description, Location, WorkType, URL string
-	SalaryMin, SalaryMax                                             int
-	PublishedAt                                                      string // ISO-8601
-	Vector                                                           pq.Float32Array
-	FitScore                                                         *float32
+func (s *Store) FetchPendingUserSkillEmbeds(ctx context.Context, limit int) ([]UserSkillEmbedJob, error) {
+	stmt := `SELECT user_id, skills, attempts
+    FROM user_profile_embed_jobs
+    WHERE status='pending' AND next_run_at <= now()
+    ORDER BY next_run_at ASC
+    FOR UPDATE SKIP LOCKED
+    LIMIT $1`
+
+	rows, err := s.DB.QueryContext(ctx, stmt, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var jobs []UserSkillEmbedJob
+	for rows.Next() {
+		var job UserSkillEmbedJob
+		if err := rows.Scan(&job.UserID, &job.Skills, &job.Attempts); err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, job)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return jobs, nil
+}
+
+// delete succeeded user_skill_embed_jobs
+func (s *Store) DeleteSucceededUserSkillEmbedJobs(ctx context.Context, userID string) error {
+	stmt := `
+		DELETE FROM user_profile_embed_jobs
+		WHERE user_id = $1
+	`
+	_, err := s.DB.ExecContext(ctx, stmt, userID)
+	return err
+}
+
+func (s *Store) UpdateUserSkillEmbedJobStatus(ctx context.Context, userID string, status UserProfileEmbedJobStatus) error {
+	stmt := `
+		UPDATE user_profile_embed_jobs
+			SET status=$2, updated_at=now()
+			WHERE user_id=$1 AND status='pending'
+	`
+	_, err := s.DB.ExecContext(ctx, stmt, userID, status)
+	return err
+}
+
+func (s *Store) UpdateUserSkillEmbedJobStatusWithError(ctx context.Context, userID string, status UserProfileEmbedJobStatus, errMsg string, attempt int, nextRunAt string) error {
+	stmt := `
+		UPDATE user_profile_embed_jobs
+			SET status=$2, attempts=$3, last_error=$4,
+				next_run_at = now() + $5::interval, updated_at=now()
+			WHERE user_id=$1
+	`
+	_, err := s.DB.ExecContext(ctx, stmt, userID, status, attempt, errMsg, nextRunAt)
+	return err
+}
+
+// update user_profile with updated vector
+func (s *Store) UpdateUsersSkillVector(ctx context.Context, userID string, vector []float32) error {
+	stmt := `
+		UPDATE user_profiles
+			SET skill_vector = $2::float4[]::vector, updated_at = now()
+			WHERE user_id = $1
+	`
+	_, err := s.DB.ExecContext(ctx, stmt, userID, vector)
+	return err
 }
