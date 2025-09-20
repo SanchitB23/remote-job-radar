@@ -1,3 +1,16 @@
+/*
+ * DISABLED CRON JOB - NOT CONFIGURED IN VERCEL
+ * 
+ * This endpoint is not set up as a cron job due to Vercel free tier limitations.
+ * Vercel free plans allow only 2 cron jobs maximum, and we've reached that limit.
+ * 
+ * The functionality provided by this endpoint (cleaning old job data) should be 
+ * handled by the aggregator service which has its own cleanup mechanisms.
+ * 
+ * This route remains available for manual triggering if needed, but is not
+ * automatically scheduled via Vercel cron jobs.
+ */
+
 import { NextResponse } from "next/server";
 
 const CRON_SECRET = process.env.CRON_SECRET;
