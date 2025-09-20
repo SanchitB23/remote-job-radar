@@ -1,3 +1,4 @@
+import { WEB_URL } from "@/constants";
 import type { FetchJobsParams, JobsConnection, PipelineItem } from "@/types/gql";
 
 // Base API URL for the Next.js app
@@ -63,4 +64,10 @@ export async function upsertPipelineItemApi(
     body: JSON.stringify({ jobId, column, position }),
   });
   return handleApiResponse<{ pipelineUpsert: boolean }>(response);
+}
+
+// API to get status of all the services
+export async function getServicesStatusApi(): Promise<{ [key: string]: string }> {
+  const response = await fetch(`${WEB_URL}/api/health`);
+  return handleApiResponse<{ [key: string]: string }>(response);
 }

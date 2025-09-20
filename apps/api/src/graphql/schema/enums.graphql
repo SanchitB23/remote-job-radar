@@ -10,6 +10,12 @@ enum JobSource {
   REMOTIVE
   "Adzuna job source"
   ADZUNA
+  "Remote.ok job source"
+  REMOTEOK
+  "We Work Remotely job source"
+  WEWORKREMOTELY
+  "Jooble job source"
+  JOOBLE
   "Other/unknown job source"
   OTHER
 }

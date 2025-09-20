@@ -1,5 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 
+// Define or import EmbeddingStatus
+export type EmbeddingStatus = "UPDATED" | "QUEUED";
+
 // Context type for GraphQL resolvers
 export interface GraphQLContext {
   userId?: string;
@@ -105,4 +108,8 @@ export interface JobResult {
   url: string | null;
   publishedAt: Date | null;
   fitScore: number;
+}
+export interface SetUserSkillsResponse {
+  ok: boolean;
+  embedding: EmbeddingStatus;
 }
