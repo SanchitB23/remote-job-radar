@@ -167,3 +167,22 @@ type UserProfile {
 A custom scalar representing a date and time in ISO 8601 format.
 """
 scalar DateTime
+
+type SetSkillsResponse {
+  """
+  Indicates whether the skills were successfully set.
+  """
+  ok: Boolean!
+  """
+  Embedding status: 'UPDATED' if embedding succeeded, 'QUEUED' if queued for later.
+  """
+  embedding: EmbeddingStatus!
+}
+
+"""
+Status of the embedding operation for user skills.
+"""
+enum EmbeddingStatus {
+  UPDATED
+  QUEUED
+}

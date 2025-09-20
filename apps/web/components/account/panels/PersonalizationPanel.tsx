@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSetUserSkills, useUserSkills } from "@/lib/hooks";
+import { useGetHealthStatus, useSetUserSkills, useUserSkills } from "@/lib/hooks";
 
 function LoadingSkillsCard() {
   return (
@@ -121,8 +121,11 @@ function TagInput({ tags, setTags }: { tags: string[]; setTags: (tags: string[])
 }
 
 export function PersonalizationPanel() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isLoaded } = useAuth();
   const [tags, setTags] = useState<string[]>([]);
+
+  useGetHealthStatus();
+
   const {
     data: userSkills,
     isPending: isLoadingUserSkills,
