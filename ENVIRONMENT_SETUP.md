@@ -147,6 +147,17 @@ For production deployment:
 5. Use secure secrets management
 6. Enable structured JSON logging
 
+### Security Environment Variables
+
+These variables are required for production security:
+
+| Variable | Service | Description | Example |
+|----------|---------|-------------|----------|
+| `CRON_SECRET` | Web | Secret for Vercel cron job authentication | `your_secure_cron_secret_123` |
+| `MANUAL_FETCH_TOKEN_CRON` | Web | Token for manual fetch endpoint access | `your_secure_manual_token_456` |
+
+**Important**: Generate cryptographically secure random strings for these values in production.
+
 ## 🔒 Security Considerations
 
 ### Development
