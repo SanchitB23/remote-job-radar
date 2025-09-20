@@ -138,26 +138,78 @@ All PRs are validated against the branch naming convention:
 
 ### 📋 Pull Request Standards
 
-#### PR Template Structure (`.github/pull_request_template.md`)
+#### Enhanced PR Template Structure (`.github/pull_request_template.md`)
 
-1. **Title Convention** - Must follow [Conventional Commits](https://www.conventionalcommits.org/):
-   ```
-   feat: add job aggregator API endpoint
-   fix: resolve pagination issue in job listings
-   docs: update deployment instructions
-   refactor: improve error handling in components
-   chore: update dependencies to latest versions
-   ```
+The project uses a **comprehensive PR template** with multiple sections for better documentation and review:
 
-2. **Required Sections**:
-   - **What**: Short summary of changes
-   - **Why**: Context/problem solved  
-   - **How**: Implementation details
-   - **Testing**: Verification steps
-   - **Checklist**: 
-     - [ ] No breaking changes
-     - [ ] Linked issue: closes #ISSUE_NUMBER
-     - [ ] Docs updated (if needed)
+##### **1. Summary & Type Selection**
+- **Brief description** of what the PR accomplishes
+- **Type checkboxes**: Feature, Bug Fix, Documentation, Style, Refactor, Performance, Tests, Chore, CI/CD, Breaking Change
+
+##### **2. Issue Linking**
+- **Required**: `Closes #issue_number` for automatic issue linking
+- **Optional**: Related issues for reference
+
+##### **3. What Changed (Detailed)**
+- **Added**: New features, files, or functionality
+- **Changed**: Modifications to existing functionality
+- **Fixed**: Bug fixes and corrections
+- **Removed**: Deleted features, files, or functionality
+
+##### **4. Context & Implementation**
+- **Why These Changes**: Reasoning and problem solved
+- **How It Was Implemented**: Technical approach and key decisions
+- **Technical Details**: Implementation specifics
+- **Database Changes**: Schema modifications checklist
+
+##### **5. Testing & Quality Assurance**
+- **Test Coverage**: Unit, integration, E2E, manual testing checkboxes
+- **Test Results**: Description or screenshots
+- **Manual Testing Steps**: Step-by-step verification instructions
+
+##### **6. Visual Documentation**
+- **Screenshots/Demo**: Before/after comparisons for UI changes
+- **Performance Impact**: Performance implications assessment
+- **Security Considerations**: Security review checklist
+
+##### **7. Documentation & Deployment**
+- **Documentation**: README, API docs, AGENTS.md update requirements
+- **Deployment Requirements**: Environment variables, migrations, rollback plan
+
+##### **8. Comprehensive Checklists**
+
+**Pre-Submission Checklist**:
+- **Code Quality**: Style guidelines, self-review, comments, error handling
+- **Testing & Validation**: All tests pass, edge cases, cross-browser testing
+- **Integration**: No conflicts, up-to-date branch, CI passing, conventional commits
+- **Impact Assessment**: Breaking changes, compatibility, dependencies, performance
+
+**Review Checklist (for reviewers)**:
+- Code quality and standards met
+- Tests comprehensive and passing
+- Documentation adequate
+- Security and performance acceptable
+- UX/UI changes intuitive
+- Ready to merge
+
+##### **9. Title Convention Reference**
+**Conventional Commit Format**:
+- `feat: <description>` - New feature
+- `fix: <description>` - Bug fix  
+- `docs: <description>` - Documentation changes
+- `style: <description>` - Code style changes
+- `refactor: <description>` - Code refactoring
+- `perf: <description>` - Performance improvements
+- `test: <description>` - Test changes
+- `build: <description>` - Build system changes
+- `ci: <description>` - CI/CD changes
+- `chore: <description>` - Maintenance tasks
+- `revert: <description>` - Reverts a previous commit
+
+**Examples with scopes**:
+- `feat(api): add job aggregation endpoint`
+- `fix(web): resolve pagination crash on mobile`
+- `docs: update deployment instructions`
 
 #### PR Title Validation
 - **Semantic PR Action**: Validates PR titles against Conventional Commits
