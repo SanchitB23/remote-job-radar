@@ -1,12 +1,13 @@
 "use client";
 
-import { useClerk } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import type { InfiniteData } from "@tanstack/react-query";
-import { Info, UserPlus, X } from "lucide-react";
+import { Info, UserPlus, UserStar, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { PersonalizationPanel } from "@/components/account/panels/PersonalizationPanel";
 import { Button } from "@/components/ui/button";
 import { useInfiniteJobs, useUserSkills } from "@/lib/hooks";
 import type { Job, JobsConnection } from "@/types/gql";
@@ -30,9 +31,9 @@ function JobsError({ error }: { error: unknown }): JSX.Element {
 }
 
 export function JobsPageClient(): JSX.Element {
-  const clerkClient = useClerk();
   const searchParams = useSearchParams();
   const params = parseUrlJobParams(searchParams);
+  const userButtonRef = useRef<HTMLDivElement>(null);
 
   // Remove 'after' param before passing to useInfiniteJobs - using underscore prefix to indicate intentionally unused
   const { after: _after, ...infiniteParams } = params;
@@ -166,14 +167,19 @@ export function JobsPageClient(): JSX.Element {
               {/* Action buttons */}
               <div className="flex items-center gap-2">
                 <Button
-                  onClick={() => clerkClient.openUserProfile()}
+                  onClick={() => {
+                    // Trigger the UserButton modal to open
+                    const userButton = userButtonRef.current?.querySelector("button");
+                    if (userButton) {
+                      userButton.click();
+                    }
+                  }}
                   variant="default"
                   size="sm"
-                  className="relative h-8 px-4 text-xs font-medium bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white border-0 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-105 active:scale-95"
+                  className="relative h-8 px-4 text-xs font-medium bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white border-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <UserPlus className="w-3.5 h-3.5 mr-1.5 transition-transform group-hover:rotate-12" />
+                  <UserPlus className="w-3.5 h-3.5 mr-1.5" />
                   Add Skills
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
                 </Button>
 
                 {/* Dismiss button */}
@@ -237,6 +243,24 @@ export function JobsPageClient(): JSX.Element {
           </p>
         </div>
       )}
+
+      {/* Hidden UserButton to provide the modal with Personalization tab */}
+      <div ref={userButtonRef} className="hidden">
+        <UserButton userProfileMode="modal">
+          <UserButton.UserProfilePage
+            label="Personalization"
+            url="personalization"
+            labelIcon={
+              <UserStar
+                className="w-4 h-4 text-muted-foreground transition-colors duration-200 group-hover:text-chart-4"
+                fill="currentColor"
+              />
+            }
+          >
+            <PersonalizationPanel />
+          </UserButton.UserProfilePage>
+        </UserButton>
+      </div>
     </div>
   );
 }
