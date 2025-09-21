@@ -7,7 +7,7 @@ import {
   CurrencyDollarIcon,
   StarIcon,
   CalendarIcon,
-  ExternalLinkIcon,
+  ArrowTopRightOnSquareIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
@@ -84,7 +84,7 @@ export function KanbanCard({
             onClick={(e) => e.stopPropagation()}
             title="View job posting"
           >
-            <ExternalLinkIcon className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            <ArrowTopRightOnSquareIcon className="h-4 w-4 text-muted-foreground hover:text-foreground" />
           </a>
         </div>
         
