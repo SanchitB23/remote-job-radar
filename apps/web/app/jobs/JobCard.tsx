@@ -56,7 +56,16 @@ function formatJobTime(workType?: string): string {
 }
 
 // Convert our Job type to SmoothUI Job format
-function convertToSmoothUIJob(job: Job) {
+function convertToSmoothUIJob(job: Job): {
+  company: string;
+  title: string;
+  logo: JSX.Element;
+  job_description: string;
+  salary: string;
+  location: string;
+  remote: string;
+  job_time: string;
+} {
   return {
     company: job.company,
     title: job.title,
