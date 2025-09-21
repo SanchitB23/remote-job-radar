@@ -3,6 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { DateTimeResolver } from "graphql-scalars";
 import { PubSub } from "graphql-subscriptions";
 
+import { pgHealthMonitor } from "@/lib/postgresql-health";
 import { type NotificationHandler, PostgreSQLListener } from "@/lib/postgresql-listener";
 
 import { getJobFieldResolvers } from "./job.js";
@@ -29,8 +30,13 @@ export function getResolvers(prisma: PrismaClient): IResolvers<string, unknown> 
       keepAliveInitialDelayMillis: parseInt(process.env.PG_LISTENER_KEEPALIVE_DELAY || "30000"),
     });
 
+    // Connect health monitor to the listener
+    pgHealthMonitor.setListener(pgListener);
+
     // Set up notification handler for new jobs
     const newJobHandler: NotificationHandler = async (channel: string, payload: string | null) => {
+      pgHealthMonitor.recordNotification();
+
       const jobId = payload;
       if (jobId) {
         try {
@@ -54,16 +60,27 @@ export function getResolvers(prisma: PrismaClient): IResolvers<string, unknown> 
           }
         } catch (error) {
           console.error("[GraphQL] Error processing new job notification:", error);
+          pgHealthMonitor.recordNotificationError();
         }
       }
     };
 
     pgListener.listen("new_job", newJobHandler);
 
-    // Start the connection
-    pgListener.connect().catch((error: Error) => {
-      console.error("[GraphQL] Failed to establish PostgreSQL listener connection:", error);
-    });
+    // Start the connection and track health metrics
+    pgHealthMonitor.recordConnectionAttempt();
+
+    pgListener
+      .connect()
+      .then(() => {
+        pgHealthMonitor.recordConnectionSuccess();
+        console.log("[GraphQL] PostgreSQL listener connected successfully");
+        console.log(`[GraphQL] Connection status: ${pgHealthMonitor.getStatusSummary()}`);
+      })
+      .catch((error: Error) => {
+        pgHealthMonitor.recordConnectionFailure(error.message);
+        console.error("[GraphQL] Failed to establish PostgreSQL listener connection:", error);
+      });
   }
 
   return {
