@@ -29,6 +29,8 @@ export default function JobAlerts(): null {
     (async () => {
       try {
         const jwt = await getToken({ template: "remote-job-radar" });
+        console.log("🔑 WebSocket auth ready:", { hasToken: !!jwt });
+
         wsClientRef.current = await getWSClient(jwt || undefined);
         console.log("🔌 Starting WebSocket subscription...");
         subscribeToNewJobs({
@@ -46,14 +48,27 @@ export default function JobAlerts(): null {
             }
           },
           error: (error: unknown) => {
-            console.error("❌ WebSocket subscription error:", error);
+            console.error("❌ WebSocket subscription error:", {
+              error,
+              type: typeof error,
+              message: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              timestamp: new Date().toISOString(),
+            });
           },
           complete: () => {
             console.log("✅ WebSocket subscription completed");
           },
         });
       } catch (error) {
-        console.error("❌ Failed to setup WebSocket subscription:", error);
+        console.error("❌ Failed to setup WebSocket subscription:", {
+          error,
+          type: typeof error,
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          endpoint: process.env.NEXT_PUBLIC_GRAPHQL_WS_ENDPOINT || "ws://localhost:4000/graphql",
+          timestamp: new Date().toISOString(),
+        });
       }
     })();
 
