@@ -104,7 +104,7 @@ export function JobsPageClient(): JSX.Element {
   if (isLoading || isFilterLoading) {
     // Show skeleton cards for initial load or filter changes
     return (
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <JobCardSkeleton key={i} />
         ))}
@@ -123,7 +123,7 @@ export function JobsPageClient(): JSX.Element {
           </span>
         )}
       </div>
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {jobs.map((j: Job) => (
           <li key={j.id}>
             <JobCard job={j} />
@@ -134,7 +134,7 @@ export function JobsPageClient(): JSX.Element {
       {/* Loading indicator for next page */}
       {isFetchingNextPage && (
         <div className="mt-4">
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <JobCardSkeleton key={`loading-${i}`} />
             ))}
