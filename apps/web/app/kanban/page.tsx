@@ -1,44 +1,43 @@
 "use client";
-import type { DragEndEvent } from "@dnd-kit/core";
-import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import toast from "react-hot-toast";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Kanban,
+  KanbanBoard,
+  KanbanColumn,
+  KanbanColumnContent,
+  KanbanItem,
+  KanbanOverlay,
+  type KanbanMoveEvent,
+} from "@/components/ui/kanban";
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
 import type { PipelineItem } from "@/types/gql";
 
-import { KANBAN_COLUMNS } from "./constants";
+import { KANBAN_COLUMNS, COLUMN_DISPLAY_NAMES, COLUMN_COLORS } from "./constants";
 import { KanbanCard } from "./KanbanCard";
-import { KanbanColumnDroppable } from "./KanbanColumnDroppable";
 import { KanbanLoading } from "./KanbanLoading";
 
-export default function Kanban(): JSX.Element {
+export default function KanbanPage(): JSX.Element {
   const { data: pipelineData, isLoading, error } = usePipeline();
   const pipelineUpsertMutation = usePipelineUpsertMutation();
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   // Group pipeline items by column and sort by position
-  const items = useMemo(() => {
+  const columns = useMemo(() => {
     if (!pipelineData) {
-      return {
-        wishlist: [],
-        applied: [],
-        interview: [],
-        offer: [],
-      };
+      return Object.fromEntries(KANBAN_COLUMNS.map(col => [col, []]));
     }
 
-    const grouped: Record<string, PipelineItem[]> = {
-      wishlist: [],
-      applied: [],
-      interview: [],
-      offer: [],
-    };
+    // Initialize all columns
+    const grouped: Record<string, PipelineItem[]> = Object.fromEntries(
+      KANBAN_COLUMNS.map(col => [col, []])
+    );
 
+    // Group items by column
     for (const item of pipelineData) {
       if (item?.column && item.column in grouped) {
         grouped[item.column]?.push(item);
@@ -57,11 +56,25 @@ export default function Kanban(): JSX.Element {
     try {
       await pipelineUpsertMutation.mutateAsync({ jobId, column, position });
       // React Query will automatically refetch the pipeline data
+      toast.success(`Job moved to ${COLUMN_DISPLAY_NAMES[column]}`);
     } catch (err) {
       console.error("Failed to move job:", err);
       toast.error("Failed to move job. Please try again.");
     }
   }
+
+  const handleKanbanMove = async (moveEvent: KanbanMoveEvent) => {
+    const { activeContainer, overContainer, overIndex } = moveEvent;
+    
+    // Find the item being moved
+    const movingItem = columns[activeContainer]?.find(item => 
+      item.job.id === moveEvent.event.active.id
+    );
+    
+    if (movingItem) {
+      await moveTo(movingItem.job.id, overContainer, overIndex + 1);
+    }
+  };
 
   if (isLoading) {
     return <KanbanLoading />;
@@ -86,85 +99,76 @@ export default function Kanban(): JSX.Element {
   }
 
   return (
-    <DndContext
-      collisionDetection={closestCorners}
-      onDragStart={(e) => setActiveId(e.active.id as string)}
-      onDragEnd={async (e: DragEndEvent) => {
-        setActiveId(null);
-        const jobId = e.active.id as string;
-        const overId = e.over?.id as string | undefined;
-        if (!overId) return;
-
-        // Find the column and new index
-        let targetColumn = "";
-        let newIndex = 0;
-        for (const col of KANBAN_COLUMNS) {
-          const idx = items[col]?.findIndex((it) => it.job?.id === overId) ?? -1;
-          if (idx !== -1) {
-            targetColumn = col;
-            newIndex = idx;
-            break;
-          }
-        }
-        // If dropped on empty column, append to end
-        if (!targetColumn) {
-          for (const col of KANBAN_COLUMNS) {
-            if (overId === col) {
-              targetColumn = col;
-              newIndex = items[col]?.length ?? 0;
-              break;
-            }
-          }
-        }
-        if (!targetColumn) return;
-
-        // Reorder: position = newIndex + 1 (1-based)
-        await moveTo(jobId, targetColumn, newIndex + 1);
-      }}
-      onDragCancel={() => setActiveId(null)}
+    <Kanban
+      value={columns}
+      onValueChange={() => {}} // We handle moves via onMove
+      getItemValue={(item: PipelineItem) => item.job.id}
+      onMove={handleKanbanMove}
+      className="bg-gradient-to-br from-background to-muted/20"
     >
-      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-4">
-        {KANBAN_COLUMNS.map((column) => (
-          <Card key={column} className="h-[80vh] bg-muted/50 flex flex-col">
-            <CardContent className="p-4 flex flex-col h-full">
-              <h2 className="font-semibold capitalize mb-4 text-lg">{column}</h2>
-              <KanbanColumnDroppable id={column}>
-                <SortableContext
-                  id={column}
-                  items={items[column]?.map((item) => item.job.id) ?? []}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-3 min-h-[40px] flex-1 overflow-y-auto pr-1">
-                    {items[column]?.map((item: PipelineItem) => (
-                      <KanbanCard key={item.id} item={item} />
-                    ))}
-                    {(items[column]?.length ?? 0) === 0 && (
-                      <div className="text-center py-8 text-muted-foreground text-sm">
-                        No jobs in {column}
-                      </div>
-                    )}
-                  </div>
-                </SortableContext>
-              </KanbanColumnDroppable>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Job Application Pipeline</h1>
+            <p className="text-muted-foreground mt-1">
+              Track your job applications through each stage of the process
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Total Jobs:</span>
+              <Badge variant="secondary" className="font-mono">
+                {pipelineData?.length ?? 0}
+              </Badge>
+            </div>
+          </div>
+        </div>
       </div>
-      <DragOverlay
-        dropAnimation={{
-          duration: 200,
-          easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+      
+      <KanbanBoard>
+        {KANBAN_COLUMNS.map((columnId) => (
+          <KanbanColumn key={columnId} value={columnId}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-sm text-foreground">
+                {COLUMN_DISPLAY_NAMES[columnId]}
+              </h3>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs font-mono">
+                  {columns[columnId]?.length ?? 0}
+                </Badge>
+              </div>
+            </div>
+            
+            <KanbanColumnContent value={columnId}>
+              {columns[columnId]?.map((item: PipelineItem) => (
+                <KanbanItem key={item.id} value={item.job.id}>
+                  <KanbanCard item={item} />
+                </KanbanItem>
+              ))}
+              
+              {(columns[columnId]?.length ?? 0) === 0 && (
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                  <PlusIcon className="h-8 w-8 mb-2 opacity-50" />
+                  <p className="text-sm font-medium">No jobs yet</p>
+                  <p className="text-xs">Drag jobs here to get started</p>
+                </div>
+              )}
+            </KanbanColumnContent>
+          </KanbanColumn>
+        ))}
+      </KanbanBoard>
+      
+      <KanbanOverlay>
+        {({ value, variant }) => {
+          if (variant === 'item') {
+            const item = Object.values(columns)
+              .flat()
+              .find((i) => i?.job?.id === value);
+            return item ? <KanbanCard item={item} isOverlay /> : null;
+          }
+          return null;
         }}
-      >
-        {activeId
-          ? (() => {
-              const found = Object.values(items)
-                .flat()
-                .find((i) => i?.job?.id === activeId);
-              return found ? <KanbanCard item={found} isOverlay /> : null;
-            })()
-          : null}
-      </DragOverlay>
-    </DndContext>
+      </KanbanOverlay>
+    </Kanban>
   );
 }
