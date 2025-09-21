@@ -296,7 +296,7 @@ function Kanban<T>({
         <div
           data-slot="kanban"
           data-dragging={activeId !== null}
-          className={cn("min-h-screen bg-background", className)}
+          className={cn("h-screen bg-background flex flex-col overflow-hidden", className)}
         >
           {children}
         </div>
@@ -317,7 +317,7 @@ function KanbanBoard({ children, className }: KanbanBoardProps) {
     <SortableContext items={columnIds} strategy={rectSortingStrategy}>
       <div
         data-slot="kanban-board"
-        className={cn("flex gap-6 p-6 overflow-x-auto min-h-screen", className)}
+        className={cn("flex gap-6 p-6 overflow-x-auto flex-1 min-h-0", className)}
       >
         {children}
       </div>
@@ -365,9 +365,10 @@ function KanbanColumn({ value, className, children, disabled }: KanbanColumnProp
         ref={setNodeRef}
         style={style}
         className={cn(
-          "group/kanban-column flex flex-col min-w-[320px] max-w-[320px]",
+          "group/kanban-column flex flex-col min-w-[280px] max-w-[400px] flex-1",
           "bg-muted/30 border border-border rounded-xl p-4",
           "shadow-sm hover:shadow-md transition-all duration-200",
+          "min-h-0 max-h-full",
           isSortableDragging && "opacity-50 rotate-3 scale-105",
           disabled && "opacity-50",
           className,
@@ -514,10 +515,11 @@ function KanbanColumnContent({ value, className, children }: KanbanColumnContent
       <div
         data-slot="kanban-column-content"
         className={cn(
-          "flex flex-col gap-0 flex-1 min-h-[200px]",
+          "flex flex-col gap-0 flex-1 min-h-[200px] overflow-y-auto",
           "bg-background/50 rounded-lg p-2 mt-4",
           "border-2 border-dashed border-transparent",
           "hover:border-border transition-colors",
+          "scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent",
           className,
         )}
       >

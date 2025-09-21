@@ -106,7 +106,7 @@ export default function KanbanPage(): JSX.Element {
       onMove={handleKanbanMove}
       className="bg-gradient-to-br from-background to-muted/20"
     >
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b px-6 py-4">
+      <div className="flex-shrink-0 bg-background/80 backdrop-blur-sm border-b px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Job Application Pipeline</h1>
@@ -125,7 +125,7 @@ export default function KanbanPage(): JSX.Element {
         </div>
       </div>
 
-      <KanbanBoard>
+      <KanbanBoard className="max-w-none">
         {KANBAN_COLUMNS.map((columnId) => (
           <KanbanColumn key={columnId} value={columnId}>
             <div className="flex items-center justify-between mb-2">

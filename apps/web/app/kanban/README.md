@@ -9,15 +9,12 @@ This update modernizes the Kanban board UI with enhanced drag-and-drop functiona
 ### 1. Updated Workflow Stages
 
 **Old:** 4 stages (wishlist, applied, interview, offer)
-**New:** 7 stages covering complete job application lifecycle:
+**New:** 4 optimized stages covering job application lifecycle:
 
 - Interested - Jobs user wants to apply for
-- Applied - Applications submitted
-- Phone/Initial Screen - First round interviews
-- Technical Interview - Technical assessments
-- Final Interview - Final round interviews
-- Offer - Job offers received
-- Rejected - Unsuccessful applications
+- Applied - Applications submitted  
+- Interviewing - All interview stages combined
+- Closed - Final outcomes (offers, rejections, etc.)
 
 ### 2. Modern Kanban Component
 
@@ -43,9 +40,10 @@ Each job card now displays:
 
 - Modern card-based design with shadows and hover effects
 - Color-coded fit scores (green: 90%+, blue: 70%+, yellow: 50%+, red: <50%)
-- Responsive layout for mobile and tablet
+- Responsive layout optimized for 4-column display
+- Fixed screen height with individual column scrolling
 - Gradient background
-- Sticky header with statistics
+- Non-sticky header with statistics
 - Empty state illustrations
 
 ### 5. User Experience Enhancements
