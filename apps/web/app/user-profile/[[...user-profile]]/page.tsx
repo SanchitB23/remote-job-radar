@@ -1,113 +1,101 @@
 "use client";
 
 import { UserProfile } from "@clerk/nextjs";
-import { UserStar } from "lucide-react";
+import { Settings } from "lucide-react";
 import type { JSX } from "react";
 
-// Optional: your custom panel embedded as a Clerk page (keeps Clerk shell)
-import { PersonalizationPanel } from "@/components/account/panels/PersonalizationPanel";
+// Custom panels
+import { PersonalizationPanel } from "@/components/ui/PersonalizationPanel";
 
 /**
- * Clerk "path" must match the base route folder (/user-profile).
- * This file lives in [[...user-profile]] so Clerk can handle nested paths
- * like /user-profile, /user-profile/security, etc.
- *
- * We do NOT replace Clerk's UI/flow; we only theme it to match your tokens.
+ * Full-screen User Profile page with 1:3 layout split
+ * Fixed sidebar, scrollable content area only
  */
 export default function ClerkUserProfilePage(): JSX.Element {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="h-screen bg-background overflow-hidden">
       <UserProfile
         routing="path"
         path="/user-profile"
-        /*
-         * Appearance only: keep Clerk sidebar, header, and internal pages.
-         * We map colors/spacing/rounding to your Tailwind/shadcn CSS variables
-         * for a native look across light/dark themes.
-         */
         appearance={{
           variables: {
-            // Colors
             colorPrimary: "hsl(var(--primary))",
             colorText: "hsl(var(--foreground))",
             colorTextSecondary: "hsl(var(--muted-foreground))",
-            colorBackground: "hsl(var(--card))",
+            colorBackground: "hsl(var(--background))",
             colorInputBackground: "hsl(var(--background))",
             colorInputText: "hsl(var(--foreground))",
-            // colorAlphaShade: "hsl(var(--muted))",
-            // Shape & density
-            borderRadius: "12px",
+            borderRadius: "var(--radius)",
             fontSize: "14px",
-            // Shadows
-            // boxShadow: "0 1px 2px 0 hsl(var(--border) / 0.4), 0 8px 24px -8px hsl(var(--foreground) / 0.08)",
+            fontFamily: "var(--font-sans)",
           },
           elements: {
-            // Outer card & layout
-            rootBox: "w-full",
-            card: "bg-card border rounded-xl shadow-sm",
-            headerTitle: "text-sm font-semibold",
-            headerSubtitle: "text-xs text-muted-foreground",
-            pageScrollBox: "p-0",
+            // Full screen layout - no scrolling on main container
+            rootBox: "w-full h-screen bg-background",
+            card: "bg-background border-0 shadow-none w-full h-screen flex overflow-hidden",
 
-            // Left navbar (keep it; just align with your tokens)
-            navbar: "border-r pr-2 mr-2",
+            // Fixed left sidebar - exactly 1/4 width, no scrolling
+            navbar:
+              "w-1/4 min-w-[320px] border-r border-border bg-card/30 flex-shrink-0 flex flex-col overflow-hidden",
+            navbarMobileMenuButton: "hidden",
+
+            // Sidebar header area
+            userButtonBox: "p-6 border-b border-border flex-shrink-0",
+            userButtonAvatarBox: "h-10 w-10",
+            userButtonAvatarImage: "rounded-full",
+
+            // Navigation area within sidebar - fixed, no scrolling
+            navbarButtons: "flex-1 p-6 space-y-2 overflow-hidden",
             navbarButton:
-              "h-9 rounded-md text-sm data-[active=true]:bg-muted data-[active=true]:text-foreground hover:bg-muted/60 hover:text-foreground",
-            navbarItem__personalization: "text-sm",
+              "w-full justify-start gap-3 h-12 px-4 text-sm font-medium transition-all duration-200 rounded-lg data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:bg-muted/60 hover:text-foreground text-muted-foreground",
+            navbarButtonIcon: "h-5 w-5 flex-shrink-0",
 
-            // Forms/buttons/inputs
+            // Right content area - 3/4 width, ONLY this area scrolls
+            pageScrollBox: "flex-1 overflow-auto bg-background",
+            page: "p-8 w-full min-h-full",
+
+            // Content headers
+            headerTitle: "text-2xl font-bold text-foreground mb-2",
+            headerSubtitle: "text-sm text-muted-foreground mb-6",
+
+            // Form styling
             formButtonPrimary:
-              "h-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90",
+              "h-10 px-6 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors",
             formButtonSecondary:
-              "h-9 rounded-md border bg-background text-foreground hover:bg-muted",
+              "h-10 px-6 rounded-md border border-border bg-background text-foreground font-medium hover:bg-muted transition-colors",
             formFieldInput:
-              "h-9 rounded-md border bg-background focus-visible:ring-2 focus-visible:ring-primary/30",
-            formFieldLabel: "text-xs",
-            formFieldAction: "text-xs text-muted-foreground hover:text-foreground",
+              "h-10 px-3 rounded-md border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors",
+            formFieldLabel: "text-sm font-medium text-foreground mb-2",
+            formFieldAction: "text-sm text-primary hover:text-primary/80 transition-colors",
 
-            // Specific sections (account/security look like cards)
-            profileSection__account: "rounded-lg border bg-background p-4 sm:p-5",
-            profileSection__security: "rounded-lg border bg-background p-4 sm:p-5",
+            // Content sections
+            profileSection: "bg-card rounded-lg border border-border p-6 shadow-sm mb-6",
+            profileSection__account: "bg-card rounded-lg border border-border p-6 shadow-sm mb-6",
+            profileSection__security: "bg-card rounded-lg border border-border p-6 shadow-sm mb-6",
 
-            // Misc polish
-            avatarBox: "ring-1 ring-border",
-            dividerRow: "bg-border/60",
-            modalCloseButton: "rounded-md",
-            badge: "rounded-md",
-            breadcrumb: "text-xs",
+            // UI elements
+            avatarBox: "ring-2 ring-border rounded-full",
+            dividerRow: "bg-border",
+            modalCloseButton: "rounded-md hover:bg-muted/60 transition-colors",
+            badge: "rounded-md bg-muted text-muted-foreground px-2 py-1 text-xs font-medium",
+            breadcrumb: "text-sm text-muted-foreground",
           },
         }}
       >
-        {/* Optional: keep Clerk shell and add a custom page inside it */}
         <UserProfile.Page
           label="Personalization"
           url="personalization"
-          labelIcon={
-            <UserStar
-              className="h-4 w-4 text-muted-foreground group-data-[active=true]:text-primary"
-              fill="currentColor"
-            />
-          }
+          labelIcon={<Settings className="h-4 w-4" />}
         >
           <div className="space-y-6">
-            {/* Header with icon + text */}
-            <div className="flex items-start gap-3">
-              <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <UserStar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold">Personalization</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Customize your experience with skills and résumé data to get better job
-                  recommendations.
-                </p>
-              </div>
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-semibold text-foreground">Personalization Settings</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Customize your job search experience by adding your skills and preferences.
+              </p>
             </div>
 
-            {/* Main panel content */}
-            <div className="rounded-lg border bg-background p-4 sm:p-5 shadow-sm">
-              <PersonalizationPanel />
-            </div>
+            <PersonalizationPanel />
           </div>
         </UserProfile.Page>
       </UserProfile>

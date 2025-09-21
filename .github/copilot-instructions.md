@@ -63,11 +63,75 @@ Remote Job Radar is a **Turbo monorepo** for AI-powered job discovery, using a m
 - **Pipeline System**: Position-based ordering with column-specific grouping
 - **Data Integrity**: Foreign key constraints and cascade deletes for data consistency
 
-## Enhanced UI/UX with shadcn/ui
+## Enhanced UI/UX with Premium Component Registries
 
 **Component System:**
 
-- **shadcn/ui**: Modern, accessible component library with Tailwind CSS
+Remote Job Radar uses multiple premium UI component registries for enhanced visual experiences:
+
+### Available Registries
+
+- **shadcn/ui (`@shadcn`)**: Foundation component library with Tailwind CSS
+- **KokonutUI (`@kokonutui`)**: 70+ animated components with shimmer effects and AI-themed elements
+  - Specialties: `shimmer-text`, `profile-dropdown`, `particle-button`, `glitch-text`
+- **SmoothUI (`@smoothui`)**: Framer Motion components for smooth animations
+  - Specialties: `job-listing-component`, `user-account-avatar`, `animated-tags`
+- **ReUI (`@reui`)**: 1,164+ advanced UI blocks and data visualization components
+  - Specialties: `kanban`, `data-grid`, `rating`, `chart` components
+- **Motion Primitives (`@motion-primitives`)**: Advanced animations and interactive elements
+  - Specialties: `text-shimmer`, `morphing-dialog`, `dock`, `spotlight`
+
+### Registry Configuration
+
+Configured in `apps/web/components.json`:
+
+```json
+{
+  "registries": {
+    "@smoothui": "https://smoothui.dev/r/{name}.json",
+    "@kokonutui": "https://kokonutui.com/r/{name}.json",
+    "@motion-primitives": "https://motion-primitives.com/r/{name}.json",
+    "@reui": "https://reui.io/r/{name}.json",
+    "@clerk": "https://clerk.com/r/{name}.json"
+  }
+}
+```
+
+### Component Installation
+
+```bash
+# Install premium components using direct URLs
+npx shadcn@latest add "https://kokonutui.com/r/shimmer-text.json"
+npx shadcn@latest add "https://smoothui.dev/r/job-listing-component.json"
+npx shadcn@latest add "https://reui.io/r/kanban.json"
+```
+
+### Component Usage Guidelines
+
+**When to use each registry:**
+
+1. **KokonutUI**: Use for hero sections, profile pages, and text animations
+   - `shimmer-text` for animated headings
+   - `profile-dropdown` for user management interfaces
+   - `particle-button` for call-to-action buttons
+
+2. **SmoothUI**: Use for job-related components and user interfaces
+   - `job-listing-component` for job cards and listings
+   - `user-account-avatar` for profile avatars
+   - `animated-tags` for skill tags and categories
+
+3. **ReUI**: Use for data-heavy components and complex layouts
+   - `kanban` for job pipeline management
+   - `data-grid` for tabular data display
+   - `chart` for analytics and data visualization
+
+4. **Motion Primitives**: Use for advanced animations and interactions
+   - `text-shimmer` for sophisticated text effects
+   - `morphing-dialog` for modal transitions
+   - `dock` for navigation elements
+
+**Additional UI Features:**
+
 - **Icons**: Heroicons for consistent iconography throughout the app
 - **Themes**: Dark/light mode support with next-themes
 - **Animations**: Smooth transitions and micro-interactions for better UX

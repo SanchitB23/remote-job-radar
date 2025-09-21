@@ -197,6 +197,17 @@ user_profiles: user_id, skills[], skill_vector (pgvector)
 
 ## Configuration & Environment Setup
 
+### Git Configuration
+
+**Repository Details:**
+
+- **GitHub Owner**: `SanchitB23`
+- **Repository**: `remote-job-radar`
+- **Full path**: `SanchitB23/remote-job-radar`
+
+**Important for MCP/API access:**
+When accessing GitHub issues, PRs, or repository data, always use the correct owner `SanchitB23`.
+
 ### Critical Environment Files
 
 Each service needs its own `.env` file:
@@ -356,3 +367,83 @@ console.trace("[ComponentName.tsx] [functionName] error:", error);
 - Toast notifications with react-hot-toast
 
 This architecture enables efficient AI-powered job discovery with modern UX patterns and robust error handling across all service boundaries.
+
+## UI Component Registries
+
+Remote Job Radar uses multiple premium UI component registries beyond shadcn/ui for enhanced visual experiences:
+
+### Available Registries
+
+**1. shadcn/ui (`@shadcn`)** - Foundation components
+
+- URL: https://ui.shadcn.com
+- Usage: Standard shadcn CLI commands
+
+**2. KokonutUI (`@kokonutui`)** - Animated components
+
+- URL: https://kokonutui.com
+- Specialties: Text animations, interactive buttons, AI-themed components
+- Key components: `shimmer-text`, `profile-dropdown`, `particle-button`
+
+**3. SmoothUI (`@smoothui`)** - Framer Motion components
+
+- URL: https://smoothui.dev
+- Specialties: Job listings, user management, smooth transitions
+- Key components: `job-listing-component`, `user-account-avatar`, `animated-tags`
+
+**4. ReUI (`@reui`)** - Advanced UI blocks
+
+- URL: https://reui.io
+- Specialties: Kanban boards, data grids, complex layouts
+- Key components: `kanban`, `data-grid`, `rating`, `chart`
+
+**5. Motion Primitives (`@motion-primitives`)** - Advanced animations
+
+- URL: https://motion-primitives.com
+- Specialties: Text effects, interactive elements, morphing transitions
+- Key components: `text-shimmer`, `morphing-dialog`, `dock`, `spotlight`
+
+### Installation Commands
+
+```bash
+# Install from specific registries
+npx shadcn@latest add "https://kokonutui.com/r/shimmer-text.json"
+npx shadcn@latest add "https://smoothui.dev/r/job-listing-component.json"
+npx shadcn@latest add "https://reui.io/r/kanban.json"
+
+# Or use registry names (if configured)
+npx shadcn@latest add @kokonutui/shimmer-text
+npx shadcn@latest add @smoothui/job-listing-component
+```
+
+### Component Usage Examples
+
+```tsx
+// KokonutUI Shimmer Text
+import ShimmerText from "@/components/kokonutui/shimmer-text";
+<ShimmerText text="Profile Dashboard" className="text-4xl font-bold" />
+
+// SmoothUI User Avatar
+import UserAccountAvatar from "@/components/smoothui/ui/UserAccountAvatar";
+<UserAccountAvatar user={{...}} className="hover:scale-110" />
+
+// ReUI Kanban Board
+import { Kanban } from "@/components/ui/kanban";
+<Kanban columns={columns} onCardMove={handleMove} />
+```
+
+### Registry Configuration
+
+The `apps/web/components.json` file configures all registries:
+
+```json
+{
+  "registries": {
+    "@smoothui": "https://smoothui.dev/r/{name}.json",
+    "@kokonutui": "https://kokonutui.com/r/{name}.json",
+    "@motion-primitives": "https://motion-primitives.com/r/{name}.json",
+    "@reui": "https://reui.io/r/{name}.json",
+    "@clerk": "https://clerk.com/r/{name}.json"
+  }
+}
+```
