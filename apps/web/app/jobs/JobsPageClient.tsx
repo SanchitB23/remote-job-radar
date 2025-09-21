@@ -3,7 +3,7 @@
 import type { InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useInfiniteJobs, useUserSkills } from "@/lib/hooks";
@@ -30,6 +30,7 @@ function JobsError({ error }: { error: unknown }): JSX.Element {
 export function JobsPageClient(): JSX.Element {
   const searchParams = useSearchParams();
   const params = parseUrlJobParams(searchParams);
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   // Remove 'after' param before passing to useInfiniteJobs - using underscore prefix to indicate intentionally unused
   const { after: _after, ...infiniteParams } = params;
@@ -46,6 +47,15 @@ export function JobsPageClient(): JSX.Element {
   // Flatten all jobs from all pages
   const jobs: Job[] =
     (data as InfiniteData<JobsConnection> | undefined)?.pages.flatMap((page) => page.edges) || [];
+
+  // Handlers for centralized expanded job state management
+  const handleJobExpand = useCallback((job: Job) => {
+    setExpandedJobId(job.id);
+  }, []);
+
+  const handleJobCollapse = useCallback(() => {
+    setExpandedJobId(null);
+  }, []);
 
   // Smart loading state: show skeletons for filter changes, not pagination
   const isFilterLoading = isFetching && !isFetchingNextPage && !isLoading;
@@ -125,7 +135,13 @@ export function JobsPageClient(): JSX.Element {
       </div>
       <div className="space-y-0">
         {jobs.map((j: Job) => (
-          <JobCard key={j.id} job={j} />
+          <JobCard
+            key={j.id}
+            job={j}
+            isExpanded={expandedJobId === j.id}
+            onExpand={handleJobExpand}
+            onCollapse={handleJobCollapse}
+          />
         ))}
       </div>
 
