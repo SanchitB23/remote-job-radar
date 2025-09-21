@@ -85,7 +85,7 @@ export async function getWSClient(jwt?: string): Promise<Client> {
         console.log("🔌 WebSocket client closed:", event);
       },
       connected: (socket) => {
-        console.log("✅ WebSocket client connected:", socket.url);
+        console.log("✅ WebSocket client connected:", GRAPHQL_WS_ENDPOINT);
       },
       connecting: () => {
         console.log("🔄 WebSocket client connecting...");
