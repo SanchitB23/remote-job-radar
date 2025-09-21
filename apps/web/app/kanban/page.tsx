@@ -1,8 +1,8 @@
 "use client";
-import { ExclamationTriangleIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { JSX } from "react";
 import { useMemo } from "react";
 import toast from "react-hot-toast";
+import { ExclamationTriangleIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import {
 import { usePipeline, usePipelineUpsertMutation } from "@/lib/hooks";
 import type { PipelineItem } from "@/types/gql";
 
-import { KANBAN_COLUMNS, COLUMN_DISPLAY_NAMES, COLUMN_COLORS } from "./constants";
+import { KANBAN_COLUMNS, COLUMN_DISPLAY_NAMES } from "./constants";
 import { KanbanCard } from "./KanbanCard";
 import { KanbanLoading } from "./KanbanLoading";
 
@@ -29,12 +29,12 @@ export default function KanbanPage(): JSX.Element {
   // Group pipeline items by column and sort by position
   const columns = useMemo(() => {
     if (!pipelineData) {
-      return Object.fromEntries(KANBAN_COLUMNS.map(col => [col, []]));
+      return Object.fromEntries(KANBAN_COLUMNS.map((col) => [col, []]));
     }
 
     // Initialize all columns
     const grouped: Record<string, PipelineItem[]> = Object.fromEntries(
-      KANBAN_COLUMNS.map(col => [col, []])
+      KANBAN_COLUMNS.map((col) => [col, []]),
     );
 
     // Group items by column
@@ -63,14 +63,14 @@ export default function KanbanPage(): JSX.Element {
     }
   }
 
-  const handleKanbanMove = async (moveEvent: KanbanMoveEvent) => {
+  const handleKanbanMove = async (moveEvent: KanbanMoveEvent): Promise<void> => {
     const { activeContainer, overContainer, overIndex } = moveEvent;
-    
+
     // Find the item being moved
-    const movingItem = columns[activeContainer]?.find(item => 
-      item.job.id === moveEvent.event.active.id
+    const movingItem = columns[activeContainer]?.find(
+      (item) => item.job.id === moveEvent.event.active.id,
     );
-    
+
     if (movingItem) {
       await moveTo(movingItem.job.id, overContainer, overIndex + 1);
     }
@@ -124,7 +124,7 @@ export default function KanbanPage(): JSX.Element {
           </div>
         </div>
       </div>
-      
+
       <KanbanBoard>
         {KANBAN_COLUMNS.map((columnId) => (
           <KanbanColumn key={columnId} value={columnId}>
@@ -138,14 +138,14 @@ export default function KanbanPage(): JSX.Element {
                 </Badge>
               </div>
             </div>
-            
+
             <KanbanColumnContent value={columnId}>
               {columns[columnId]?.map((item: PipelineItem) => (
                 <KanbanItem key={item.id} value={item.job.id}>
                   <KanbanCard item={item} />
                 </KanbanItem>
               ))}
-              
+
               {(columns[columnId]?.length ?? 0) === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <PlusIcon className="h-8 w-8 mb-2 opacity-50" />
@@ -157,10 +157,10 @@ export default function KanbanPage(): JSX.Element {
           </KanbanColumn>
         ))}
       </KanbanBoard>
-      
+
       <KanbanOverlay>
         {({ value, variant }) => {
-          if (variant === 'item') {
+          if (variant === "item") {
             const item = Object.values(columns)
               .flat()
               .find((i) => i?.job?.id === value);

@@ -1,15 +1,18 @@
 # Kanban UI Update - Issue #126
 
 ## Overview
+
 This update modernizes the Kanban board UI with enhanced drag-and-drop functionality, improved job card design, and a more comprehensive workflow pipeline.
 
 ## Key Changes
 
 ### 1. Updated Workflow Stages
+
 **Old:** 4 stages (wishlist, applied, interview, offer)
 **New:** 7 stages covering complete job application lifecycle:
+
 - Interested - Jobs user wants to apply for
-- Applied - Applications submitted  
+- Applied - Applications submitted
 - Phone/Initial Screen - First round interviews
 - Technical Interview - Technical assessments
 - Final Interview - Final round interviews
@@ -17,13 +20,16 @@ This update modernizes the Kanban board UI with enhanced drag-and-drop functiona
 - Rejected - Unsuccessful applications
 
 ### 2. Modern Kanban Component
+
 - Replaced old DnD implementation with modern `@/components/ui/kanban`
 - Improved drag-and-drop animations and transitions
 - Better touch/mobile support
 - Enhanced visual feedback during dragging
 
 ### 3. Enhanced Job Cards
+
 Each job card now displays:
+
 - Job title with external link
 - Company name with icon
 - Location and work type badges
@@ -34,6 +40,7 @@ Each job card now displays:
 - Job source
 
 ### 4. Visual Improvements
+
 - Modern card-based design with shadows and hover effects
 - Color-coded fit scores (green: 90%+, blue: 70%+, yellow: 50%+, red: <50%)
 - Responsive layout for mobile and tablet
@@ -42,6 +49,7 @@ Each job card now displays:
 - Empty state illustrations
 
 ### 5. User Experience Enhancements
+
 - Real-time job count per column
 - Total jobs counter in header
 - Success toast notifications on job moves
@@ -51,6 +59,7 @@ Each job card now displays:
 ## Technical Details
 
 ### Components Structure
+
 ```
 /kanban/
   ├── page.tsx          # Main Kanban page component
@@ -61,12 +70,14 @@ Each job card now displays:
 ```
 
 ### New Dependencies
+
 - Enhanced `@/components/ui/kanban` component
 - `@/components/ui/badge` for status indicators
 - `@/components/ui/separator` for visual separation
 - Additional Heroicons for better iconography
 
 ### Data Flow
+
 1. `usePipeline()` hook fetches pipeline data
 2. Data is grouped by column and sorted by position
 3. `handleKanbanMove()` processes drag-and-drop events
@@ -74,6 +85,7 @@ Each job card now displays:
 5. React Query automatically refetches and updates UI
 
 ## Future Enhancements (Out of Scope)
+
 - Column filtering and sorting options
 - Advanced job card actions (notes, due dates)
 - Bulk operations
@@ -82,12 +94,15 @@ Each job card now displays:
 - Team collaboration features
 
 ## Migration Notes
+
 - Existing pipeline data is compatible (no schema changes required)
 - Old column names are mapped to new workflow stages
 - All existing functionality preserved with enhanced UX
 
 ## Testing
+
 The implementation should be tested across:
+
 - Desktop browsers (Chrome, Firefox, Safari)
 - Mobile devices (iOS Safari, Chrome Mobile)
 - Tablet devices (iPad, Android tablets)

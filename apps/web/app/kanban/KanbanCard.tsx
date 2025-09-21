@@ -8,7 +8,6 @@ import {
   StarIcon,
   CalendarIcon,
   ArrowTopRightOnSquareIcon,
-  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
 import type { JSX } from "react";
@@ -32,7 +31,7 @@ function formatDate(dateString: string): string {
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - date.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 1) return "1 day ago";
   if (diffDays < 7) return `${diffDays} days ago`;
   if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
@@ -54,7 +53,7 @@ export function KanbanCard({
   isOverlay?: boolean;
 }): JSX.Element {
   const { job } = item;
-  
+
   // Custom animateLayoutChanges for smoother transitions
   const animateLayoutChanges: AnimateLayoutChanges = (args) => {
     if (args.isSorting || args.wasDragging) {
@@ -73,9 +72,7 @@ export function KanbanCard({
       {/* Header with title and external link */}
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm leading-tight line-clamp-2 flex-1">
-            {job.title}
-          </h3>
+          <h3 className="font-semibold text-sm leading-tight line-clamp-2 flex-1">{job.title}</h3>
           <a
             href={job.url}
             target="_blank"
@@ -87,7 +84,7 @@ export function KanbanCard({
             <ArrowTopRightOnSquareIcon className="h-4 w-4 text-muted-foreground hover:text-foreground" />
           </a>
         </div>
-        
+
         {/* Company info */}
         <div className="flex items-center gap-1 text-muted-foreground">
           <BuildingOfficeIcon className="h-3.5 w-3.5 flex-shrink-0" />
@@ -141,14 +138,14 @@ export function KanbanCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <StarIcon className="h-3.5 w-3.5 text-muted-foreground" />
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className={`text-xs px-2 py-0.5 border ${getFitScoreColor(job.fitScore)}`}
           >
             {job.fitScore}% fit
           </Badge>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {job.bookmarked && (
             <StarSolidIcon className="h-4 w-4 text-yellow-500" title="Bookmarked" />
