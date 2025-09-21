@@ -5,6 +5,7 @@
 <!-- Provide a brief description of what this PR accomplishes -->
 
 **Type of Change**: <!-- Select one -->
+
 - [ ] 🎉 **Feature** - New functionality
 - [ ] 🐛 **Bug Fix** - Fixes an issue
 - [ ] 📚 **Documentation** - Documentation only changes
@@ -21,7 +22,9 @@
 ## 🔗 Related Issues
 
 <!-- Link to the issue this PR addresses -->
+
 Closes #<!-- issue number -->
+
 <!-- If this PR addresses multiple issues, list them all -->
 <!-- Related issues: #123, #456 -->
 
@@ -32,20 +35,28 @@ Closes #<!-- issue number -->
 <!-- Describe the changes made in this PR -->
 
 ### Added
+
 <!-- List new features, files, or functionality -->
-- 
+
+-
 
 ### Changed
+
 <!-- List modifications to existing functionality -->
-- 
+
+-
 
 ### Fixed
+
 <!-- List bug fixes -->
-- 
+
+-
 
 ### Removed
+
 <!-- List removed features, files, or functionality -->
-- 
+
+-
 
 ---
 
@@ -64,10 +75,13 @@ Closes #<!-- issue number -->
 <!-- Include any architectural changes -->
 
 ### Technical Details
+
 <!-- Add technical implementation details if needed -->
 
 ### Database Changes
+
 <!-- If applicable, describe any database schema changes -->
+
 - [ ] No database changes
 - [ ] Database migration required
 - [ ] New tables/columns added
@@ -78,19 +92,23 @@ Closes #<!-- issue number -->
 ## 🧪 Testing
 
 ### Test Coverage
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] E2E tests added/updated
 - [ ] Manual testing completed
 
 ### Test Results
+
 <!-- Describe test results or attach screenshots -->
 
 ### Manual Testing Steps
+
 <!-- Provide step-by-step instructions for manual testing -->
-1. 
-2. 
-3. 
+
+1.
+2.
+3.
 
 ---
 
@@ -100,9 +118,11 @@ Closes #<!-- issue number -->
 <!-- For UI changes, show before/after comparisons -->
 
 **Before:**
+
 <!-- Screenshot/description of before state -->
 
 **After:**
+
 <!-- Screenshot/description of after state -->
 
 ---
@@ -142,6 +162,7 @@ Closes #<!-- issue number -->
 ## 🚀 Deployment
 
 ### Deployment Requirements
+
 - [ ] No special deployment requirements
 - [ ] Environment variables updated
 - [ ] Database migration required
@@ -149,6 +170,7 @@ Closes #<!-- issue number -->
 - [ ] Dependencies updated
 
 ### Rollback Plan
+
 <!-- Describe how to rollback these changes if needed -->
 
 ---
@@ -156,6 +178,7 @@ Closes #<!-- issue number -->
 ## ✅ Pre-Submission Checklist
 
 ### Code Quality
+
 - [ ] Code follows project style guidelines
 - [ ] Self-review of code completed
 - [ ] Code is well-commented and documented
@@ -163,6 +186,7 @@ Closes #<!-- issue number -->
 - [ ] Error handling implemented appropriately
 
 ### Testing & Validation
+
 - [ ] All tests pass locally
 - [ ] New tests added for new functionality
 - [ ] Edge cases considered and tested
@@ -170,12 +194,14 @@ Closes #<!-- issue number -->
 - [ ] Mobile responsiveness verified (if applicable)
 
 ### Integration
+
 - [ ] No merge conflicts
 - [ ] Branch is up-to-date with target branch
 - [ ] CI/CD checks passing
 - [ ] Conventional commit message format used
 
 ### Impact Assessment
+
 - [ ] Breaking changes documented
 - [ ] Backward compatibility maintained (or migration provided)
 - [ ] Dependencies are secure and up-to-date
@@ -219,6 +245,7 @@ Use [Conventional Commit](https://www.conventionalcommits.org/) format for PR ti
 - `revert: <description>` - Reverts a previous commit
 
 **Examples:**
+
 - `feat(api): add job aggregation endpoint`
 - `fix(web): resolve pagination crash on mobile`
 - `docs: update deployment instructions`

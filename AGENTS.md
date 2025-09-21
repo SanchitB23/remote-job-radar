@@ -29,6 +29,7 @@ remote-job-radar/
 The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
 
 #### 1. 🐛 Bug Report (`bug_report.yml`)
+
 - **Title Format**: `[BUG] <short summary>`
 - **Auto Labels**: `bug`, `triage`
 - **Required Fields**:
@@ -40,6 +41,7 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Logs/screenshots**: Error logs or visual proof
 
 #### 2. ✨ Feature Request (`feature_request.yml`)
+
 - **Title Format**: `[FEAT] <short summary>`
 - **Auto Labels**: `enhancement`
 - **Required Fields**:
@@ -51,6 +53,7 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Impact**: High/Medium/Low dropdown
 
 #### 3. 📝 Documentation (`documentation.yml`)
+
 - **Title Format**: `[DOCS] <subject>`
 - **Auto Labels**: `documentation`
 - **Required Fields**:
@@ -60,6 +63,7 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Scope checkboxes**: README, API reference, Architecture/ADR, Contributing/Runbook
 
 #### 4. 🧰 Chore (`chore.yml`)
+
 - **Title Format**: `[CHORE] <subject>`
 - **Auto Labels**: `chore`
 - **Required Fields**:
@@ -70,6 +74,7 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Requires doc update**: Optional checkbox
 
 #### 5. 🧹 Refactor/Cleanup (`refactor_cleanup.yml`)
+
 - **Title Format**: `[REFACTOR] <area>`
 - **Auto Labels**: `refactor`
 - **Required Fields**:
@@ -81,6 +86,7 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Safety checks**: Unit tests, E2E smoke tests
 
 #### 6. ❓ Question/Support (`question.yml`)
+
 - **Title Format**: `[QUESTION] <topic>`
 - **Auto Labels**: `question`
 - **Required Fields**:
@@ -89,12 +95,14 @@ The project uses **7 structured issue templates** in `.github/ISSUE_TEMPLATE/`:
   - **Context**: What you tried, logs, screenshots
 
 #### 7. Issue Template Configuration (`config.yml`)
+
 - **Disables blank issues**: Forces template usage
 - **Contact links**: Directs general questions to Discussions
 
 ### 🌿 Branch Creation Workflow
 
 #### Automatic Branch Creation
+
 After creating any issue, comment with the `/branch` command:
 
 ```bash
@@ -103,24 +111,28 @@ After creating any issue, comment with the `/branch` command:
 
 # Create branch with specific type
 /branch bug
-/branch feat  
+/branch feat
 /branch chore
 /branch docs
 /branch refactor
 ```
 
 #### Branch Naming Convention
+
 Branches are automatically created following this pattern:
+
 ```
 <type>/<issue-number>-<kebab-case-title>
 ```
 
 **Examples**:
+
 - Issue #123 "Add user login functionality" → `feat/123-add-user-login-functionality`
 - Issue #45 "Fix pagination bug" → `bug/45-fix-pagination-bug`
 - Issue #78 "Update README docs" → `docs/78-update-readme-docs`
 
 #### Branch Creation Process
+
 1. **Auto-detects issue number** from the comment context
 2. **Slugifies the issue title** (lowercase, kebab-case, max 50 chars)
 3. **Creates ref** based off the default branch (main)
@@ -131,7 +143,9 @@ Branches are automatically created following this pattern:
    ```
 
 #### Branch Naming Validation
+
 All PRs are validated against the branch naming convention:
+
 - **Pattern**: `^(feat|bug|chore|docs|refactor)/[0-9]+-[a-z0-9._-]+$`
 - **Protected branches**: `main`, `next`, `develop` are exempt
 - **Enforcement**: PR will fail CI if branch name doesn't match
@@ -143,48 +157,57 @@ All PRs are validated against the branch naming convention:
 The project uses a **comprehensive PR template** with multiple sections for better documentation and review:
 
 ##### **1. Summary & Type Selection**
+
 - **Brief description** of what the PR accomplishes
 - **Type checkboxes**: Feature, Bug Fix, Documentation, Style, Refactor, Performance, Tests, Chore, CI/CD, Breaking Change
 
 ##### **2. Issue Linking**
+
 - **Required**: `Closes #issue_number` for automatic issue linking
 - **Optional**: Related issues for reference
 
 ##### **3. What Changed (Detailed)**
+
 - **Added**: New features, files, or functionality
 - **Changed**: Modifications to existing functionality
 - **Fixed**: Bug fixes and corrections
 - **Removed**: Deleted features, files, or functionality
 
 ##### **4. Context & Implementation**
+
 - **Why These Changes**: Reasoning and problem solved
 - **How It Was Implemented**: Technical approach and key decisions
 - **Technical Details**: Implementation specifics
 - **Database Changes**: Schema modifications checklist
 
 ##### **5. Testing & Quality Assurance**
+
 - **Test Coverage**: Unit, integration, E2E, manual testing checkboxes
 - **Test Results**: Description or screenshots
 - **Manual Testing Steps**: Step-by-step verification instructions
 
 ##### **6. Visual Documentation**
+
 - **Screenshots/Demo**: Before/after comparisons for UI changes
 - **Performance Impact**: Performance implications assessment
 - **Security Considerations**: Security review checklist
 
 ##### **7. Documentation & Deployment**
+
 - **Documentation**: README, API docs, AGENTS.md update requirements
 - **Deployment Requirements**: Environment variables, migrations, rollback plan
 
 ##### **8. Comprehensive Checklists**
 
 **Pre-Submission Checklist**:
+
 - **Code Quality**: Style guidelines, self-review, comments, error handling
 - **Testing & Validation**: All tests pass, edge cases, cross-browser testing
 - **Integration**: No conflicts, up-to-date branch, CI passing, conventional commits
 - **Impact Assessment**: Breaking changes, compatibility, dependencies, performance
 
 **Review Checklist (for reviewers)**:
+
 - Code quality and standards met
 - Tests comprehensive and passing
 - Documentation adequate
@@ -193,9 +216,11 @@ The project uses a **comprehensive PR template** with multiple sections for bett
 - Ready to merge
 
 ##### **9. Title Convention Reference**
+
 **Conventional Commit Format**:
+
 - `feat: <description>` - New feature
-- `fix: <description>` - Bug fix  
+- `fix: <description>` - Bug fix
 - `docs: <description>` - Documentation changes
 - `style: <description>` - Code style changes
 - `refactor: <description>` - Code refactoring
@@ -207,11 +232,13 @@ The project uses a **comprehensive PR template** with multiple sections for bett
 - `revert: <description>` - Reverts a previous commit
 
 **Examples with scopes**:
+
 - `feat(api): add job aggregation endpoint`
 - `fix(web): resolve pagination crash on mobile`
 - `docs: update deployment instructions`
 
 #### PR Title Validation
+
 - **Semantic PR Action**: Validates PR titles against Conventional Commits
 - **Allowed types**: feat, fix, perf, docs, refactor, test, build, ci, chore, release
 - **Subject pattern**: Must start lowercase and be descriptive
@@ -221,17 +248,17 @@ The project uses a **comprehensive PR template** with multiple sections for bett
 
 The project uses a comprehensive labeling system (`.github/labels.yml`):
 
-| Label | Color | Description | Auto-Applied By |
-|-------|-------|-------------|------------------|
-| `bug` | ![#d73a4a](https://via.placeholder.com/10/d73a4a/000000?text=+) | Something is not working | Bug report template |
-| `enhancement` | ![#a2eeef](https://via.placeholder.com/10/a2eeef/000000?text=+) | New feature or request | Feature request template |
-| `documentation` | ![#0075ca](https://via.placeholder.com/10/0075ca/000000?text=+) | Documentation improvements | Documentation template |
-| `refactor` | ![#cfd3d7](https://via.placeholder.com/10/cfd3d7/000000?text=+) | Internal code change, no behavior change | Refactor template |
-| `chore` | ![#6f42c1](https://via.placeholder.com/10/6f42c1/000000?text=+) | Tooling, CI/CD, dependencies, configs | Chore template |
-| `question` | ![#d876e3](https://via.placeholder.com/10/d876e3/000000?text=+) | Further information is requested | Question template |
-| `good first issue` | ![#7057ff](https://via.placeholder.com/10/7057ff/000000?text=+) | Good for newcomers | Manual |
-| `help wanted` | ![#008672](https://via.placeholder.com/10/008672/000000?text=+) | Extra attention is needed | Manual |
-| `triage` | Auto-applied | Needs initial review | Bug report template |
+| Label              | Color                                                           | Description                              | Auto-Applied By          |
+| ------------------ | --------------------------------------------------------------- | ---------------------------------------- | ------------------------ |
+| `bug`              | ![#d73a4a](https://via.placeholder.com/10/d73a4a/000000?text=+) | Something is not working                 | Bug report template      |
+| `enhancement`      | ![#a2eeef](https://via.placeholder.com/10/a2eeef/000000?text=+) | New feature or request                   | Feature request template |
+| `documentation`    | ![#0075ca](https://via.placeholder.com/10/0075ca/000000?text=+) | Documentation improvements               | Documentation template   |
+| `refactor`         | ![#cfd3d7](https://via.placeholder.com/10/cfd3d7/000000?text=+) | Internal code change, no behavior change | Refactor template        |
+| `chore`            | ![#6f42c1](https://via.placeholder.com/10/6f42c1/000000?text=+) | Tooling, CI/CD, dependencies, configs    | Chore template           |
+| `question`         | ![#d876e3](https://via.placeholder.com/10/d876e3/000000?text=+) | Further information is requested         | Question template        |
+| `good first issue` | ![#7057ff](https://via.placeholder.com/10/7057ff/000000?text=+) | Good for newcomers                       | Manual                   |
+| `help wanted`      | ![#008672](https://via.placeholder.com/10/008672/000000?text=+) | Extra attention is needed                | Manual                   |
+| `triage`           | Auto-applied                                                    | Needs initial review                     | Bug report template      |
 
 **Label Sync**: Labels are automatically synchronized when `.github/labels.yml` changes via the Labels workflow.
 
@@ -241,7 +268,7 @@ The project uses a CODEOWNERS file (`.github/CODEOWNERS`) for automatic PR revie
 
 ```
 /apps/web/          @SanchitB23
-/apps/api/          @SanchitB23  
+/apps/api/          @SanchitB23
 /services/aggregator/ @SanchitB23
 /services/embedder/ @SanchitB23
 ```
@@ -253,9 +280,11 @@ The project uses a CODEOWNERS file (`.github/CODEOWNERS`) for automatic PR revie
 The project includes **7 automated workflows** for comprehensive CI/CD:
 
 ### 1. 🌿 Branch Creation (`create-branch-from-issue.yml`)
+
 **Triggers**: Issue comments containing `/branch`, Manual workflow dispatch
 
 **Process**:
+
 1. **Comment Detection**: Listens for `/branch` comments on issues
 2. **Type Parsing**: Extracts branch type from comment (defaults to `feat`)
 3. **Branch Generation**: Creates branch with pattern `<type>/<number>-<slug>`
@@ -264,28 +293,33 @@ The project includes **7 automated workflows** for comprehensive CI/CD:
 6. **Response**: Comments back with git checkout instructions
 
 **Manual Usage**:
+
 ```yaml
 workflow_dispatch:
   inputs:
     issue_number: "123"
-    type: "feat"  # feat|bug|chore|docs|refactor
+    type: "feat" # feat|bug|chore|docs|refactor
 ```
 
 **Error Handling**: If branch already exists, responds with existing branch checkout instructions.
 
 ### 2. 🔍 Branch Naming Validation (`branch-naming.yml`)
+
 **Triggers**: PR opened, synchronized, reopened, edited
 
 **Validation Rules**:
+
 - **Pattern**: `^(feat|bug|chore|docs|refactor)/[0-9]+-[a-z0-9._-]+$`
 - **Examples**: ✅ `feat/123-add-login`, ❌ `feature/add-login`, ❌ `123-fix`
 - **Protected Branch Exemption**: `main`, `next`, `develop` skip validation
 - **Failure Result**: PR CI fails with clear error message and expected pattern
 
 ### 3. 🎯 Semantic PR Validation (`semantic-pr.yml`)
+
 **Triggers**: PR target events (opened, edited, synchronized, reopened, ready_for_review)
 
 **Validation Rules**:
+
 - **Types**: feat, fix, perf, docs, refactor, test, build, ci, chore, release
 - **Subject Pattern**: `^[a-z].+` (must start lowercase)
 - **Ignore Labels**: `dependencies` (auto-generated PRs)
@@ -293,11 +327,13 @@ workflow_dispatch:
 - **Token**: Uses `SEMREL_PAT` for validation
 
 ### 4. 🏗️ Continuous Integration (`ci.yml`)
+
 **Triggers**: PRs, pushes to main/next/develop
 
 **Multi-Service Testing**:
 
 #### **JavaScript/TypeScript** (Apps: web, api)
+
 - **Node.js 20** with npm caching
 - **Matrix Strategy**: Tests both `apps/web` and `apps/api`
 - **Steps**: Type checking, linting, format checking, building
@@ -305,31 +341,37 @@ workflow_dispatch:
 - **Clerk Auth**: Uses `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` secret
 
 #### **Go** (Aggregator Service)
+
 - **Go 1.22** with golangci-lint
 - **Working Directory**: `services/aggregator`
 - **Steps**: Linting, vetting, race-condition testing
 - **Command**: `go test ./... -race -count=1`
 
-#### **Python** (Embedder Service)  
+#### **Python** (Embedder Service)
+
 - **Python 3.11** with requirements installation
-- **Working Directory**: `services/embedder` 
+- **Working Directory**: `services/embedder`
 - **Steps**: Ruff linting, MyPy type checking
 - **Resilient**: `pip install` allowed to fail (optional dependencies)
 
 ### 5. 🏷️ Label Synchronization (`labels.yml`)
+
 **Triggers**: Push to develop branch (when labels change), Manual dispatch
 
 **Process**:
+
 1. **File Monitoring**: Watches `.github/labels.yml` and workflow file
 2. **Sync Action**: Uses `crazy-max/ghaction-github-labeler@v5`
 3. **Permissions**: Requires `contents: read`, `issues: write`
 4. **Behavior**: `skip-delete: false` (removes labels not in config)
 
 ### 6. 🚀 Release Management (`release.yml`)
+
 **Purpose**: Automated semantic versioning and changelog generation
 **Details**: Implementation depends on semantic-release configuration
 
 ### 7. 🌐 Neon Database Previews (`neondb-preview.yml`)
+
 **Purpose**: Creates preview database branches for PR testing
 **Integration**: Connects with Neon's database branching for isolated testing
 
@@ -341,14 +383,14 @@ flowchart TD
     B --> C[Branch Creation Workflow]
     C --> D[Create PR]
     D --> E[Branch Naming Validation]
-    D --> F[Semantic PR Validation] 
+    D --> F[Semantic PR Validation]
     D --> G[CI Tests]
     E --> H[All Checks Pass]
     F --> H
     G --> H
     H --> I[Merge to Main]
     I --> J[Release Workflow]
-    
+
     K[Edit Labels] --> L[Label Sync Workflow]
     M[DB Changes] --> N[Neon Preview Workflow]
 ```
@@ -401,6 +443,7 @@ graph TD
 The project **strictly enforces** [Conventional Commits](https://www.conventionalcommits.org/) via commitlint:
 
 #### **Format Structure**
+
 ```
 <type>[optional scope]: <description>
 
@@ -410,46 +453,51 @@ The project **strictly enforces** [Conventional Commits](https://www.conventiona
 ```
 
 #### **Allowed Types**
-| Type | Purpose | Example |
-|------|---------|----------|
-| `feat` | New feature | `feat(api): add job aggregation endpoint` |
-| `fix` | Bug fix | `fix(web): resolve pagination crash on mobile` |
-| `docs` | Documentation only | `docs: update API deployment guide` |
-| `style` | Code style changes | `style(web): fix ESLint warnings in components` |
+
+| Type       | Purpose                         | Example                                           |
+| ---------- | ------------------------------- | ------------------------------------------------- |
+| `feat`     | New feature                     | `feat(api): add job aggregation endpoint`         |
+| `fix`      | Bug fix                         | `fix(web): resolve pagination crash on mobile`    |
+| `docs`     | Documentation only              | `docs: update API deployment guide`               |
+| `style`    | Code style changes              | `style(web): fix ESLint warnings in components`   |
 | `refactor` | Code change, no behavior change | `refactor(aggregator): extract job scoring logic` |
-| `perf` | Performance improvement | `perf(db): optimize vector similarity queries` |
-| `test` | Adding/updating tests | `test(api): add integration tests for GraphQL` |
-| `chore` | Maintenance, tooling, deps | `chore(deps): update Next.js to v15.4.5` |
-| `build` | Build system changes | `build: update Dockerfile for production` |
-| `ci` | CI configuration changes | `ci: add Neon database preview workflow` |
-| `revert` | Revert previous commit | `revert: "feat(api): add job aggregation"` |
+| `perf`     | Performance improvement         | `perf(db): optimize vector similarity queries`    |
+| `test`     | Adding/updating tests           | `test(api): add integration tests for GraphQL`    |
+| `chore`    | Maintenance, tooling, deps      | `chore(deps): update Next.js to v15.4.5`          |
+| `build`    | Build system changes            | `build: update Dockerfile for production`         |
+| `ci`       | CI configuration changes        | `ci: add Neon database preview workflow`          |
+| `revert`   | Revert previous commit          | `revert: "feat(api): add job aggregation"`        |
 
 #### **Optional Scopes**
-| Scope | Usage | Example |
-|-------|-------|----------|
-| `api` | GraphQL API changes | `feat(api): add bookmark mutations` |
-| `web` | Frontend/web app changes | `fix(web): resolve hydration error in SSR` |
-| `aggregator` | Go aggregator service | `perf(aggregator): optimize concurrent fetching` |
-| `embedder` | Python embedder service | `fix(embedder): handle empty text gracefully` |
-| `pipeline` | Kanban/pipeline features | `feat(pipeline): add drag-and-drop support` |
-| `ui` | UI/UX improvements | `style(ui): update button hover animations` |
-| `db` | Database schema/queries | `feat(db): add vector similarity index` |
-| *(none)* | Cross-cutting changes | `docs: update project README` |
+
+| Scope        | Usage                    | Example                                          |
+| ------------ | ------------------------ | ------------------------------------------------ |
+| `api`        | GraphQL API changes      | `feat(api): add bookmark mutations`              |
+| `web`        | Frontend/web app changes | `fix(web): resolve hydration error in SSR`       |
+| `aggregator` | Go aggregator service    | `perf(aggregator): optimize concurrent fetching` |
+| `embedder`   | Python embedder service  | `fix(embedder): handle empty text gracefully`    |
+| `pipeline`   | Kanban/pipeline features | `feat(pipeline): add drag-and-drop support`      |
+| `ui`         | UI/UX improvements       | `style(ui): update button hover animations`      |
+| `db`         | Database schema/queries  | `feat(db): add vector similarity index`          |
+| _(none)_     | Cross-cutting changes    | `docs: update project README`                    |
 
 #### **Validation Rules (Commitlint)**
 
 **Header (Title)**:
+
 - **Maximum length**: 90 characters (enforced)
 - **Format**: Must match `<type>[optional scope]: <description>`
 - **Description**: Imperative mood, lowercase start
 - **Breaking changes**: Use `!` after type/scope (e.g., `feat(api)!: remove legacy endpoints`)
 
 **Body** (Optional):
+
 - **Blank line required** after header
 - **Line length**: Maximum 90 characters per line
 - **Purpose**: Additional context, motivation, or explanation
 
 **Footer** (Optional):
+
 - **Blank line required** after body
 - **Line length**: Maximum 100 characters per line
 - **Usage**: Breaking changes, issue references
@@ -459,32 +507,36 @@ The project **strictly enforces** [Conventional Commits](https://www.conventiona
 #### **Examples**
 
 **Simple commit**:
+
 ```
 feat(pipeline): add drag-and-drop functionality to kanban board
 ```
 
 **With body**:
+
 ```
 fix(api): resolve job fetching pagination issue
 
-The GraphQL resolver was incorrectly calculating offset for 
+The GraphQL resolver was incorrectly calculating offset for
 large page numbers, causing duplicate results in job listings.
 ```
 
 **Breaking change**:
+
 ```
 feat(api)!: migrate to GraphQL subscriptions
 
-Replace REST endpoints with GraphQL subscriptions for real-time 
+Replace REST endpoints with GraphQL subscriptions for real-time
 job updates and pipeline changes.
 
-BREAKING CHANGE: REST endpoints /api/jobs and /api/pipeline 
+BREAKING CHANGE: REST endpoints /api/jobs and /api/pipeline
 are no longer available. Use GraphQL subscriptions instead.
 
 Closes #234
 ```
 
 **Commit with scope and references**:
+
 ```
 chore(deps): update Next.js to v15.4.5
 
@@ -525,6 +577,7 @@ console.log("[Filename] [functionName] varName:", value);
 ```
 
 Example:
+
 ```javascript
 console.log("[JobCard.tsx] [handleBookmark] jobId:", jobId);
 console.trace("[JobCard.tsx] [handleBookmark] error:", error);
@@ -677,22 +730,26 @@ npx prisma studio  # (in apps/api)
 ### ⚠️ Critical Workflow Rules
 
 **🚫 Never Skip Templates**
+
 - Always use issue templates - blank issues are disabled
 - Always fill required fields - validation will fail otherwise
 - Always follow title formats - automation depends on them
 
 **🎯 Branch Naming is Enforced**
+
 - Use `/branch` command - don't create branches manually
 - Pattern `<type>/<number>-<slug>` is strictly enforced
 - PR will fail CI if branch name doesn't match
 
-**📝 Commit Messages are Validated**  
+**📝 Commit Messages are Validated**
+
 - commitlint runs on every commit
 - Maximum 90 characters for header
 - Use conventional commit format exactly
 - Breaking changes must use `!` notation
 
 **🚀 PR Requirements**
+
 - Title must be semantic (validated by GitHub Action)
 - Must link to issue: `Closes #123`
 - All CI checks must pass
@@ -703,34 +760,42 @@ npx prisma studio  # (in apps/api)
 **⚠️ When an agent picks up ANY existing issue, you MUST follow this exact sequence:**
 
 #### Step 1: Comment `/branch` on the Issue
+
 ```markdown
 /branch
 ```
 
 **Or specify the type explicitly:**
+
 ```markdown
-/branch bug    # For bug fixes
-/branch feat   # For new features  
-/branch docs   # For documentation
-/branch chore  # For maintenance
+/branch bug # For bug fixes
+/branch feat # For new features  
+/branch docs # For documentation
+/branch chore # For maintenance
 /branch refactor # For code refactoring
 ```
 
 #### Step 2: Wait for Automated Response
+
 The GitHub Action will automatically:
+
 1. **Create a new branch** with the correct naming pattern
 2. **Comment back** with the branch name and checkout instructions
 
 **Example automated response:**
-```markdown
+
+````markdown
 Created branch `feat/123-add-user-login-functionality` off `main`.
 
 **Checkout:**
+
 ```bash
 git fetch origin feat/123-add-user-login-functionality
 git switch -c feat/123-add-user-login-functionality --track origin/feat/123-add-user-login-functionality
 ```
-```
+````
+
+````
 
 #### Step 3: Checkout the Created Branch
 **Use the EXACT git commands provided in the automated response:**
@@ -739,15 +804,17 @@ git switch -c feat/123-add-user-login-functionality --track origin/feat/123-add-
 # Example (use the actual branch name from the response)
 git fetch origin feat/123-add-user-login-functionality
 git switch -c feat/123-add-user-login-functionality --track origin/feat/123-add-user-login-functionality
-```
+````
 
 #### Step 4: Verify You're on the Correct Branch
+
 ```bash
 git branch --show-current
 # Should show: feat/123-add-user-login-functionality
 ```
 
 #### Step 5: Create Draft Pull Request
+
 **After checking out the branch, immediately create a draft PR:**
 
 ```bash
@@ -760,13 +827,16 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 ```
 
 **Draft PR Requirements:**
+
 - **Base branch**: `develop` (default integration branch)
 - **Title**: Follow conventional commit format with `[WIP]` prefix
 - **Body**: Link to issue with `Fixes #123` and checklist of pending work
 - **Draft status**: Must be marked as draft initially
 
 #### Step 6: Start Implementation
+
 **Only AFTER creating the draft PR:**
+
 - Read the issue requirements carefully
 - Plan your implementation approach
 - Make the necessary code changes
@@ -777,6 +847,7 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 ### 🚒 **CRITICAL: Never Skip the `/branch` Step**
 
 **❌ DO NOT:**
+
 - Create branches manually
 - Start work without commenting `/branch`
 - Use non-standard branch names
@@ -784,6 +855,7 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 - Assume a branch already exists
 
 **✅ ALWAYS:**
+
 - Comment `/branch` first
 - Wait for the automated response
 - Use the exact checkout commands provided
@@ -793,9 +865,11 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 ### 🤖 **Agent Tool Usage Guidelines**
 
 #### GitHub MCP Integration
+
 **Agents can and should use GitHub MCP tools for GitHub-related tasks:**
 
 **✅ Use GitHub MCP for:**
+
 - Creating issues with proper templates
 - Commenting `/branch` on issues
 - Creating draft pull requests
@@ -805,6 +879,7 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 - Reviewing PR files and changes
 
 **GitHub MCP Commands Examples:**
+
 ```bash
 # Create issue with template
 call_mcp_tool create_issue
@@ -824,6 +899,7 @@ call_mcp_tool get_pull_request
 **🚨 AGENTS MUST NEVER MERGE PRs/MRs**
 
 **❌ ABSOLUTELY FORBIDDEN:**
+
 - Merging pull requests (even your own)
 - Approving pull requests without user review
 - Using merge tools or commands
@@ -831,6 +907,7 @@ call_mcp_tool get_pull_request
 - Auto-merging any changes
 
 **✅ REQUIRED PROCESS:**
+
 1. **Create and complete** your implementation
 2. **Mark PR as ready** for review (remove draft status)
 3. **Request user review** explicitly
@@ -838,6 +915,7 @@ call_mcp_tool get_pull_request
 5. **Let the user merge** after they review and approve
 
 **Why this is critical:**
+
 - 👥 **Human oversight**: All code changes need human review
 - 🔒 **Quality control**: Users validate implementation meets requirements
 - 🛡️ **Risk prevention**: Prevents automated merging of potentially problematic code
@@ -848,28 +926,33 @@ call_mcp_tool get_pull_request
 **After checking out your branch, IMMEDIATELY create a draft PR:**
 
 #### Using GitHub CLI (Recommended)
+
 ```bash
 gh pr create --draft --base develop --title "[WIP] feat: add user login functionality" --body "Fixes #123\n\n## Implementation Progress\n- [ ] Core functionality\n- [ ] Tests added\n- [ ] Documentation updated\n- [ ] Ready for review"
 ```
 
 #### Using GitHub Web Interface
+
 1. **Navigate to**: `https://github.com/SanchitB23/remote-job-radar/compare/develop...your-branch-name`
 2. **Click**: "Create pull request"
 3. **Select**: "Create draft pull request" (dropdown arrow next to the button)
 4. **Set base**: `develop` branch
 5. **Title format**: `[WIP] <type>: <description>`
 6. **Body requirements**:
+
    ```markdown
    Fixes #123
-   
+
    ## Implementation Progress
+
    - [ ] Core functionality
-   - [ ] Tests added  
+   - [ ] Tests added
    - [ ] Documentation updated
    - [ ] Ready for review
    ```
 
 #### Draft PR Benefits
+
 - 👁️ **Early visibility**: Team can see work in progress
 - 💬 **Early feedback**: Get input before implementation is complete
 - 🔄 **CI integration**: Tests run on every push
@@ -877,13 +960,16 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 - 🔗 **Issue linkage**: Automatic connection to the original issue
 
 #### Converting from Draft to Ready
+
 **When your implementation is complete:**
+
 1. **Update the PR body** - check off completed items
 2. **Remove `[WIP]` from title**
 3. **Click "Ready for review"** button
 4. **Add reviewers** (if not auto-assigned via CODEOWNERS)
 
 **Why this matters:**
+
 - 🎯 **Enforced naming**: Automation ensures correct branch patterns
 - 🔄 **Workflow integration**: All subsequent automation depends on proper branch names
 - 🛡️ **Conflict prevention**: Avoids naming collisions and workflow failures
@@ -895,6 +981,7 @@ gh pr create --draft --base develop --title "[WIP] feat: add user login function
 The project is **heavily automated**. Work **with** the automation, not against it:
 
 **✅ Good Practices**:
+
 - **ALWAYS comment `/branch` first** when picking up any issue
 - **Wait for automated branch creation** before starting work
 - **Use exact checkout commands** provided by the automation
@@ -913,6 +1000,7 @@ The project is **heavily automated**. Work **with** the automation, not against 
 - **Convert draft to ready** only when implementation is complete AND CI passes
 
 **❌ Bad Practices**:
+
 - Starting work without commenting `/branch` first
 - Creating branches manually with non-standard names
 - Ignoring automated responses and checkout instructions
@@ -932,6 +1020,7 @@ The project is **heavily automated**. Work **with** the automation, not against 
 **🚨 CRITICAL WORKFLOW RULE: Never request review until ALL CI checks pass!**
 
 #### CI Check Requirements
+
 **Before marking PR ready for review, you MUST ensure:**
 
 1. **✅ All CI jobs pass** - No red X marks on the PR
@@ -942,32 +1031,35 @@ The project is **heavily automated**. Work **with** the automation, not against 
 6. **✅ Tests pass** - Unit tests and integration tests run successfully
 
 #### CI Failure Response Process
+
 **If ANY CI check fails:**
 
 1. **🔍 Examine the CI logs** to identify the specific failure
 2. **🔧 Fix the issues locally** (formatting, linting, type errors, etc.)
 3. **🧪 Test fixes locally** before pushing:
+
    ```bash
    # For formatting issues
    npm run format --workspace apps/web
    npm run format --workspace apps/api
-   
-   # For linting issues  
+
+   # For linting issues
    npm run lint --workspace apps/web
    npm run lint --workspace apps/api
-   
+
    # For type checking
    npm run typecheck --workspace apps/web
    npm run typecheck --workspace apps/api
-   
+
    # For Go issues
    cd services/aggregator && golangci-lint run
    cd services/aggregator && go vet ./...
-   
+
    # For Python issues
    cd services/embedder && ruff check .
    cd services/embedder && mypy .
    ```
+
 4. **📝 Commit fixes** with conventional commit messages
 5. **🚀 Push changes** and wait for CI to re-run
 6. **🔁 Repeat until all checks pass**
@@ -975,26 +1067,31 @@ The project is **heavily automated**. Work **with** the automation, not against 
 #### Common CI Failures and Fixes
 
 **❌ Prettier/Formatting Failures:**
+
 - **Cause**: Code not formatted according to project standards
 - **Fix**: Run `npm run format` in affected workspace
 - **Prevention**: Set up IDE auto-formatting on save
 
 **❌ ESLint/Linting Failures:**
+
 - **Cause**: Code style violations or potential issues
 - **Fix**: Run `npm run lint` and address reported issues
 - **Auto-fix**: Many issues can be fixed with `npm run lint -- --fix`
 
 **❌ TypeScript Compilation Failures:**
+
 - **Cause**: Type errors, missing types, or incorrect imports
 - **Fix**: Run `npm run typecheck` and resolve type issues
 - **Common**: Import paths, missing return types, incorrect prop types
 
 **❌ Go Linting Failures:**
+
 - **Cause**: Go code style violations or potential bugs
 - **Fix**: Run `golangci-lint run` in `services/aggregator/`
 - **Common**: Unused variables, inefficient code, formatting
 
 **❌ Python Linting Failures:**
+
 - **Cause**: Python code style violations
 - **Fix**: Run `ruff check .` and `mypy .` in `services/embedder/`
 - **Common**: Import sorting, unused imports, type annotations
@@ -1002,21 +1099,25 @@ The project is **heavily automated**. Work **with** the automation, not against 
 #### Why CI Validation is Mandatory
 
 **🎯 Quality Assurance:**
+
 - Ensures consistent code quality across the entire codebase
 - Prevents introduction of formatting inconsistencies
 - Catches type errors and potential bugs early
 
 **⚡ Review Efficiency:**
+
 - Reviewers can focus on logic and implementation rather than style
 - Reduces back-and-forth on formatting and linting issues
 - Speeds up the overall review and merge process
 
 **🔧 Continuous Integration:**
+
 - Maintains the integrity of the CI pipeline
 - Prevents CI failures from accumulating
 - Ensures the main/develop branches stay stable
 
 **📋 Professional Standards:**
+
 - Demonstrates attention to detail and code quality
 - Maintains professional development practices
 - Sets a good example for collaborative development
@@ -1024,21 +1125,25 @@ The project is **heavily automated**. Work **with** the automation, not against 
 ### 🛠️ Developer Tools Integration
 
 **commitlint**: Enforces commit message format
+
 - Runs on every commit
 - Fails build if format is wrong
 - Configured in `commitlint.config.cjs`
 
 **ESLint + Prettier**: Code quality and formatting
+
 - Runs in CI for all TypeScript/JavaScript
 - Must pass for PR to be mergeable
 - Auto-fixes available in most IDEs
 
 **golangci-lint**: Go code quality
+
 - Comprehensive linting for aggregator service
 - Includes race condition detection
 - Must pass for PR to be mergeable
 
 **Ruff + MyPy**: Python code quality
+
 - Modern Python linting and type checking
 - Runs on embedder service
 - Resilient to missing optional dependencies
@@ -1046,6 +1151,7 @@ The project is **heavily automated**. Work **with** the automation, not against 
 ## 📚 Reference Documentation
 
 ### Project Documentation
+
 - **🏠 Main README**: `/README.md` - Complete setup and overview
 - **🌐 Web App README**: `/apps/web/README.md` - Frontend specifics
 - **🚀 Environment Setup**: `/ENVIRONMENT_SETUP.md` - Detailed setup guide
@@ -1053,6 +1159,7 @@ The project is **heavily automated**. Work **with** the automation, not against 
 - **📝 Git Commit Guide**: `/.github/git-commit-instructions.md` - Commit message help
 
 ### Template References
+
 - **Issue Templates**: `.github/ISSUE_TEMPLATE/` - All 6 structured templates
 - **PR Template**: `.github/pull_request_template.md` - Pull request format
 - **Workflow Files**: `.github/workflows/` - All automation definitions
@@ -1060,6 +1167,7 @@ The project is **heavily automated**. Work **with** the automation, not against 
 - **CODEOWNERS**: `.github/CODEOWNERS` - Automatic review assignments
 
 ### External Resources
+
 - **[Conventional Commits](https://www.conventionalcommits.org/)** - Commit message standard
 - **[Semantic Versioning](https://semver.org/)** - Version numbering scheme
 - **[GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow)** - Branch and PR workflow
@@ -1067,20 +1175,23 @@ The project is **heavily automated**. Work **with** the automation, not against 
 ## ❓ Need Help?
 
 ### For Questions
+
 1. **Check existing documentation** first (this guide, READMEs)
 2. **Search existing issues** for similar questions
 3. **Create a question issue** using the `question.yml` template
 4. **Use GitHub Discussions** for general project discussion
 
 ### For Bugs
+
 1. **Reproduce the issue** on the latest main branch
 2. **Search existing bugs** to avoid duplicates
 3. **Use bug report template** with all required information
 4. **Include logs/screenshots** for faster resolution
 
 ### For Feature Requests
+
 1. **Check if feature exists** in current codebase
-2. **Search existing features** to avoid duplicates  
+2. **Search existing features** to avoid duplicates
 3. **Use feature request template** with user story format
 4. **Include success metrics** for measuring impact
 

@@ -7,7 +7,7 @@ This guide will help you set up all the necessary environment variables for the 
 Before setting up environment variables, make sure you have:
 
 1. **Node.js 18+** and npm installed
-2. **Docker** and Docker Compose installed  
+2. **Docker** and Docker Compose installed
 3. **Go 1.24.5+** installed
 4. **Python 3.8+** installed
 5. A **Clerk account** for authentication
@@ -23,7 +23,7 @@ cp .env.example .env.local
 # Web app
 cp apps/web/.env.example apps/web/.env.local
 
-# API server  
+# API server
 cp apps/api/.env.example apps/api/.env.local
 
 # Aggregator service
@@ -92,29 +92,29 @@ npm run dev:all
 
 These variables **must** be set for the application to work:
 
-| Variable | Service | Description | Example |
-|----------|---------|-------------|---------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Web | Clerk public key | `pk_test_abc123...` |
-| `CLERK_SECRET_KEY` | Web/API | Clerk secret key | `sk_test_def456...` |
-| `CLERK_JWT_KID` | Web/API | JWT template ID | `ins_2abc123def456` |
-| `CLERK_JWT_ISSUER` | Web/API | Your Clerk instance URL | `https://your-app.clerk.accounts.dev` |
-| `DATABASE_URL` | API | PostgreSQL connection | `postgresql://postgres:local@localhost:5432/postgres` |
-| `DB_DSN` | Aggregator | PostgreSQL connection | `host=localhost user=postgres password=local dbname=postgres sslmode=disable` |
-| `EMBEDDER_URL` | Aggregator | ML service URL | `http://localhost:8000` |
-| `SKILLS_FILE` | Aggregator | Skills config path | `skills.yml` |
-| `CORS_ORIGIN` | API | Allowed origins | `http://localhost:3000` |
+| Variable                            | Service    | Description             | Example                                                                       |
+| ----------------------------------- | ---------- | ----------------------- | ----------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Web        | Clerk public key        | `pk_test_abc123...`                                                           |
+| `CLERK_SECRET_KEY`                  | Web/API    | Clerk secret key        | `sk_test_def456...`                                                           |
+| `CLERK_JWT_KID`                     | Web/API    | JWT template ID         | `ins_2abc123def456`                                                           |
+| `CLERK_JWT_ISSUER`                  | Web/API    | Your Clerk instance URL | `https://your-app.clerk.accounts.dev`                                         |
+| `DATABASE_URL`                      | API        | PostgreSQL connection   | `postgresql://postgres:local@localhost:5432/postgres`                         |
+| `DB_DSN`                            | Aggregator | PostgreSQL connection   | `host=localhost user=postgres password=local dbname=postgres sslmode=disable` |
+| `EMBEDDER_URL`                      | Aggregator | ML service URL          | `http://localhost:8000`                                                       |
+| `SKILLS_FILE`                       | Aggregator | Skills config path      | `skills.yml`                                                                  |
+| `CORS_ORIGIN`                       | API        | Allowed origins         | `http://localhost:3000`                                                       |
 
 ### Optional Environment Variables
 
 These variables have sensible defaults but can be customized:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 3000/4000/8080/8000 | Service ports |
-| `FETCH_INTERVAL` | `2h` | Job fetch frequency |
-| `SCORE_INTERVAL` | `4h` | Job scoring frequency |
-| `FETCH_TIMEOUT` | `30s` | Fetch operation timeout |
-| `LOG_LEVEL` | `info` | Logging verbosity |
+| Variable         | Default             | Description             |
+| ---------------- | ------------------- | ----------------------- |
+| `PORT`           | 3000/4000/8080/8000 | Service ports           |
+| `FETCH_INTERVAL` | `2h`                | Job fetch frequency     |
+| `SCORE_INTERVAL` | `4h`                | Job scoring frequency   |
+| `FETCH_TIMEOUT`  | `30s`               | Fetch operation timeout |
+| `LOG_LEVEL`      | `info`              | Logging verbosity       |
 
 ## 🌍 Environment-Specific Setup
 
@@ -151,21 +151,23 @@ For production deployment:
 
 These variables are required for production security:
 
-| Variable | Service | Description | Example |
-|----------|---------|-------------|----------|
-| `CRON_SECRET` | Web | Secret for Vercel cron job authentication | `your_secure_cron_secret_123` |
-| `MANUAL_FETCH_TOKEN_CRON` | Web | Token for manual fetch endpoint access | `your_secure_manual_token_456` |
+| Variable                  | Service | Description                               | Example                        |
+| ------------------------- | ------- | ----------------------------------------- | ------------------------------ |
+| `CRON_SECRET`             | Web     | Secret for Vercel cron job authentication | `your_secure_cron_secret_123`  |
+| `MANUAL_FETCH_TOKEN_CRON` | Web     | Token for manual fetch endpoint access    | `your_secure_manual_token_456` |
 
 **Important**: Generate cryptographically secure random strings for these values in production.
 
 ## 🔒 Security Considerations
 
 ### Development
+
 - ✅ Use `.env.local` files (already in `.gitignore`)
 - ✅ Never commit real secrets to git
 - ✅ Use different keys for each environment
 
 ### Production
+
 - ✅ Use environment variables or secrets management
 - ✅ Enable HTTPS for all services
 - ✅ Restrict CORS origins
