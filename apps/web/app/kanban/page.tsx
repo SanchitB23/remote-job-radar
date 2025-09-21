@@ -1,8 +1,10 @@
 "use client";
+
 import type { JSX } from "react";
 import { useMemo } from "react";
-import toast from "react-hot-toast";
+
 import { ExclamationTriangleIcon, PlusIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

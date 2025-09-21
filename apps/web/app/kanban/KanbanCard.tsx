@@ -1,17 +1,18 @@
-import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
-import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  BuildingOfficeIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  StarIcon,
-  CalendarIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/24/outline";
-import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
 import type { JSX } from "react";
 import React from "react";
+
+import { CSS } from "@dnd-kit/utilities";
+import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
+import { defaultAnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
+import {
+  ArrowTopRightOnSquareIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  CurrencyDollarIcon,
+  MapPinIcon,
+  StarIcon,
+} from "@heroicons/react/24/outline";
+import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

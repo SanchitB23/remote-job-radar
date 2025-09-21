@@ -12,7 +12,7 @@ This update modernizes the Kanban board UI with enhanced drag-and-drop functiona
 **New:** 4 optimized stages covering job application lifecycle:
 
 - Interested - Jobs user wants to apply for
-- Applied - Applications submitted  
+- Applied - Applications submitted
 - Interviewing - All interview stages combined
 - Closed - Final outcomes (offers, rejections, etc.)
 
