@@ -1,7 +1,6 @@
-import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
-import { AvatarMenu } from "./account/AvatarMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Header() {
@@ -42,7 +41,7 @@ export function Header() {
             <SignUpButton />
           </SignedOut>
           <SignedIn>
-            <AvatarMenu />
+            <UserButton userProfileMode="navigation" userProfileUrl="/user-profile" />
           </SignedIn>
         </div>
       </div>

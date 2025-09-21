@@ -1,9 +1,11 @@
 "use client";
 
 import type { InfiniteData } from "@tanstack/react-query";
+import { Info, UserPlus, X } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { JSX } from "react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useInfiniteJobs, useUserSkills } from "@/lib/hooks";
@@ -42,6 +44,22 @@ export function JobsPageClient(): JSX.Element {
     isLoading: isLoadingUserSkills,
     isError: isErrorUserSkills,
   } = useUserSkills();
+
+  // Helper text dismissible functionality
+  const [isHelperDismissed, setIsHelperDismissed] = useState(false);
+
+  // Load dismissed state from localStorage on mount
+  useEffect(() => {
+    const dismissed = localStorage.getItem("skills-helper-dismissed");
+    if (dismissed === "true") {
+      setIsHelperDismissed(true);
+    }
+  }, []);
+
+  const dismissHelper = useCallback(() => {
+    setIsHelperDismissed(true);
+    localStorage.setItem("skills-helper-dismissed", "true");
+  }, []);
 
   // Flatten all jobs from all pages
   const jobs: Job[] =
@@ -122,6 +140,55 @@ export function JobsPageClient(): JSX.Element {
             {hasNextPage && " (loading more as you scroll)"}
           </span>
         )}
+        {/* Prompt to add skills if none are found */}
+        {!isLoadingUserSkills &&
+          !isErrorUserSkills &&
+          !isHelperDismissed &&
+          (!userSkills?.skills || userSkills.skills.length === 0) && (
+            <div className="group relative flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 dark:from-blue-950/80 dark:via-indigo-950/60 dark:to-purple-950/80 rounded-xl border border-blue-200/60 dark:border-blue-800/60 shadow-sm hover:shadow-md transition-all duration-300 animate-in fade-in-0 slide-in-from-top-2">
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-400/5 dark:via-indigo-400/5 dark:to-purple-400/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              {/* Icon with pulse animation */}
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse" />
+                <Info className="relative w-5 h-5 text-blue-600 dark:text-blue-400 animate-in zoom-in-0 duration-300" />
+              </div>
+
+              {/* Enhanced text with gradient */}
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-700 dark:from-blue-300 dark:via-indigo-300 dark:to-purple-300 bg-clip-text text-transparent leading-relaxed">
+                  ✨ Add your skills to unlock personalized job recommendations and better matches
+                </span>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  asChild
+                  variant="default"
+                  size="sm"
+                  className="relative h-8 px-4 text-xs font-medium bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white border-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Link href="/user-profile/personalization">
+                    <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+                    Add Skills
+                  </Link>
+                </Button>
+
+                {/* Dismiss button */}
+                <Button
+                  onClick={dismissHelper}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors duration-200"
+                  aria-label="Dismiss helper"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
       </div>
       <ul className="space-y-2">
         {jobs.map((j: Job) => (
