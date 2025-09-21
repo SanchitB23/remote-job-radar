@@ -164,6 +164,13 @@ func minInt(a, b int) int {
 }
 
 func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
+	// Bail fast if the request was already canceled
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
 	// Ensure embedder is warmed up before proceeding
 	if err := e.ensureEmbedderWarmedUp(ctx); err != nil {
 		logger.Warn("[EMBEDDER_WARMUP] Warmup process encountered an issue, proceeding anyway",
@@ -177,17 +184,18 @@ func (e *Embedder) Embed(ctx context.Context, text string) ([]float32, error) {
 	}
 
 	// Generate hash and preview for cross-service logging synchronization
-	hash := sha256.Sum256([]byte(processedText))
-	textHash := hex.EncodeToString(hash[:])
-	textPreview := strings.ReplaceAll(strings.ReplaceAll(processedText[:minInt(100, len(processedText))], "\n", " "), "\r", "")
+	sum := sha256.Sum256([]byte(processedText))
+	textHash := hex.EncodeToString(sum[:])
+	preview := processedText[:minInt(100, len(processedText))]
+	preview = strings.NewReplacer("\n", " ", "\r", " ").Replace(preview)
 
-	// Log at debug level to reduce production log volume
-	logger.Info("[EMBED_REQUEST] Starting embedding request",
-		zap.Int("originalLength", len(text)),
-		zap.Int("processedLength", len(processedText)),
+	logger.Info("[EMBED_REQUEST]",
+		zap.Int("origLen", len(text)),
+		zap.Int("procLen", len(processedText)),
 		zap.Bool("wasHTML", wasHTML),
 		zap.String("sha256", textHash),
-		zap.String("preview", textPreview+"..."))
+		zap.String("preview", preview+"..."),
+	)
 
 	return e.performEmbedding(ctx, processedText, textHash)
 }

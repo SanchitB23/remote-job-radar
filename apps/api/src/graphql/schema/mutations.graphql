@@ -61,5 +61,5 @@ type Mutation {
     A non-empty list of skill names to set for the user.
     """
     skills: [String!]!
-  ): Boolean!
+  ): SetSkillsResponse!
 }
