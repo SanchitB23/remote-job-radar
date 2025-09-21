@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/config"
 	"github.com/sanchitb23/remote-job-radar/aggregator/internal/logger"
@@ -16,16 +17,18 @@ import (
 )
 
 type Handlers struct {
-	store      *storage.Store
-	jobService *services.JobService
-	config     *config.Config
+	store         *storage.Store
+	jobService    *services.JobService
+	skillsService *services.SkillsService
+	config        *config.Config
 }
 
-func NewHandlers(store *storage.Store, jobService *services.JobService, cfg *config.Config) *Handlers {
+func NewHandlers(store *storage.Store, jobService *services.JobService, skillsService *services.SkillsService, cfg *config.Config) *Handlers {
 	return &Handlers{
-		store:      store,
-		jobService: jobService,
-		config:     cfg,
+		store:         store,
+		jobService:    jobService,
+		skillsService: skillsService,
+		config:        cfg,
 	}
 }
 
@@ -197,4 +200,49 @@ func (h *Handlers) TriggerClean(w http.ResponseWriter, r *http.Request) {
 		"ok":      true,
 		"message": "clean triggered",
 	})
+}
+
+func (h *Handlers) TriggerEmbedPendingSkills(w http.ResponseWriter, r *http.Request) {
+	logger.Info("Embed pending skills triggered", zap.String("remote_addr", r.RemoteAddr))
+
+	// Accept either ?token=... or ?cron_secret=... for authorization
+	token := r.URL.Query().Get("token")
+	cronSecret := r.Header.Get("X-Cron-Secret")
+
+	validToken := token != "" && token == h.config.ManualJobFetchToken
+	validCronSecret := cronSecret != "" && h.config.CronSecret != "" && cronSecret == h.config.CronSecret
+
+	if !validToken && !validCronSecret {
+		logger.Warn("Missing or invalid token or X-Cron-Secret header", zap.String("remote_addr", r.RemoteAddr))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"ok":      false,
+			"error":   "Missing or invalid token or X-Cron-Secret header",
+			"message": "Authorization required",
+		})
+		return
+	}
+
+	limit := 25
+	if s := r.URL.Query().Get("limit"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil && n > 0 && n <= 200 {
+			limit = n
+		}
+	}
+
+	// Short overall request budget; worker will use independent contexts per item.
+	ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
+	defer cancel()
+
+	summary, err := h.skillsService.ProcessPendingEmbeds(ctx, limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"ok": true, "processed": summary.Processed, "succeeded": summary.Succeeded,
+		"failed": summary.Failed, "requeued": summary.Requeued, "nextDueMs": summary.NextDueMs,
+	})
+
 }

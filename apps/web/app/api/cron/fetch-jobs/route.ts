@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Optionally, use an env var for a secret to protect the cron endpoint
-const CRON_SECRET = process.env.CRON_SECRET;
-const AGGREGATOR_URL = process.env.CRON_SERVER_BASE_URL || "http://localhost:8080";
+import { AGGREGATOR_URL, CRON_SECRET } from "@/constants";
 
 export async function POST(request: Request): Promise<ReturnType<typeof NextResponse.json>> {
   const { headers } = request;

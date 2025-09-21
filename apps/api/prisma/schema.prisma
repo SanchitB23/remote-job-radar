@@ -3,6 +3,13 @@ datasource db {
   url      = env("PG_DATABASE_URL") // point to the same DB as aggregator
 }
 
+enum UserProfileEmbedJobStatus {
+  pending
+  processing
+  done
+  failed
+}
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -28,12 +35,12 @@ model job {
 }
 
 model bookmark {
-  id                  String        @id @default(uuid())
-  job_id              String
-  user_id             String
+  id      String @id @default(uuid())
+  job_id  String
+  user_id String
 
-  job                 job           @relation(fields: [job_id], references: [id])
-  user                user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  job  job           @relation(fields: [job_id], references: [id])
+  user user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, job_id])
   @@index([user_id])
@@ -49,8 +56,8 @@ model PipelineItem {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  job                 job           @relation(fields: [job_id], references: [id])
-  user                user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  job  job           @relation(fields: [job_id], references: [id])
+  user user_profile? @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, job_id])
   @@index([user_id, column, position])
@@ -68,4 +75,19 @@ model user_profile {
   pipeline_items PipelineItem[]
 
   @@map("user_profiles")
+}
+
+model user_profile_embed_jobs {
+  id          String                    @id @default(uuid())
+  user_id     String                    @unique
+  skills      String[] // snapshot when enqueued
+  status      UserProfileEmbedJobStatus @default(pending)
+  attempts    Int                       @default(0)
+  last_error  String?
+  next_run_at DateTime                  @default(now())
+  created_at  DateTime                  @default(now())
+  updated_at  DateTime                  @updatedAt
+
+  @@index([status, next_run_at])
+  @@map("user_profile_embed_jobs")
 }

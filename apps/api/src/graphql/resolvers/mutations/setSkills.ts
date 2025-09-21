@@ -1,52 +1,71 @@
 import { GraphQLError } from "graphql";
+import { uniqueClean, withTimeout } from "utils/index.js";
 
-import type { AuthenticatedGraphQLContext } from "@/types/resolvers";
+import type { AuthenticatedGraphQLContext, SetUserSkillsResponse } from "@/types/resolvers";
 
 import { MAX_SKILLS_LEN } from "../../../constants/index.js";
 import { embedText } from "../../../lib/embedder.js";
+
+const QUICK_EMBED_TIMEOUT_MS = 5000;
 
 export const setSkills = async (
   _: unknown,
   { skills }: { skills: string[] },
   ctx: AuthenticatedGraphQLContext,
-): Promise<boolean> => {
+): Promise<SetUserSkillsResponse> => {
   try {
     if (!ctx.userId) throw new GraphQLError("UNAUTHENTICATED");
     console.log(`[setSkills] userId: ${ctx.userId}, skills:`, skills);
-    const cleaned = (skills || [])
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, MAX_SKILLS_LEN);
+    const cleaned = uniqueClean(skills, MAX_SKILLS_LEN);
 
-    const text = cleaned.join(" ");
-    let vec;
+    // 1) Persist skills via Prisma (no raw SQL)
     try {
-      vec = await embedText(text); // 384-d from FastEmbed
-      console.log(`[setSkills] Embedded vector length: ${vec?.length}`);
+      await ctx.prisma.user_profile.upsert({
+        where: { user_id: ctx.userId },
+        create: { user_id: ctx.userId, skills: cleaned },
+        update: { skills: cleaned, updated_at: new Date() },
+      });
+    } catch (err) {
+      console.error("[setSkills] upsert skills failed:", err);
+      throw new GraphQLError("Failed to save skills");
+    }
+
+    try {
+      const text = cleaned.join(" ");
+      const vec = await withTimeout(embedText(text), QUICK_EMBED_TIMEOUT_MS);
+      // vector write needs cast -> use parameterized $executeRaw (safe)
+      await ctx.prisma.$executeRaw`
+      UPDATE "user_profiles"
+      SET "skill_vector" = ${vec}::float8[]::vector,
+          "updated_at"   = now()
+      WHERE "user_id" = ${ctx.userId}
+    `;
+
+      // best-effort cleanup any stale queue row
+      await ctx.prisma.user_profile_embed_jobs.deleteMany({ where: { user_id: ctx.userId } });
+
+      return { ok: true, embedding: "UPDATED" };
     } catch (embedErr) {
-      console.error(`[setSkills] Error embedding skills:`, embedErr);
-      throw new GraphQLError("Failed to embed skills");
-    }
+      console.error(`[setSkills] Error embedding skills:`, embedErr, "Queued for next run");
+      // 3) Enqueue for aggregator to process
+      await ctx.prisma.user_profile_embed_jobs.upsert({
+        where: { user_id: ctx.userId },
+        create: {
+          user_id: ctx.userId,
+          skills: cleaned,
+          status: "pending",
+          attempts: 0,
+          next_run_at: new Date(),
+        },
+        update: {
+          skills: cleaned,
+          status: "pending",
+          next_run_at: new Date(),
+        },
+      });
 
-    try {
-      // Pass the vector as a parameter to avoid SQL injection
-      await ctx.prisma.$executeRawUnsafe(
-        `INSERT INTO "user_profiles" ("user_id","skills","skill_vector")
-             VALUES ($1,$2,$3::vector)
-             ON CONFLICT ("user_id")
-             DO UPDATE SET "skills"=EXCLUDED."skills",
-                           "skill_vector"=EXCLUDED."skill_vector",
-                           "updated_at"=now()`,
-        ctx.userId,
-        cleaned,
-        vec, // Pass the array directly; pgvector will accept array input
-      );
-      console.log(`[setSkills] Successfully upserted user profile for userId: ${ctx.userId}`);
-    } catch (dbErr) {
-      console.error(`[setSkills] DB error:`, dbErr);
-      throw new GraphQLError("Failed to update user profile");
+      return { ok: true, embedding: "QUEUED" };
     }
-    return true;
   } catch (err) {
     console.error(`[setSkills] Error:`, err);
     throw err;
