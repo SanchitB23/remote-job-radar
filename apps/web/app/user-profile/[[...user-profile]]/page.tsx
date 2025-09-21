@@ -5,7 +5,7 @@ import { Settings } from "lucide-react";
 import type { JSX } from "react";
 
 // Custom panels
-import { PersonalizationPanel } from "@/components/ui/PersonalizationPanel";
+import { PersonalizationPanel } from "./PersonalizationPanel";
 
 /**
  * Full-screen User Profile page with 1:3 layout split
