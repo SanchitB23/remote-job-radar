@@ -32,6 +32,7 @@ function JobsError({ error }: { error: unknown }): JSX.Element {
 export function JobsPageClient(): JSX.Element {
   const searchParams = useSearchParams();
   const params = parseUrlJobParams(searchParams);
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   // Remove 'after' param before passing to useInfiniteJobs - using underscore prefix to indicate intentionally unused
   const { after: _after, ...infiniteParams } = params;
@@ -64,6 +65,15 @@ export function JobsPageClient(): JSX.Element {
   // Flatten all jobs from all pages
   const jobs: Job[] =
     (data as InfiniteData<JobsConnection> | undefined)?.pages.flatMap((page) => page.edges) || [];
+
+  // Handlers for centralized expanded job state management
+  const handleJobExpand = useCallback((job: Job) => {
+    setExpandedJobId(job.id);
+  }, []);
+
+  const handleJobCollapse = useCallback(() => {
+    setExpandedJobId(null);
+  }, []);
 
   // Smart loading state: show skeletons for filter changes, not pagination
   const isFilterLoading = isFetching && !isFetchingNextPage && !isLoading;
@@ -122,11 +132,11 @@ export function JobsPageClient(): JSX.Element {
   if (isLoading || isFilterLoading) {
     // Show skeleton cards for initial load or filter changes
     return (
-      <ul className="space-y-2">
+      <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <JobCardSkeleton key={i} />
         ))}
-      </ul>
+      </div>
     );
   }
 
@@ -190,22 +200,26 @@ export function JobsPageClient(): JSX.Element {
             </div>
           )}
       </div>
-      <ul className="space-y-2">
+      <div className="space-y-0">
         {jobs.map((j: Job) => (
-          <li key={j.id}>
-            <JobCard job={j} />
-          </li>
+          <JobCard
+            key={j.id}
+            job={j}
+            isExpanded={expandedJobId === j.id}
+            onExpand={handleJobExpand}
+            onCollapse={handleJobCollapse}
+          />
         ))}
-      </ul>
+      </div>
 
       {/* Loading indicator for next page */}
       {isFetchingNextPage && (
         <div className="mt-4">
-          <ul className="space-y-2">
+          <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <JobCardSkeleton key={`loading-${i}`} />
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
