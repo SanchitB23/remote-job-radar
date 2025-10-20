@@ -2,6 +2,7 @@
 
 - feat: major feature updates including skill embedding, cron scheduler, and UI improvements ([76d4017](https://github.com/SanchitB23/remote-job-radar/commit/76d4017)), closes [#114](https://github.com/SanchitB23/remote-job-radar/issues/114)
 - release: next (#114) ([104daa0](https://github.com/SanchitB23/remote-job-radar/commit/104daa0)), closes [#114](https://github.com/SanchitB23/remote-job-radar/issues/114) [#86](https://github.com/SanchitB23/remote-job-radar/issues/86) [#109](https://github.com/SanchitB23/remote-job-radar/issues/109) [#111](https://github.com/SanchitB23/remote-job-radar/issues/111) [#119](https://github.com/SanchitB23/remote-job-radar/issues/119) [#120](https://github.com/SanchitB23/remote-job-radar/issues/120) [#122](https://github.com/SanchitB23/remote-job-radar/issues/122) [#121](https://github.com/SanchitB23/remote-job-radar/issues/121) [#121](https://github.com/SanchitB23/remote-job-radar/issues/121) [#123](https://github.com/SanchitB23/remote-job-radar/issues/123) [#118](https://github.com/SanchitB23/remote-job-radar/issues/118) [#115](https://github.com/SanchitB23/remote-job-radar/issues/115)
+
 ## <small>2.2.2 (2025-08-30)</small>
 
 - Chore/93 chore semantic pr workflow issue (#96) ([baadd6f](https://github.com/SanchitB23/remote-job-radar/commit/baadd6f)), closes [#96](https://github.com/SanchitB23/remote-job-radar/issues/96)
