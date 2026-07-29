@@ -64,8 +64,32 @@ export function subscribeToNewJobs({
 export async function getWSClient(jwt?: string): Promise<Client> {
   const connectionParams = jwt ? { Authorization: `Bearer ${jwt}` } : {};
 
+  // Log WebSocket connection attempt (production-safe)
+  console.log("🔌 WebSocket connecting to:", GRAPHQL_WS_ENDPOINT, { hasAuth: !!jwt });
+
   return createClient({
     url: GRAPHQL_WS_ENDPOINT,
     connectionParams,
+    retryAttempts: 5,
+    retryWait: async function waitForRetry(retries) {
+      console.log(`🔄 WebSocket retry attempt ${retries + 1}/5...`);
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+      const delay = Math.min(1000 * Math.pow(2, retries), 16000);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    },
+    on: {
+      error: (err) => {
+        console.error("❌ WebSocket client error:", err);
+      },
+      closed: (event) => {
+        console.log("🔌 WebSocket client closed:", event);
+      },
+      connected: (socket) => {
+        console.log("✅ WebSocket client connected:", GRAPHQL_WS_ENDPOINT);
+      },
+      connecting: () => {
+        console.log("🔄 WebSocket client connecting...");
+      },
+    },
   });
 }

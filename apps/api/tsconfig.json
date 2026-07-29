@@ -1,5 +1,6 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
+  "exclude": ["**/*.test.ts", "**/__tests__/**/*"],
   "compilerOptions": {
     // File Layout
     "rootDir": "src",
@@ -48,7 +49,8 @@
     "resolveJsonModule": true,
     "baseUrl": "./src",
     "paths": {
-      "@/types/*": ["types/*"]
+      "@/types/*": ["types/*"],
+      "@/lib/*": ["lib/*"]
     }
   }
 }

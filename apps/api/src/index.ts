@@ -11,6 +11,7 @@ import { WebSocketServer } from "ws";
 import { GQL_API_BASE_URL, GQL_API_CORS_ORIGIN, GQL_API_PORT } from "./constants/index.js";
 import { schema } from "./graphql/schema.js";
 import { getUserId, getUserIdFromToken } from "./lib/auth.js";
+import { pgHealthMonitor } from "./lib/postgresql-health.js";
 
 const prisma = new PrismaClient();
 
@@ -33,6 +34,48 @@ app.get("/health/db", async (req, res) => {
   } catch (err) {
     console.error("DB health check failed:", err);
     res.status(503).json({ db: "unhealthy" });
+  }
+});
+
+// PostgreSQL LISTEN/NOTIFY connection health check
+app.get("/health/pg-listener", (req, res) => {
+  try {
+    const healthReport = pgHealthMonitor.generateHealthReport();
+
+    if (healthReport.healthy) {
+      res.json(healthReport);
+    } else {
+      res.status(503).json(healthReport);
+    }
+  } catch (err) {
+    console.error("PostgreSQL listener health check failed:", err);
+    res.status(503).json({
+      healthy: false,
+      status: "error",
+      error: err instanceof Error ? err.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// PostgreSQL listener metrics endpoint (for monitoring dashboards)
+app.get("/metrics/pg-listener", (req, res) => {
+  try {
+    const metrics = pgHealthMonitor.getMetrics();
+    const status = pgHealthMonitor.getHealthStatus();
+
+    res.json({
+      status: status.status,
+      metrics,
+      summary: pgHealthMonitor.getStatusSummary(),
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("PostgreSQL listener metrics failed:", err);
+    res.status(500).json({
+      error: err instanceof Error ? err.message : "Unknown error",
+      timestamp: new Date().toISOString(),
+    });
   }
 });
 
